@@ -1,0 +1,316 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+.custom-logo{
+    display: block;
+    font-size: 21px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
+
+.container-custom {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 180px;
+  background: #2d2d2d;
+  color: #fff;
+  padding-top: 12px;
+  height: 100vh;
+  overflow-y: auto;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%); /* Hide sidebar by default on mobile */
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0 !important; /* Force no margin on mobile */
+    width: 100%;
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .sidebar {
+    transform: translateX(0); /* Show sidebar by default on desktop */
+  }
+
+  .sidebar.active {
+    transform: translateX(-180px);
+  }
+
+  .main-content {
+    margin-left: 180px;
+  }
+
+  body.sidebar-hidden .main-content {
+    margin-left: 0;
+  }
+}
+
+/* Logo styles */
+.logo {
+  text-align: center;
+  margin-bottom: 8px; /* reduced from 10px */
+  padding: 0 8px;
+  font-weight: bold;
+  margin-top: 22px;
+  font-size: 20px;
+  /* margin-bottom: 30px; */
+  text-align: center;
+  user-select: none;
+}
+
+.logo .orange {
+  color: #e67333; /* similar orange color */
+}
+
+/* Menu styles */
+.menu {
+  list-style: none;
+  padding: 4px 0 20px; /* reduced from 8px 0 40px */
+  margin: 0;
+}
+
+.menu li {
+  padding: 0;               /* anchors will carry padding */
+  list-style: none;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.menu li:hover,
+.menu li.active {
+  background: #f3742a;
+}
+
+.menu .icon {
+  width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  opacity: 0.95;
+  flex: 0 0 20px; display: inline-flex; align-items: center; justify-content: center; }
+/* make anchor fill the li and inherit colors */
+.menu li a {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* reduced from 12px */
+  padding: 8px 14px; /* reduced from 12px 18px */
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px; /* reduced font size */
+}
+
+/* hover & active states target the anchor so href items respond */
+.menu li a:hover,
+.menu li.active a {
+  background: #f3742a;
+  color: #fff;
+}
+
+/* optional focus outline for accessibility */
+.menu li a:focus {
+  outline: 2px solid rgba(243,116,42,0.25);
+  outline-offset: 2px;
+}
+
+/* Dashboard and end spacing */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  overflow-y: auto; /* independent scrollbar for main content */
+  height: 100vh;
+}
+
+/* add small space at end of dashboard content */
+.dashboard {
+  padding-bottom: 48px; /* extra space at end */
+}
+
+.dashboard h2 {
+  margin-bottom: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card span {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.card.green { color: green; }
+.card.red { color: red; }
+.card.blue { color: #007bff; }
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.chart-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Toggle Button (mobile) - fixed and consistent */
+.toggle-btn {
+  display: block; /* changed from none to always show */
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #f3742a;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  padding: 6px 10px;
+  min-width: 36px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1201;      /* above sidebar */
+  transition: opacity 0.18s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* removed body.sidebar-open shifting so button stays fixed after click */
+
+/* keep charts responsive by giving canvases a min-height/height so Chart.js has correct sizing */
+.chart-box canvas {
+  width: 100% !important;
+  height: 240px !important;
+}
+
+/* optional scrollbar styling for modern browsers */
+.sidebar::-webkit-scrollbar,
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 6px;
+}
+
+/* Custom Sidebar Classes */
+.ks-sidebar-logo {
+  text-align: center;
+  margin-bottom: 8px;
+  padding: 0 8px;
+  font-weight: bold;
+  margin-top: 22px;
+  font-size: 20px;
+  user-select: none;
+}
+.ks-sidebar-logo-text .ks-sidebar-orange {
+  color: #e67333;
+}
+
+.ks-sidebar-menu {
+  list-style: none;
+  padding: 4px 0 20px;
+  margin: 0;
+}
+.ks-sidebar-menu li {
+  padding: 0;
+  list-style: none;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.ks-sidebar-menu li:hover,
+.ks-sidebar-menu li.active {
+  background: #f3742a;
+}
+.ks-sidebar-icon {
+  width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  opacity: 0.95;
+  flex: 0 0 20px;
+}
+.ks-sidebar-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+.ks-sidebar-menu li a:hover,
+.ks-sidebar-menu li.active a {
+  background: #f3742a;
+  color: #fff;
+}
+.ks-sidebar-menu li a:focus {
+  outline: 2px solid rgba(243,116,42,0.25);
+  outline-offset: 2px;
+}
+
+
+
+
+
