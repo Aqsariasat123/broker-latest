@@ -16,6 +16,14 @@ use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\StatementController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\DebitNoteController;
+use App\Http\Controllers\PaymentPlanController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ScheduleController;
 
 
 
@@ -38,6 +46,50 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // All protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/export', [AuthController::class, 'exportDashboard'])->name('dashboard.export');
+
+    // User Management
+    Route::prefix('users')->name('users.')->group(function () {
+        // All users can view index and show
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        
+        // Admin only routes
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/create', [UserController::class, 'create'])->name('create');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+    // Permissions Management (Admin only)
+    Route::middleware('role:admin')->prefix('permissions')->name('permissions.')->group(function () {
+        Route::get('/', [PermissionController::class, 'index'])->name('index');
+        Route::get('/create', [PermissionController::class, 'create'])->name('create');
+        Route::post('/', [PermissionController::class, 'store'])->name('store');
+        Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
+        Route::put('/{permission}', [PermissionController::class, 'update'])->name('update');
+        Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
+    });
+
+    // Audit Logs (Admin only)
+    Route::middleware('role:admin')->prefix('audit-logs')->name('audit-logs.')->group(function () {
+        Route::get('/', [AuditLogController::class, 'index'])->name('index');
+        Route::get('/{auditLog}', [AuditLogController::class, 'show'])->name('show');
+    });
+
+    // Roles Management (Admin only)
+    Route::middleware('role:admin')->prefix('roles')->name('roles.')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::get('/create', [RoleController::class, 'create'])->name('create');
+        Route::post('/', [RoleController::class, 'store'])->name('store');
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])->name('edit');
+        Route::put('/{role}', [RoleController::class, 'update'])->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
+        Route::put('/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('permissions.update');
+    });
 
     Route::prefix('tasks')->group(function () {
         Route::get('/', [TaskController::class, 'index'])->name('tasks.index');
@@ -76,6 +128,7 @@ Route::middleware('auth')->group(function () {
 
     // Clients Routes
     Route::get('/clients/export', [ClientController::class, 'export'])->name('clients.export');
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
     Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
     Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::post('/clients/save-column-settings', [ClientController::class, 'saveColumnSettings'])->name('clients.save-column-settings');
@@ -152,5 +205,135 @@ Route::middleware('auth')->group(function () {
     Route::delete('/statements/{statement}', [StatementController::class, 'destroy'])->name('statements.destroy');
 
     Route::view('/calendar', 'calender.index')->name('calendar');
+
+    // Secure file download route for encrypted files
+    Route::get('/secure-file/{type}/{id}', function ($type, $id) {
+        try {
+            if ($type === 'debit-note') {
+                $debitNote = \App\Models\DebitNote::findOrFail($id);
+                if (!$debitNote->document_path) {
+                    abort(404, 'File not found');
+                }
+                
+                if ($debitNote->is_encrypted ?? false) {
+                    $decrypted = \App\Services\EncryptionService::getDecryptedFile($debitNote->document_path, 'encrypted');
+                    $metadata = \App\Services\EncryptionService::getFileMetadata($debitNote->document_path, 'encrypted');
+                    
+                    // Use metadata for filename and MIME type if available
+                    $filename = $metadata['original_name'] ?? 'debit_note_' . $debitNote->debit_note_no . '.pdf';
+                    $mimeType = $metadata['mime_type'] ?? 'application/pdf';
+                    
+                    // Fallback to detection if metadata not available
+                    if (!isset($metadata['mime_type']) && function_exists('finfo_open')) {
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $mimeType = finfo_buffer($finfo, $decrypted) ?: $mimeType;
+                        finfo_close($finfo);
+                    }
+                    
+                    return response($decrypted)
+                        ->header('Content-Type', $mimeType)
+                        ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+                } else {
+                    // Legacy unencrypted file
+                    return response()->file(storage_path('app/public/' . $debitNote->document_path));
+                }
+            } elseif ($type === 'payment') {
+                $payment = \App\Models\Payment::findOrFail($id);
+                if (!$payment->receipt_path) {
+                    abort(404, 'File not found');
+                }
+                
+                if ($payment->is_encrypted ?? false) {
+                    $decrypted = \App\Services\EncryptionService::getDecryptedFile($payment->receipt_path, 'encrypted');
+                    $metadata = \App\Services\EncryptionService::getFileMetadata($payment->receipt_path, 'encrypted');
+                    
+                    // Use metadata for filename and MIME type if available
+                    $filename = $metadata['original_name'] ?? 'receipt_' . $payment->payment_reference . '.pdf';
+                    $mimeType = $metadata['mime_type'] ?? 'application/pdf';
+                    
+                    // Fallback to detection if metadata not available
+                    if (!isset($metadata['mime_type']) && function_exists('finfo_open')) {
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $mimeType = finfo_buffer($finfo, $decrypted) ?: $mimeType;
+                        finfo_close($finfo);
+                    }
+                    
+                    return response($decrypted)
+                        ->header('Content-Type', $mimeType)
+                        ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+                } else {
+                    // Legacy unencrypted file
+                    return response()->file(storage_path('app/public/' . $payment->receipt_path));
+                }
+            }
+            
+            abort(404, 'Invalid file type');
+        } catch (\Exception $e) {
+            abort(500, 'Error retrieving file: ' . $e->getMessage());
+        }
+    })->middleware('auth')->name('secure.file');
+
+    // File serving route for storage files
+    Route::get('/storage/{path}', function ($path) {
+        $filePath = storage_path('app/public/' . $path);
+        
+        if (!file_exists($filePath) || !is_file($filePath)) {
+            abort(404, 'File not found');
+        }
+        
+        // Security check: ensure the file is within the public storage directory
+        $realPath = realpath($filePath);
+        $storagePath = realpath(storage_path('app/public'));
+        
+        if (!$realPath || strpos($realPath, $storagePath) !== 0) {
+            abort(403, 'Access denied');
+        }
+        
+        return response()->file($filePath);
+    })->where('path', '.*')->name('storage.serve');
+
+    // Schedules Routes
+    Route::prefix('schedules')->name('schedules.')->group(function () {
+        Route::get('/', [ScheduleController::class, 'index'])->name('index');
+        Route::get('/create', [ScheduleController::class, 'create'])->name('create');
+        Route::post('/', [ScheduleController::class, 'store'])->name('store');
+        Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('show');
+        Route::get('/{schedule}/edit', [ScheduleController::class, 'edit'])->name('edit');
+        Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('update');
+        Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
+    });
+
+    // Payment Tracking Routes
+    Route::prefix('debit-notes')->name('debit-notes.')->group(function () {
+        Route::get('/', [DebitNoteController::class, 'index'])->name('index');
+        Route::get('/create', [DebitNoteController::class, 'create'])->name('create');
+        Route::post('/', [DebitNoteController::class, 'store'])->name('store');
+        Route::get('/{debitNote}', [DebitNoteController::class, 'show'])->name('show');
+        Route::get('/{debitNote}/edit', [DebitNoteController::class, 'edit'])->name('edit');
+        Route::put('/{debitNote}', [DebitNoteController::class, 'update'])->name('update');
+        Route::delete('/{debitNote}', [DebitNoteController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('payment-plans')->name('payment-plans.')->group(function () {
+        Route::get('/', [PaymentPlanController::class, 'index'])->name('index');
+        Route::get('/create', [PaymentPlanController::class, 'create'])->name('create');
+        Route::post('/', [PaymentPlanController::class, 'store'])->name('store');
+        Route::post('/create-instalments', [PaymentPlanController::class, 'createInstalments'])->name('create-instalments');
+        Route::get('/{paymentPlan}', [PaymentPlanController::class, 'show'])->name('show');
+        Route::get('/{paymentPlan}/edit', [PaymentPlanController::class, 'edit'])->name('edit');
+        Route::put('/{paymentPlan}', [PaymentPlanController::class, 'update'])->name('update');
+        Route::delete('/{paymentPlan}', [PaymentPlanController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/report', [PaymentController::class, 'report'])->name('report');
+        Route::get('/create', [PaymentController::class, 'create'])->name('create');
+        Route::post('/', [PaymentController::class, 'store'])->name('store');
+        Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::get('/{payment}/edit', [PaymentController::class, 'edit'])->name('edit');
+        Route::put('/{payment}', [PaymentController::class, 'update'])->name('update');
+        Route::delete('/{payment}', [PaymentController::class, 'destroy'])->name('destroy');
+    });
 });
 

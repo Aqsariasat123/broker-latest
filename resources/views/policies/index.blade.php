@@ -36,7 +36,10 @@
     tbody td:last-child { border-right:none; }
     .icon-expand { cursor:pointer; color:black; text-align:center; width:20px; }
     .btn-action { padding:2px 6px; font-size:11px; margin:1px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:2px; display:inline-block; }
+    .btn-action:hover { background:#f0f0f0; }
     .badge-status { font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; }
+    tbody td a { color:#007bff; text-decoration:underline; }
+    tbody td a:hover { color:#0056b3; text-decoration:none; }
     .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
     .modal.show { display:flex; }
     .modal-content { background:#fff; border-radius:6px; width:92%; max-width:1100px; max-height:calc(100vh - 40px); overflow:auto; box-shadow:0 4px 6px rgba(0,0,0,.1); padding:0; }
@@ -127,30 +130,90 @@
         </thead>
         <tbody>
           @foreach($policies as $policy)
-            <tr class="{{ $policy->policy_status == 'DFR' ? 'dfr-row' : '' }}">
-              <td class="icon-expand" onclick="openEditPolicy({{ $policy->id }})">⤢</td>
-              @if(in_array('policy_no',$selectedColumns))<td data-column="policy_no">{{ $policy->policy_no }}</td>@endif
-              @if(in_array('client_name',$selectedColumns))<td data-column="client_name">{{ $policy->client_name }}</td>@endif
-              @if(in_array('insurer',$selectedColumns))<td data-column="insurer">{{ $policy->insurer }}</td>@endif
-              @if(in_array('policy_class',$selectedColumns))<td data-column="policy_class">{{ $policy->policy_class }}</td>@endif
-              @if(in_array('policy_plan',$selectedColumns))<td data-column="policy_plan">{{ $policy->policy_plan }}</td>@endif
+            @php
+              $policyStatusName = $policy->policy_status_name ?? 'N/A';
+              $isDFR = stripos($policyStatusName, 'DFR') !== false || (optional($policy->end_date) && $policy->end_date->isBetween(now(), now()->addDays(30)));
+            @endphp
+            <tr class="{{ $isDFR ? 'dfr-row' : '' }}">
+              <td style="text-align:center; white-space:nowrap;">
+                <a href="{{ route('policies.show', $policy->id) }}" class="btn-action" style="text-decoration:none; margin-right:4px;" title="View Details">👁</a>
+                <span class="icon-expand" onclick="openEditPolicy({{ $policy->id }})" title="Edit">⤢</span>
+              </td>
+              @if(in_array('policy_no',$selectedColumns))<td data-column="policy_no"><a href="{{ route('policies.show', $policy->id) }}" style="color:#007bff; text-decoration:underline;">{{ $policy->policy_no }}</a></td>@endif
+              @if(in_array('client_name',$selectedColumns))
+                <td data-column="client_name">
+                  @php
+                    $clientName = $policy->client_name;
+                  @endphp
+                  @if($clientName)
+                    {{ $clientName }}
+                  @else
+                    <span style="color:#999;" title="Client ID: {{ $policy->client_id ?? 'NULL' }}">—</span>
+                  @endif
+                </td>
+              @endif
+              @if(in_array('insurer',$selectedColumns))
+                <td data-column="insurer">
+                  @php
+                    $insurerName = $policy->insurer_name;
+                  @endphp
+                  @if($insurerName)
+                    {{ $insurerName }}
+                  @else
+                    <span style="color:#999;" title="Insurer ID: {{ $policy->insurer_id ?? 'NULL' }}">—</span>
+                  @endif
+                </td>
+              @endif
+              @if(in_array('policy_class',$selectedColumns))
+                <td data-column="policy_class">
+                  @php
+                    $className = $policy->policy_class_name;
+                  @endphp
+                  @if($className)
+                    {{ $className }}
+                  @else
+                    <span style="color:#999;" title="Class ID: {{ $policy->policy_class_id ?? 'NULL' }}">—</span>
+                  @endif
+                </td>
+              @endif
+              @if(in_array('policy_plan',$selectedColumns))
+                <td data-column="policy_plan">
+                  @php
+                    $planName = $policy->policy_plan_name;
+                  @endphp
+                  @if($planName)
+                    {{ $planName }}
+                  @else
+                    <span style="color:#999;" title="Plan ID: {{ $policy->policy_plan_id ?? 'NULL' }}">—</span>
+                  @endif
+                </td>
+              @endif
               @if(in_array('sum_insured',$selectedColumns))<td data-column="sum_insured">{{ $policy->sum_insured ? number_format($policy->sum_insured,2) : '###########' }}</td>@endif
               @if(in_array('start_date',$selectedColumns))<td data-column="start_date">{{ $policy->start_date ? $policy->start_date->format('d-M-y') : '###########' }}</td>@endif
               @if(in_array('end_date',$selectedColumns))<td data-column="end_date">{{ $policy->end_date ? $policy->end_date->format('d-M-y') : '###########' }}</td>@endif
               @if(in_array('insured',$selectedColumns))<td data-column="insured">{{ $policy->insured ?? '###########' }}</td>@endif
-              @if(in_array('policy_status',$selectedColumns))<td data-column="policy_status"><span class="badge-status" style="background:{{ $policy->policy_status == 'In Force' ? '#28a745' : ($policy->policy_status=='DFR' ? '#ffc107' : ($policy->policy_status=='Expired' ? '#6c757d' : '#dc3545')) }}">{{ $policy->policy_status }}</span></td>@endif
+              @if(in_array('policy_status',$selectedColumns))
+                @php
+                  $statusColor = '#6c757d';
+                  if (stripos($policyStatusName, 'In Force') !== false) $statusColor = '#28a745';
+                  elseif (stripos($policyStatusName, 'DFR') !== false || stripos($policyStatusName, 'Due') !== false) $statusColor = '#ffc107';
+                  elseif (stripos($policyStatusName, 'Expired') !== false) $statusColor = '#6c757d';
+                  elseif (stripos($policyStatusName, 'Cancelled') !== false) $statusColor = '#dc3545';
+                @endphp
+                <td data-column="policy_status"><span class="badge-status" style="background:{{ $statusColor }}">{{ $policyStatusName }}</span></td>
+              @endif
               @if(in_array('date_registered',$selectedColumns))<td data-column="date_registered">{{ $policy->date_registered ? $policy->date_registered->format('d-M-y') : '###########' }}</td>@endif
-              @if(in_array('policy_id',$selectedColumns))<td data-column="policy_id">{{ $policy->policy_id }}</td>@endif
+              @if(in_array('policy_id',$selectedColumns))<td data-column="policy_id">{{ $policy->policy_code ?? $policy->id }}</td>@endif
               @if(in_array('insured_item',$selectedColumns))<td data-column="insured_item">{{ $policy->insured_item ?? '-' }}</td>@endif
-              @if(in_array('renewable',$selectedColumns))<td data-column="renewable">{{ $policy->renewable }}</td>@endif
-              @if(in_array('biz_type',$selectedColumns))<td data-column="biz_type">{{ $policy->biz_type }}</td>@endif
-              @if(in_array('term',$selectedColumns))<td data-column="term">{{ $policy->term }}</td>@endif
-              @if(in_array('term_unit',$selectedColumns))<td data-column="term_unit">{{ $policy->term_unit }}</td>@endif
-              @if(in_array('base_premium',$selectedColumns))<td data-column="base_premium">{{ number_format($policy->base_premium,2) }}</td>@endif
-              @if(in_array('premium',$selectedColumns))<td data-column="premium">{{ number_format($policy->premium,2) }}</td>@endif
-              @if(in_array('frequency',$selectedColumns))<td data-column="frequency">{{ $policy->frequency }}</td>@endif
-              @if(in_array('pay_plan',$selectedColumns))<td data-column="pay_plan">{{ $policy->pay_plan }}</td>@endif
-              @if(in_array('agency',$selectedColumns))<td data-column="agency">{{ $policy->agency ?? '-' }}</td>@endif
+              @if(in_array('renewable',$selectedColumns))<td data-column="renewable">{{ $policy->renewable ? 'Yes' : 'No' }}</td>@endif
+              @if(in_array('biz_type',$selectedColumns))<td data-column="biz_type">{{ $policy->business_type_name ?? 'N/A' }}</td>@endif
+              @if(in_array('term',$selectedColumns))<td data-column="term">{{ $policy->term ?? '-' }}</td>@endif
+              @if(in_array('term_unit',$selectedColumns))<td data-column="term_unit">{{ $policy->term_unit ?? '-' }}</td>@endif
+              @if(in_array('base_premium',$selectedColumns))<td data-column="base_premium">{{ $policy->base_premium ? number_format($policy->base_premium,2) : '###########' }}</td>@endif
+              @if(in_array('premium',$selectedColumns))<td data-column="premium">{{ $policy->premium ? number_format($policy->premium,2) : '###########' }}</td>@endif
+              @if(in_array('frequency',$selectedColumns))<td data-column="frequency">{{ $policy->frequency_name ?? 'N/A' }}</td>@endif
+              @if(in_array('pay_plan',$selectedColumns))<td data-column="pay_plan">{{ $policy->pay_plan_name ?? 'N/A' }}</td>@endif
+              @if(in_array('agency',$selectedColumns))<td data-column="agency">{{ $policy->agency_name ?? ($policy->agent ?? '-') }}</td>@endif
               @if(in_array('agent',$selectedColumns))<td data-column="agent">{{ $policy->agent ?? '-' }}</td>@endif
               @if(in_array('notes',$selectedColumns))<td data-column="notes">{{ $policy->notes ?? '-' }}</td>@endif
               <!-- <td>
@@ -212,30 +275,41 @@
               <input id="policy_no" name="policy_no" class="form-control" required>
             </div>
             <div class="form-group">
-              <label for="client_name">Client Name *</label>
-              <input id="client_name" name="client_name" class="form-control" required>
+              <label for="client_id">Client *</label>
+              <select id="client_id" name="client_id" class="form-control" required>
+                <option value="">Select</option>
+                @foreach($lookupData['clients'] as $client)
+                  <option value="{{ $client['id'] }}">{{ $client['client_name'] }} ({{ $client['clid'] ?? '' }})</option>
+                @endforeach
+              </select>
             </div>
             <div class="form-group">
-              <label for="insurer">Insurer *</label>
-              <select id="insurer" name="insurer" class="form-control" required>
+              <label for="insurer_id">Insurer *</label>
+              <select id="insurer_id" name="insurer_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['insurers'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['insurers'] as $insurer)
+                  <option value="{{ $insurer['id'] }}">{{ $insurer['name'] }}</option>
+                @endforeach
               </select>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="policy_class">Policy Class *</label>
-              <select id="policy_class" name="policy_class" class="form-control" required>
+              <label for="policy_class_id">Policy Class *</label>
+              <select id="policy_class_id" name="policy_class_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['policy_classes'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['policy_classes'] as $class)
+                  <option value="{{ $class['id'] }}">{{ $class['name'] }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
-              <label for="policy_plan">Policy Plan *</label>
-              <select id="policy_plan" name="policy_plan" class="form-control" required>
+              <label for="policy_plan_id">Policy Plan *</label>
+              <select id="policy_plan_id" name="policy_plan_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['policy_plans'] as $plan)
+                  <option value="{{ $plan['id'] }}">{{ $plan['name'] }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
@@ -259,10 +333,12 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="policy_status">Policy Status *</label>
-              <select id="policy_status" name="policy_status" class="form-control" required>
+              <label for="policy_status_id">Policy Status *</label>
+              <select id="policy_status_id" name="policy_status_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['policy_statuses'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['policy_statuses'] as $status)
+                  <option value="{{ $status['id'] ?? '' }}">{{ $status['name'] }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
@@ -270,8 +346,8 @@
               <input id="date_registered" name="date_registered" type="date" class="form-control" required>
             </div>
             <div class="form-group">
-              <label for="policy_id">Policy ID *</label>
-              <input id="policy_id" name="policy_id" class="form-control" required>
+              <label for="policy_code">Policy Code</label>
+              <input id="policy_code" name="policy_code" class="form-control" placeholder="Auto-generated if empty">
             </div>
           </div>
           <div class="form-row">
@@ -280,17 +356,19 @@
               <input id="insured_item" name="insured_item" class="form-control">
             </div>
             <div class="form-group">
-              <label for="renewable">Renewable *</label>
-              <select id="renewable" name="renewable" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['renewable_options'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+              <label for="renewable">Renewable</label>
+              <select id="renewable" name="renewable" class="form-control">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="biz_type">Business Type *</label>
-              <select id="biz_type" name="biz_type" class="form-control" required>
+              <label for="business_type_id">Business Type *</label>
+              <select id="business_type_id" name="business_type_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['biz_types'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['business_types'] as $bizType)
+                  <option value="{{ $bizType['id'] ?? '' }}">{{ $bizType['name'] }}</option>
+                @endforeach
               </select>
             </div>
           </div>
@@ -303,7 +381,9 @@
               <label for="term_unit">Term Unit *</label>
               <select id="term_unit" name="term_unit" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['term_units'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['term_units'] as $unit)
+                  <option value="{{ $unit['name'] }}">{{ $unit['name'] }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
@@ -317,24 +397,33 @@
               <input id="premium" name="premium" type="number" step="0.01" class="form-control" required>
             </div>
             <div class="form-group">
-              <label for="frequency">Frequency *</label>
-              <select id="frequency" name="frequency" class="form-control" required>
+              <label for="frequency_id">Frequency *</label>
+              <select id="frequency_id" name="frequency_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['frequencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['frequencies'] as $freq)
+                  <option value="{{ $freq['id'] ?? '' }}">{{ $freq['name'] }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
-              <label for="pay_plan">Pay Plan *</label>
-              <select id="pay_plan" name="pay_plan" class="form-control" required>
+              <label for="pay_plan_lookup_id">Pay Plan *</label>
+              <select id="pay_plan_lookup_id" name="pay_plan_lookup_id" class="form-control" required>
                 <option value="">Select</option>
-                @foreach($lookupData['pay_plans'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                @foreach($lookupData['pay_plans'] as $payPlan)
+                  <option value="{{ $payPlan['id'] ?? '' }}">{{ $payPlan['name'] }}</option>
+                @endforeach
               </select>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="agency">Agency</label>
-              <input id="agency" name="agency" class="form-control">
+              <label for="agency_id">Agency</label>
+              <select id="agency_id" name="agency_id" class="form-control">
+                <option value="">Select</option>
+                @foreach($lookupData['agencies'] ?? [] as $agency)
+                  <option value="{{ $agency['id'] }}">{{ $agency['name'] }}</option>
+                @endforeach
+              </select>
             </div>
             <div class="form-group">
               <label for="agent">Agent</label>
@@ -462,19 +551,52 @@
       formMethod.innerHTML = `@method('PUT')`;
       deleteBtn.style.display = 'inline-block';
 
-      // Populate fields
-      const fields = [
-        'policy_no','client_name','insurer','policy_class','policy_plan','sum_insured','start_date','end_date','insured',
-        'policy_status','date_registered','policy_id','insured_item','renewable','biz_type','term','term_unit','base_premium',
-        'premium','frequency','pay_plan','agency','agent','notes'
-      ];
-      fields.forEach(k => {
-        const el = document.getElementById(k);
+      // Populate fields - map old field names to new ones
+      const fieldMap = {
+        'policy_no': 'policy_no',
+        'client_name': 'client_id',
+        'insurer': 'insurer_id',
+        'policy_class': 'policy_class_id',
+        'policy_plan': 'policy_plan_id',
+        'sum_insured': 'sum_insured',
+        'start_date': 'start_date',
+        'end_date': 'end_date',
+        'insured': 'insured',
+        'policy_status': 'policy_status_id',
+        'date_registered': 'date_registered',
+        'policy_id': 'policy_code',
+        'insured_item': 'insured_item',
+        'renewable': 'renewable',
+        'biz_type': 'business_type_id',
+        'term': 'term',
+        'term_unit': 'term_unit',
+        'base_premium': 'base_premium',
+        'premium': 'premium',
+        'frequency': 'frequency_id',
+        'pay_plan': 'pay_plan_lookup_id',
+        'agency': 'agency_id',
+        'agent': 'agent',
+        'notes': 'notes'
+      };
+
+      Object.keys(fieldMap).forEach(oldKey => {
+        const newKey = fieldMap[oldKey];
+        const el = document.getElementById(newKey);
         if (!el) return;
+        
+        let value = null;
+        if (policy[oldKey] !== undefined) {
+          value = policy[oldKey];
+        } else if (policy[newKey] !== undefined) {
+          value = policy[newKey];
+        }
+        
         if (el.type === 'date') {
-          el.value = policy[k] ? policy[k].substring(0,10) : '';
-        } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-          el.value = policy[k] ?? '';
+          el.value = value ? (typeof value === 'string' ? value.substring(0,10) : value) : '';
+        } else if (el.tagName === 'SELECT') {
+          el.value = value ?? '';
+        } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.value = value ?? '';
         }
       });
     }

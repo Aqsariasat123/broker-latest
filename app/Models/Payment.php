@@ -17,12 +17,14 @@ class Payment extends Model
         'amount',
         'mode_of_payment_id',
         'receipt_path',
+        'is_encrypted',
         'notes',
     ];
 
     protected $casts = [
         'paid_on' => 'date',
         'amount' => 'decimal:2',
+        'is_encrypted' => 'boolean',
     ];
 
     public function debitNote(): BelongsTo

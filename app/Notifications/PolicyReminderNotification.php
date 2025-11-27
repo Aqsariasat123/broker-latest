@@ -36,11 +36,17 @@ class PolicyReminderNotification extends Notification implements ShouldQueue
 
             $this->renewals->each(function ($policy) use (&$mail) {
                 $client = optional($policy->client)->client_name ?? 'Unknown client';
+                $daysUntilExpiry = $policy->end_date ? (int) now()->diffInDays($policy->end_date, false) : null;
+                $daysText = $daysUntilExpiry !== null 
+                    ? ($daysUntilExpiry < 0 ? abs($daysUntilExpiry) . ' days overdue' : $daysUntilExpiry . ' days remaining')
+                    : 'date unknown';
+                
                 $mail->line(sprintf(
-                    '- %s (%s) expires on %s (premium %s)',
+                    '- %s (%s) expires on %s (%s) - Premium: %s',
                     $policy->policy_no,
                     $client,
-                    optional($policy->end_date)->toFormattedDateString() ?? 'n/a',
+                    optional($policy->end_date)->format('d-M-Y') ?? 'n/a',
+                    $daysText,
                     number_format($policy->premium ?? 0, 2)
                 ));
             });
@@ -55,13 +61,18 @@ class PolicyReminderNotification extends Notification implements ShouldQueue
             $this->paymentPlans->each(function ($plan) use (&$mail) {
                 $policy = optional($plan->schedule)->policy;
                 $client = optional(optional($policy)->client)->client_name ?? 'Unknown client';
+                $daysUntilDue = $plan->due_date ? (int) now()->diffInDays($plan->due_date, false) : null;
+                $daysText = $daysUntilDue !== null 
+                    ? ($daysUntilDue < 0 ? abs($daysUntilDue) . ' days overdue' : $daysUntilDue . ' days remaining')
+                    : 'date unknown';
 
                 $mail->line(sprintf(
-                    '- %s / %s is due on %s (%s %s)',
+                    '- %s / %s - %s due on %s (%s) - Amount: %s',
                     optional($policy)->policy_no ?? 'Policy ?',
                     $client,
-                    optional($plan->due_date)->toFormattedDateString() ?? 'n/a',
                     $plan->installment_label ?? 'installment',
+                    optional($plan->due_date)->format('d-M-Y') ?? 'n/a',
+                    $daysText,
                     number_format($plan->amount ?? 0, 2)
                 ));
             });

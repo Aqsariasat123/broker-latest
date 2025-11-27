@@ -122,6 +122,7 @@
         <thead>
           <tr>
             <th>Action</th>
+            <th>View</th>
             @if(in_array('client_name',$selectedColumns))<th data-column="client_name">Client Name</th>@endif
             @if(in_array('client_type',$selectedColumns))<th data-column="client_type">Client Type</th>@endif
             @if(in_array('nin_bcrn',$selectedColumns))<th data-column="nin_bcrn">NIN/BCRN</th>@endif
@@ -159,7 +160,12 @@
           @foreach($clients as $client)
             <tr class="{{ $client->status === 'Inactive' ? 'inactive-row' : '' }}">
               <td class="icon-expand" onclick="openEditClient({{ $client->id }})">⤢</td>
-              @if(in_array('client_name',$selectedColumns))<td data-column="client_name">{{ $client->client_name }}</td>@endif
+              <td>
+                <a href="{{ route('clients.show', $client->id) }}" class="btn-action" style="text-decoration:none;">View</a>
+              </td>
+              @if(in_array('client_name',$selectedColumns))<td data-column="client_name">
+                <a href="{{ route('clients.show', $client->id) }}" style="color:#007bff; text-decoration:underline;">{{ $client->client_name }}</a>
+              </td>@endif
               @if(in_array('client_type',$selectedColumns))<td data-column="client_type">{{ $client->client_type }}</td>@endif
               @if(in_array('nin_bcrn',$selectedColumns))<td data-column="nin_bcrn">{{ $client->nin_bcrn ?? '##########' }}</td>@endif
               @if(in_array('dob_dor',$selectedColumns))<td data-column="dob_dor">{{ $client->dob_dor ? $client->dob_dor->format('d-M-y') : '##########' }}</td>@endif
@@ -479,14 +485,22 @@
 
   async function openEditClient(id){
     try {
-      const res = await fetch(`/clients/${id}/edit`);
-      if (!res.ok) throw new Error('Network error');
+      const res = await fetch(`/clients/${id}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
       const client = await res.json();
       currentClientId = id;
       openClientModal('edit', client);
     } catch (e) {
       console.error(e);
-      alert('Error loading client data');
+      alert('Error loading client data: ' + e.message);
     }
   }
 

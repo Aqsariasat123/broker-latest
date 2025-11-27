@@ -99,6 +99,20 @@
             </li>
             
             <li>
+                <a href="{{ route('schedules.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M16 2V6M8 2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M3 10H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M8 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Schedules</span>
+                </a>
+            </li>
+            
+            <li>
                 <a href="/commissions">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -146,6 +160,50 @@
                         </svg>
                     </span>
                     <span class="ks-sidebar-label">Expenses</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('payment-plans.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 6H16C17.1046 6 18 6.89543 18 8V16C18 17.1046 17.1046 18 16 18H8C6.89543 18 6 17.1046 6 16V8C6 6.89543 6.89543 6 8 6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M12 2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M12 18V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M2 12H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M18 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Payment Plans</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('debit-notes.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 13H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M8 17H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Debit Notes</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('payments.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 4H3C2.44772 4 2 4.44772 2 5V19C2 19.5523 2.44772 20 3 20H21C21.5523 20 22 19.5523 22 19V5C22 4.44772 21.5523 4 21 4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M2 10H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M7 15H7.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M12 15H12.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M17 15H17.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Payments</span>
                 </a>
             </li>
             
@@ -201,6 +259,68 @@
                     <span class="ks-sidebar-label">Settings</span>
                 </a>
             </li>
+            
+            @auth
+            @if(auth()->user()->isAdmin())
+            <li>
+                <a href="{{ route('users.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('permissions.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M19.4 15C19.2667 15.3 19.1333 15.6 19 15.9C18.8333 16.2667 18.6667 16.6333 18.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M19.4 9C19.5333 8.7 19.6667 8.4 19.8 8.1C20 7.73333 20.1667 7.36667 20.3 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M4.6 15C4.46667 15.3 4.33333 15.6 4.2 15.9C4 16.2667 3.83333 16.6333 3.7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M4.6 9C4.73333 8.7 4.86667 8.4 5 8.1C5.16667 7.73333 5.33333 7.36667 5.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M8.2 19.4C8.5 19.5333 8.8 19.6667 9.1 19.8C9.46667 20 9.83333 20.1667 10.2 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M15.8 19.4C15.5 19.5333 15.2 19.6667 14.9 19.8C14.5333 20 14.1667 20.1667 13.8 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M8.2 4.6C8.5 4.46667 8.8 4.33333 9.1 4.2C9.46667 4 9.83333 3.83333 10.2 3.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M15.8 4.6C15.5 4.46667 15.2 4.33333 14.9 4.2C14.5333 4 14.1667 3.83333 13.8 3.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Permissions</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('roles.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Roles</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('audit-logs.index') }}">
+                    <span class="ks-sidebar-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 17H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 9H9H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="ks-sidebar-label">Audit Logs</span>
+                </a>
+            </li>
+            @endif
+            @endauth
             
             <li>
                 <a href="/logout">

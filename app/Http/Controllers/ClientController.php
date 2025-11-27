@@ -77,15 +77,36 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client created successfully.');
     }
 
+    public function create()
+    {
+        $lookupData = $this->getLookupData();
+        return view('clients.create', compact('lookupData'));
+    }
+
     public function show(Client $client)
     {
-        return response()->json($client);
+        // If request expects JSON (AJAX), return JSON
+        if (request()->expectsJson() || request()->wantsJson()) {
+            return response()->json($client);
+        }
+        
+        $client->load(['policies' => function($query) {
+            $query->with(['insurer', 'policyClass', 'policyPlan', 'policyStatus'])
+                  ->orderBy('date_registered', 'desc');
+        }]);
+        return view('clients.show', compact('client'));
     }
 
     public function edit(Client $client)
-{
-    return response()->json($client);
-}
+    {
+        // If request expects JSON (AJAX), return JSON for modal
+        if (request()->expectsJson() || request()->wantsJson()) {
+            return response()->json($client);
+        }
+        
+        $lookupData = $this->getLookupData();
+        return view('clients.edit', compact('client', 'lookupData'));
+    }
 
     public function update(Request $request, Client $client)
     {

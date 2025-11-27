@@ -11,14 +11,16 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'expense_id',
+        'expense_code',
         'payee',
         'date_paid',
         'amount_paid',
         'description',
-        'category',
-        'mode_of_payment',
-        'expense_notes'
+        'category_id',
+        'mode_of_payment_id',
+        'attachment_path',
+        'receipt_path',
+        'notes'
     ];
 
     protected $casts = [
