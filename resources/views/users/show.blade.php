@@ -2,28 +2,38 @@
 
 @section('content')
 <style>
-  .container-table { max-width: 100%; margin: 0 auto; }
-  h3 { background: #f1f1f1; padding: 8px; margin-bottom: 10px; font-weight: bold; border: 1px solid #ddd; }
-  .top-bar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
-  .action-buttons { margin-left:auto; display:flex; gap:10px; }
-  .btn { border:none; cursor:pointer; padding:6px 12px; font-size:13px; border-radius:2px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; }
-  .btn-back { background:#ccc; color:#333; border-color:#ccc; }
-  .btn-add { background:#df7900; color:#fff; border-color:#df7900; }
-  .info-section { background:#fff; border:1px solid #ddd; margin-bottom:15px; padding:15px; }
-  .info-section h4 { margin:0 0 12px 0; font-size:15px; font-weight:bold; color:#333; border-bottom:1px solid #ddd; padding-bottom:8px; }
-  .info-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:12px; }
-  .info-item { display:flex; flex-direction:column; }
-  .info-label { font-size:12px; color:#555; font-weight:600; margin-bottom:4px; }
-  .info-value { font-size:13px; color:#000; }
-  .badge-status { font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; }
-  .activity-list { max-height:400px; overflow-y:auto; }
-  .activity-item { padding:8px; border-bottom:1px solid #eee; font-size:12px; }
-  .activity-item:last-child { border-bottom:none; }
-  .activity-action { font-weight:600; color:#333; }
-  .activity-description { color:#666; margin-top:4px; }
-  .activity-meta { color:#999; font-size:11px; margin-top:4px; }
-  .empty-state { text-align:center; padding:20px; color:#999; font-size:13px; }
-  @media (max-width:768px) { .info-grid { grid-template-columns:1fr; } }
+  .container-table { max-width: 100%; margin: 0 auto; padding-bottom: 20px; }
+  h3 { background: #f1f1f1; padding: 10px 15px; margin-bottom: 15px; font-weight: bold; border: 1px solid #ddd; font-size: 18px; border-radius: 4px; }
+  .top-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:15px; }
+  .action-buttons { margin-left:auto; display:flex; gap:8px; }
+  .btn { border:none; cursor:pointer; padding:8px 16px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; font-weight:500; }
+  .btn:hover { opacity:0.9; transform:translateY(-1px); box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+  .btn-back { background:#6c757d; color:#fff; border-color:#6c757d; }
+  .btn-add { background:#f3742a; color:#fff; border-color:#f3742a; }
+  .info-section { background:#fff; border:1px solid #ddd; margin-bottom:15px; padding:15px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .info-section:last-child { margin-bottom:0; }
+  .dashboard { overflow: hidden; height: calc(100vh - 80px); }
+  .info-section h4 { margin:0 0 12px 0; font-size:16px; font-weight:bold; color:#333; border-bottom:2px solid #f3742a; padding-bottom:8px; }
+  .info-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; }
+  .info-item { display:flex; flex-direction:column; padding:12px; background:#f8f9fa; border-radius:4px; border:1px solid #e9ecef; }
+  .info-label { font-size:12px; color:#666; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .info-value { font-size:14px; color:#2d2d2d; font-weight:500; line-height:1.4; }
+  .badge-status { font-size:11px; padding:4px 10px; display:inline-block; border-radius:4px; color:#fff; font-weight:500; }
+  .activity-list { max-height:400px; overflow-y:auto; padding:4px; }
+  .activity-item { padding:12px; border-bottom:1px solid #eee; font-size:13px; background:#fff; margin-bottom:6px; border-radius:4px; border:1px solid #e9ecef; }
+  .activity-item:last-child { border-bottom:none; margin-bottom:0; }
+  .activity-action { font-weight:600; color:#333; font-size:14px; margin-bottom:4px; }
+  .activity-description { color:#666; margin-top:6px; line-height:1.4; }
+  .activity-meta { color:#999; font-size:11px; margin-top:6px; }
+  .empty-state { text-align:center; padding:30px 20px; color:#999; font-size:14px; }
+  @media (max-width:1200px) { 
+    .info-grid { grid-template-columns:repeat(3, 1fr); gap:16px; }
+  }
+  @media (max-width:768px) { 
+    .info-grid { grid-template-columns:1fr; gap:16px; }
+    .info-section { padding:16px; }
+    .info-item { padding:12px; }
+  }
 </style>
 
 <div class="dashboard">
@@ -31,9 +41,9 @@
     <h3>User Details</h3>
 
     @if(session('success'))
-      <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin-bottom:12px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
-        {{ session('success') }}
-        <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;">×</button>
+      <div class="alert alert-success" id="successAlert" style="padding:10px 14px; margin-bottom:15px; border:1px solid #c3e6cb; background:#d4edda; color:#155724; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+        <span>{{ session('success') }}</span>
+        <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:#155724;padding:0;margin-left:10px;">×</button>
       </div>
     @endif
 

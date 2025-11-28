@@ -69,7 +69,33 @@ class AuthController extends Controller
     public function dashboard(Request $request)
     {
         $dateRange = $request->get('date_range', 'month');
+        $selectedYear = (int) $request->get('year', now()->year);
+        
+        // Separate year parameters for each chart
+        $incomeExpenseYear = (int) $request->get('incomeExpenseYear', $selectedYear);
+        $incomeYear = (int) $request->get('incomeYear', $selectedYear);
+        $expenseYear = (int) $request->get('expenseYear', $selectedYear);
+        
         $today = now()->startOfDay();
+        
+        // If this is an AJAX request for a specific chart, return JSON
+        if ($request->expectsJson() || $request->wantsJson()) {
+            $chartType = null;
+            if ($request->has('incomeExpenseYear')) {
+                $chartType = 'incomeExpense';
+                $year = $incomeExpenseYear;
+            } elseif ($request->has('incomeYear')) {
+                $chartType = 'income';
+                $year = $incomeYear;
+            } elseif ($request->has('expenseYear')) {
+                $chartType = 'expense';
+                $year = $expenseYear;
+            }
+            
+            if ($chartType) {
+                return $this->getChartData($year, $chartType);
+            }
+        }
         
         // Set date range based on selection
         switch ($dateRange) {
@@ -160,20 +186,25 @@ class AuthController extends Controller
                 ->sum('amount'),
         ];
 
-        // Monthly Income/Expense Data (last 12 months)
-        $monthlyData = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $monthlyData[] = [
-                'month' => $month->format('M Y'),
-                'income' => Income::whereMonth('date_rcvd', $month->month)
-                    ->whereYear('date_rcvd', $month->year)
-                    ->sum('amount_received'),
-                'expense' => Expense::whereMonth('date_paid', $month->month)
-                    ->whereYear('date_paid', $month->year)
-                    ->sum('amount_paid'),
-            ];
-        }
+        // Monthly Income/Expense Data for Income v/s Expense chart
+        $incomeExpenseMonthlyData = $this->calculateMonthlyData($incomeExpenseYear);
+        $incomeExpenseTotalIncome = Income::whereYear('date_rcvd', $incomeExpenseYear)->sum('amount_received');
+        $incomeExpenseTotalExpense = Expense::whereYear('date_paid', $incomeExpenseYear)->sum('amount_paid');
+        $incomeExpenseYearStart = Carbon::create($incomeExpenseYear, 1, 1);
+        $incomeExpenseYearEnd = Carbon::create($incomeExpenseYear, 12, 31);
+        
+        // Monthly Income Data for Income chart
+        $incomeMonthlyData = $this->calculateMonthlyData($incomeYear);
+        
+        // Monthly Expense Data for Expense chart
+        $expenseMonthlyData = $this->calculateMonthlyData($expenseYear);
+        
+        // Legacy monthlyData for backward compatibility (uses selectedYear)
+        $monthlyData = $this->calculateMonthlyData($selectedYear);
+        $totalIncome = Income::whereYear('date_rcvd', $selectedYear)->sum('amount_received');
+        $totalExpense = Expense::whereYear('date_paid', $selectedYear)->sum('amount_paid');
+        $yearStart = Carbon::create($selectedYear, 1, 1);
+        $yearEnd = Carbon::create($selectedYear, 12, 31);
 
         // Recent Activities
         $recentPolicies = Policy::with('client')
@@ -193,8 +224,81 @@ class AuthController extends Controller
             'paymentStats',
             'monthlyData',
             'recentPolicies',
-            'recentPayments'
+            'recentPayments',
+            'dateRange',
+            'selectedYear',
+            'totalIncome',
+            'totalExpense',
+            'yearStart',
+            'yearEnd',
+            'incomeExpenseYear',
+            'incomeExpenseMonthlyData',
+            'incomeExpenseTotalIncome',
+            'incomeExpenseTotalExpense',
+            'incomeExpenseYearStart',
+            'incomeExpenseYearEnd',
+            'incomeYear',
+            'incomeMonthlyData',
+            'expenseYear',
+            'expenseMonthlyData'
         ));
+    }
+    
+    private function calculateMonthlyData($year)
+    {
+        $monthlyData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = Carbon::create($year, 1, 1)->addMonths($i);
+            $income = Income::whereMonth('date_rcvd', $month->month)
+                ->whereYear('date_rcvd', $month->year)
+                ->sum('amount_received');
+            $expense = Expense::whereMonth('date_paid', $month->month)
+                ->whereYear('date_paid', $month->year)
+                ->sum('amount_paid');
+            
+            // Calculate sells count (policies created in that month)
+            $sells = Policy::whereMonth('date_registered', $month->month)
+                ->whereYear('date_registered', $month->year)
+                ->count();
+            
+            $monthlyData[] = [
+                'month' => $month->format('F'),
+                'month_short' => $month->format('M'),
+                'income' => $income,
+                'expense' => $expense,
+                'sells' => $sells,
+            ];
+        }
+        
+        // Calculate percentages for each month (based on max value)
+        $maxIncome = $monthlyData ? max(array_column($monthlyData, 'income')) : 1;
+        $maxExpense = $monthlyData ? max(array_column($monthlyData, 'expense')) : 1;
+        foreach ($monthlyData as &$data) {
+            $data['income_percent'] = $maxIncome > 0 ? round(($data['income'] / $maxIncome) * 100) : 0;
+            $data['expense_percent'] = $maxExpense > 0 ? round(($data['expense'] / $maxExpense) * 100) : 0;
+        }
+        
+        return $monthlyData;
+    }
+    
+    private function getChartData($year, $chartType)
+    {
+        $monthlyData = $this->calculateMonthlyData($year);
+        $yearStart = Carbon::create($year, 1, 1);
+        $yearEnd = Carbon::create($year, 12, 31);
+        
+        $response = [
+            'monthlyData' => $monthlyData,
+            'yearStart' => $yearStart->format('j-M-y'),
+            'yearEnd' => $yearEnd->format('j-M-y'),
+        ];
+        
+        if ($chartType === 'incomeExpense') {
+            $response['totalIncome'] = Income::whereYear('date_rcvd', $year)->sum('amount_received');
+            $response['totalExpense'] = Expense::whereYear('date_paid', $year)->sum('amount_paid');
+        }
+        
+        return response()->json($response);
     }
 
     // Export Dashboard Report

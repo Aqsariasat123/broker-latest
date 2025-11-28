@@ -1,23 +1,137 @@
-// Update toggleSidebar function
+// Update toggle button icon based on sidebar state
+function updateToggleButtonIcon() {
+  const sidebar = document.querySelector(".sidebar");
+  const toggleBtn = document.getElementById("toggleBtn");
+  if (!toggleBtn) return;
+  
+  const openIcon = toggleBtn.querySelector(".toggle-icon-open");
+  const closeIcon = toggleBtn.querySelector(".toggle-icon-close");
+  
+  if (window.innerWidth > 768) {
+    // Desktop: collapsed = closed, not collapsed = open
+    if (sidebar.classList.contains("collapsed")) {
+      // Sidebar is collapsed (closed) - show open icon
+      if (openIcon) openIcon.style.display = "inline";
+      if (closeIcon) closeIcon.style.display = "none";
+    } else {
+      // Sidebar is open - show close icon
+      if (openIcon) openIcon.style.display = "none";
+      if (closeIcon) closeIcon.style.display = "inline";
+    }
+  } else {
+    // Mobile: active = open, not active = closed
+    if (sidebar.classList.contains("active")) {
+      // Sidebar is open - show close icon
+      if (openIcon) openIcon.style.display = "none";
+      if (closeIcon) closeIcon.style.display = "inline";
+    } else {
+      // Sidebar is closed - show open icon
+      if (openIcon) openIcon.style.display = "inline";
+      if (closeIcon) closeIcon.style.display = "none";
+    }
+  }
+}
+
+// Update toggleSidebar function - now toggles collapsed state instead of hiding
 function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   const body = document.body;
   
-  sidebar.classList.toggle("active");
-  
-  // Only toggle sidebar-hidden class on desktop
+  // On desktop: toggle collapsed state (icons only)
   if (window.innerWidth > 768) {
-    body.classList.toggle("sidebar-hidden");
-  }
-  
-  // For mobile: toggle body scroll
-  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle("collapsed");
+    // Update main content margin
+    if (sidebar.classList.contains("collapsed")) {
+      body.classList.add("sidebar-collapsed");
+      // Initialize tooltip positioning after sidebar collapses
+      setTimeout(() => {
+        initTooltips();
+      }, 100);
+    } else {
+      body.classList.remove("sidebar-collapsed");
+      // Remove any visible tooltips
+      const tooltip = document.querySelector(".sidebar-tooltip-chip");
+      if (tooltip) {
+        tooltip.remove();
+      }
+    }
+  } else {
+    // On mobile: keep original hide/show behavior
+    sidebar.classList.toggle("active");
     if (sidebar.classList.contains("active")) {
       body.classList.add("sidebar-open");
     } else {
       body.classList.remove("sidebar-open");
     }
   }
+  
+  // Update toggle button icon
+  updateToggleButtonIcon();
+}
+
+// Initialize tooltip positioning when sidebar is collapsed
+function initTooltips() {
+  const sidebar = document.querySelector(".sidebar");
+  if (!sidebar) return;
+  
+  const menuItems = sidebar.querySelectorAll(".ks-sidebar-menu li[data-tooltip]");
+  
+  menuItems.forEach((item) => {
+    // Skip if already initialized
+    if (item.hasAttribute('data-tooltip-initialized')) {
+      return;
+    }
+    item.setAttribute('data-tooltip-initialized', 'true');
+    
+    item.addEventListener("mouseenter", function(e) {
+      if (!sidebar.classList.contains("collapsed")) return;
+      
+      const tooltip = this.getAttribute("data-tooltip");
+      if (!tooltip) return;
+      
+      // Remove any existing tooltip
+      const existingTooltip = document.querySelector(".sidebar-tooltip-chip");
+      if (existingTooltip) {
+        existingTooltip.remove();
+      }
+      
+      const rect = this.getBoundingClientRect();
+      
+      // Create tooltip element
+      const tooltipEl = document.createElement("div");
+      tooltipEl.className = "sidebar-tooltip-chip";
+      tooltipEl.textContent = tooltip;
+      document.body.appendChild(tooltipEl);
+      
+      // Position tooltip to the right of the icon
+      const left = rect.right + 8;
+      const top = rect.top + (rect.height / 2);
+      
+      tooltipEl.style.left = left + "px";
+      tooltipEl.style.top = top + "px";
+      tooltipEl.style.transform = "translateY(-50%)";
+      tooltipEl.style.opacity = "0";
+      
+      // Trigger animation
+      requestAnimationFrame(() => {
+        tooltipEl.style.opacity = "1";
+        tooltipEl.style.transform = "translateY(-50%) translateX(0)";
+      });
+    });
+    
+    item.addEventListener("mouseleave", function() {
+      const tooltipEl = document.querySelector(".sidebar-tooltip-chip");
+      if (tooltipEl) {
+        tooltipEl.style.opacity = "0";
+        tooltipEl.style.transform = "translateY(-50%) translateX(-5px)";
+        setTimeout(() => {
+          if (tooltipEl.parentNode) {
+            tooltipEl.remove();
+          }
+        }, 200);
+      }
+    });
+  });
 }
 
 // Initialize sidebar state on page load
@@ -39,6 +153,16 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleSidebar();
     });
   }
+  
+  // Initialize tooltips if sidebar is collapsed
+  if (sidebar && sidebar.classList.contains("collapsed")) {
+    setTimeout(() => {
+      initTooltips();
+    }, 100);
+  }
+  
+  // Initialize toggle button icon
+  updateToggleButtonIcon();
 });
 
 // Close sidebar when clicking outside
@@ -52,77 +176,56 @@ document.addEventListener("click", (e) => {
       !sidebar.contains(e.target) && 
       !toggleBtn.contains(e.target)
     ) {
-      toggleSidebar();
+      sidebar.classList.remove("active");
+      document.body.classList.remove("sidebar-open");
     }
   }
 });
 
-// Reset sidebar state on resize
+// Handle window resize
 window.addEventListener("resize", () => {
   const sidebar = document.querySelector(".sidebar");
-  const body = document.body;
   
   if (window.innerWidth > 768) {
     sidebar.classList.remove("active");
-    body.classList.remove("sidebar-open");
-    body.classList.remove("sidebar-hidden");
+    document.body.classList.remove("sidebar-open");
   } else {
-    sidebar.classList.remove("active");
-    body.classList.remove("sidebar-open");
+    sidebar.classList.remove("collapsed");
+    document.body.classList.remove("sidebar-collapsed");
+    // Remove any visible tooltips
+    const tooltip = document.querySelector(".sidebar-tooltip-chip");
+    if (tooltip) {
+      tooltip.remove();
+    }
   }
+  
+  // Update toggle button icon after resize
+  updateToggleButtonIcon();
 });
 
-// Chart.js Example — only initialize when canvases exist
-const pie = document.getElementById("pieChart");
-const bar1 = document.getElementById("barChart1");
-const bar2 = document.getElementById("barChart2");
-
-if (pie) {
-  const ctx1 = pie.getContext("2d");
-  new Chart(ctx1, {
-    type: "pie",
-    data: {
-      labels: ["Income", "Expense"],
-      datasets: [{
-        data: [253000, 225000],
-        backgroundColor: ["#4CAF50", "#F44336"]
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-}
-
-if (bar1) {
-  const ctx2 = bar1.getContext("2d");
-  new Chart(ctx2, {
-    type: "bar",
-    data: {
-      labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-      datasets: [{
-        label: "Income",
-        data: [29,26,31,36,42,41,44,43,45,54,52,57],
-        backgroundColor: "#00bcd4"
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-}
-
-if (bar2) {
-  const ctx3 = bar2.getContext("2d");
-  new Chart(ctx3, {
-    type: "bar",
-    data: {
-      labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-      datasets: [{
-        label: "Expenses",
-        data: [29,26,31,36,42,41,44,43,45,54,52,57],
-        backgroundColor: "#ff9800"
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-}
-
-
-
+// Profile dropdown functionality
+document.addEventListener("DOMContentLoaded", () => {
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.querySelector(".profile-dropdown");
+  
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      profileDropdown.classList.toggle("active");
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function(e) {
+      if (!profileDropdown.contains(e.target)) {
+        profileDropdown.classList.remove("active");
+      }
+    });
+    
+    // Close dropdown on escape key
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && profileDropdown.classList.contains("active")) {
+        profileDropdown.classList.remove("active");
+      }
+    });
+  }
+});
