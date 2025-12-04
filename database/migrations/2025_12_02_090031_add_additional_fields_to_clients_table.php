@@ -28,7 +28,7 @@ return new class extends Migration
                 $table->string('source_name')->nullable()->after('source');
             }
             if (!Schema::hasColumn('clients', 'has_vehicle')) {
-                $table->boolean('has_vehicle')->default(false)->after('business_docs_path');
+                $table->boolean('has_vehicle')->default(false)->after('source_name');
             }
             if (!Schema::hasColumn('clients', 'has_house')) {
                 $table->boolean('has_house')->default(false)->after('has_vehicle');

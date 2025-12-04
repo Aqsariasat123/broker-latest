@@ -42,9 +42,7 @@ class CreateClientsTable extends Migration
             $table->string('other_names')->nullable();
             $table->string('surname');
             $table->string('passport_no')->nullable();
-            $table->string('id_document_path')->nullable();
-            $table->string('poa_document_path')->nullable();
-            $table->string('business_docs_path')->nullable();
+
             $table->timestamps();
         });
     }
