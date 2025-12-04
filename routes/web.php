@@ -51,14 +51,20 @@ Route::middleware('auth')->group(function () {
 
     // User Management
     Route::prefix('users')->name('users.')->group(function () {
-        // All users can view index and show
+        // All users can view index
         Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/{user}', [UserController::class, 'show'])->name('show');
         
-        // Admin only routes
+        // Admin only routes - must come before parameterized routes
         Route::middleware('role:admin')->group(function () {
             Route::get('/create', [UserController::class, 'create'])->name('create');
             Route::post('/', [UserController::class, 'store'])->name('store');
+        });
+        
+        // All users can view show
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        
+        // Admin only routes for editing/deleting
+        Route::middleware('role:admin')->group(function () {
             Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
@@ -289,7 +295,16 @@ Route::middleware('auth')->group(function () {
         $realPath = realpath($filePath);
         $storagePath = realpath(storage_path('app/public'));
         
-        if (!$realPath || strpos($realPath, $storagePath) !== 0) {
+        if (!$realPath || !$storagePath) {
+            abort(403, 'Access denied');
+        }
+        
+        // Normalize paths for cross-platform compatibility (Windows case-insensitive)
+        $normalizedRealPath = str_replace('\\', '/', strtolower($realPath));
+        $normalizedStoragePath = str_replace('\\', '/', strtolower($storagePath));
+        
+        // Check if the file path starts with the storage path
+        if (strpos($normalizedRealPath, $normalizedStoragePath) !== 0) {
             abort(403, 'Access denied');
         }
         
