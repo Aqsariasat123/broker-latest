@@ -969,15 +969,15 @@
       </div>
     </div>
 
-      @if(session('success'))
-        <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin:15px 20px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
-          {{ session('success') }}
-          <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;">×</button>
-        </div>
-      @endif
+    @if(session('success'))
+      <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin:15px 20px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
+        {{ session('success') }}
+        <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;">×</button>
+      </div>
+    @endif
 
-      <div class="table-responsive" id="tableResponsive">
-        <table id="clientsTable">
+    <div class="table-responsive" id="tableResponsive">
+      <table id="clientsTable">
         <thead>
           <tr>
             <th style="text-align:center;">
@@ -1090,9 +1090,7 @@
                 @elseif($col == 'income_source')
                   <td data-column="income_source">{{ $client->income_source ?? '-' }}</td>
                 @elseif($col == 'married')
-                  <td data-column="married" class="checkbox-cell">
-                    <input type="checkbox" {{ $client->married ? 'checked' : '' }} disabled>
-                  </td>
+                  <td data-column="married">{{ $client->married ? 'Yes' : 'No' }}</td>
                 @elseif($col == 'spouses_name')
                   <td data-column="spouses_name">{{ $client->spouses_name ?? '-' }}</td>
                 @elseif($col == 'alternate_no')
@@ -1108,9 +1106,7 @@
                 @elseif($col == 'po_box_no')
                   <td data-column="po_box_no">{{ $client->po_box_no ?? '-' }}</td>
                 @elseif($col == 'pep')
-                  <td data-column="pep" class="checkbox-cell">
-                    <input type="checkbox" {{ $client->pep ? 'checked' : '' }} disabled>
-                  </td>
+                  <td data-column="pep">{{ $client->pep ? 'Yes' : 'No' }}</td>
                 @elseif($col == 'pep_comment')
                   <td data-column="pep_comment">{{ $client->pep_comment ?? '-' }}</td>
                 @elseif($col == 'image')
@@ -1130,32 +1126,32 @@
             </tr>
           @endforeach
         </tbody>
-        </table>
-      </div>
+      </table>
+    </div>
 
       <div class="footer" style="background:#fff; border-top:1px solid #ddd; margin-top:0;">
-        <div class="footer-left">
-          <a class="btn btn-export" href="{{ route('clients.export', array_merge(request()->query(), ['page' => $clients->currentPage()])) }}">Export</a>
-          <button class="btn btn-column" id="columnBtn" type="button">Column</button>
-          <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
-        </div>
-        <div class="paginator">
-          @php
-            $base = url()->current();
-            $q = request()->query();
-            $current = $clients->currentPage();
-            $last = max(1,$clients->lastPage());
-            function page_url($base,$q,$p){ $params = array_merge($q,['page'=>$p]); return $base . '?' . http_build_query($params); }
-          @endphp
+      <div class="footer-left">
+        <a class="btn btn-export" href="{{ route('clients.export', array_merge(request()->query(), ['page' => $clients->currentPage()])) }}">Export</a>
+        <button class="btn btn-column" id="columnBtn" type="button">Column</button>
+        <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
+      </div>
+      <div class="paginator">
+        @php
+          $base = url()->current();
+          $q = request()->query();
+          $current = $clients->currentPage();
+          $last = max(1,$clients->lastPage());
+          function page_url($base,$q,$p){ $params = array_merge($q,['page'=>$p]); return $base . '?' . http_build_query($params); }
+        @endphp
 
-          <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,1) : '#' }}" @if($current<=1) disabled @endif>&laquo;</a>
-          <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,$current-1) : '#' }}" @if($current<=1) disabled @endif>&lsaquo;</a>
-          <span class="page-info">Page {{ $current }} of {{ $last }}</span>
-          <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$current+1) : '#' }}" @if($current>= $last) disabled @endif>&rsaquo;</a>
-          <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$last) : '#' }}" @if($current>=$last) disabled @endif>&raquo;</a>
-        </div>
+        <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,1) : '#' }}" @if($current<=1) disabled @endif>&laquo;</a>
+        <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,$current-1) : '#' }}" @if($current<=1) disabled @endif>&lsaquo;</a>
+        <span class="page-info">Page {{ $current }} of {{ $last }}</span>
+        <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$current+1) : '#' }}" @if($current>= $last) disabled @endif>&rsaquo;</a>
+        <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$last) : '#' }}" @if($current>=$last) disabled @endif>&raquo;</a>
       </div>
     </div>
+  </div>
   </div>
 </div>  
   <!-- Client Page View (Full Page) -->
@@ -1174,12 +1170,12 @@
           <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
               <div class="client-page-nav">
-                <button class="nav-tab" data-tab="proposals">Proposals</button>
-                <button class="nav-tab" data-tab="policies">Policies</button>
-                <button class="nav-tab" data-tab="payments">Payments</button>
-                <button class="nav-tab" data-tab="vehicles">Vehicles</button>
-                <button class="nav-tab" data-tab="claims">Claims</button>
-                <button class="nav-tab active" data-tab="documents">Documents</button>
+                <button class="nav-tab" data-tab="proposals" data-url="{{ route('life-proposals.index') }}">Proposals</button>
+                <button class="nav-tab" data-tab="policies" data-url="{{ route('policies.index') }}">Policies</button>
+                <button class="nav-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
+                <button class="nav-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
+                <button class="nav-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
+                <button class="nav-tab active" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
               </div>
               <div class="client-page-actions">
                 <button class="btn btn-edit" id="editClientFromPageBtn" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Edit</button>
@@ -1301,16 +1297,16 @@
                   <div style="display:flex; gap:10px; align-items:flex-start;">
                     <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
                       <div class="detail-row" style="margin-bottom:0;">
-                        <span class="detail-label">Salutation</span>
+                    <span class="detail-label">Salutation</span>
                         <select id="salutation" name="salutation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                          <option value="">Select</option>
-                          @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-                        </select>
-                      </div>
+                      <option value="">Select</option>
+                      @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                    </select>
+                  </div>
                       <div class="detail-row" style="margin-bottom:0;">
-                        <span class="detail-label">First Name</span>
-                        <input id="first_name" name="first_name" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      </div>
+                      <span class="detail-label">First Name</span>
+                      <input id="first_name" name="first_name" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                    </div>
                     </div>
                     <div style="display:flex; flex-direction:column; flex-shrink:0; margin-top:13px;">
                       <div id="clientPhotoPreview" style="width:80px; height:100px; border:1px solid #ddd; border-radius:2px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; overflow:hidden;">
@@ -1524,7 +1520,7 @@
                   <div class="detail-row" style="margin-bottom:8px; align-items:center;">
                     <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Boat</span>
                     <div class="detail-value checkbox" style="flex:0 0 auto;">
-                      <input id="has_boat" name="has_boat" type="checkbox" value="1">
+                        <input id="has_boat" name="has_boat" type="checkbox" value="1">
                     </div>
                   </div>
                   <div class="detail-row">
@@ -1647,12 +1643,37 @@
           <div class="column-selection" id="columnSelection">
             @php
               $all = [
-                'client_name'=>'Client Name','client_type'=>'Client Type','nin_bcrn'=>'NIN/BCRN','dob_dor'=>'DOB/DOR','mobile_no'=>'MobileNo',
-                'wa'=>'WA','district'=>'District','occupation'=>'Occupation','source'=>'Source','status'=>'Status','signed_up'=>'Signed Up',
-                'employer'=>'Employer','clid'=>'CLID','contact_person'=>'Contact Person','income_source'=>'Income Source','married'=>'Married',
-                'spouses_name'=>'Spouses Name','alternate_no'=>'Alternate No','email_address'=>'Email Address','location'=>'Location',
-                'island'=>'Island','country'=>'Country','po_box_no'=>'P.O. Box No','pep'=>'PEP','pep_comment'=>'PEP Comment',
-                'image'=>'Image','salutation'=>'Salutation','first_name'=>'First Name','other_names'=>'Other Names','surname'=>'Surname','passport_no'=>'Passport No'
+                'client_name'=>'Client Name',
+                'client_type'=>'Client Type',
+                'nin_bcrn'=>'NIN/BCRN',
+                'dob_dor'=>'DOB/DOR',
+                'mobile_no'=>'MobileNo',
+                'wa'=>'WA',
+                'district'=>'District',
+                'occupation'=>'Occupation',
+                'source'=>'Source',
+                'status'=>'Status',
+                'signed_up'=>'Signed Up',
+                'employer'=>'Employer',
+                'clid'=>'CLID',
+                'contact_person'=>'Contact Person',
+                'income_source'=>'Income Source',
+                'married'=>'Married',
+                'spouses_name'=>'Spouses Name',
+                'alternate_no'=>'Alternate No',
+                'email_address'=>'Email Address',
+                'location'=>'Location',
+                'island'=>'Island',
+                'country'=>'Country',
+                'po_box_no'=>'P.O. Box No',
+                'pep'=>'PEP',
+                'pep_comment'=>'PEP Comment',
+                'image'=>'Image',
+                'salutation'=>'Salutation',
+                'first_name'=>'First Name',
+                'other_names'=>'Other Names',
+                'surname'=>'Surname',
+                'passport_no'=>'Passport No'
               ];
               // Maintain order based on selectedColumns
               $ordered = [];
@@ -1792,9 +1813,7 @@
     });
   }
   
-  document.getElementById('closeBtn').addEventListener('click', () => {
-    window.location.href = '{{ route("clients.index") }}';
-  });
+
 
   async function openEditClient(id){
     try {
@@ -1953,9 +1972,9 @@
           <div class="detail-row">
             <span class="detail-label">Contact Person</span>
             <div class="detail-value">${client.contact_person || ''}</div>
+            </div>
           </div>
         </div>
-      </div>
    
     `;
 
@@ -2024,7 +2043,7 @@
               <div class="detail-row" style="margin-bottom:0;">
                 <span class="detail-label">Salutation</span>
                 <div class="detail-value" style="flex:1;">${client.salutation || '-'}</div>
-              </div>
+          </div>
               <div class="detail-row" style="margin-bottom:0;">
                 <span class="detail-label">First Name</span>
                 <div class="detail-value" style="flex:1;">${client.first_name || '-'}</div>
@@ -2055,7 +2074,7 @@
           <div class="detail-row">
             <span class="detail-label">Occupation</span>
             <div class="detail-value">${client.occupation || '-'}</div>
-          </div>
+            </div>
           <div class="detail-row">
             <span class="detail-label">Income Source</span>
             <div class="detail-value">${client.income_source || '-'}</div>
@@ -2087,7 +2106,7 @@
             <span class="detail-label">Married</span>
             <div class="detail-value checkbox">
               <input type="checkbox" ${client.married ? 'checked' : ''} disabled>
-            </div>
+          </div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Spouse's Name</span>
@@ -2098,7 +2117,7 @@
             <div style="display:flex; gap:5px; align-items:center; flex:1;">
               <div class="detail-value checkbox" style="flex:0 0 auto; min-width:auto;">
                 <input type="checkbox" ${client.pep ? 'checked' : ''} disabled>
-              </div>
+          </div>
               <input type="text" value="PEP Details" readonly style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; font-size:11px; font-family:inherit; box-sizing:border-box; min-height:22px;">
             </div>
           </div>
@@ -2134,9 +2153,9 @@
           <div class="detail-row" style="margin-bottom:8px; align-items:center;">
             <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Boat</span>
             <div class="detail-value checkbox" style="flex:0 0 auto;">
-              <input type="checkbox" ${client.has_boat ? 'checked' : ''} disabled>
+                <input type="checkbox" ${client.has_boat ? 'checked' : ''} disabled>
+              </div>
             </div>
-          </div>
           <div class="detail-row" style="align-items:flex-start;">
             <span class="detail-label">Notes</span>
             <textarea class="detail-value" style="min-height:40px; resize:vertical; flex:1; font-size:11px; padding:4px 6px;" readonly>${client.notes || ''}</textarea>
@@ -2171,13 +2190,13 @@
       documentsList.innerHTML = docsHTML || '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
     }
 
-      // Set edit button action
+    // Set edit button action
      const editBtn = document.getElementById('editClientFromPageBtn');
-     if (editBtn) {
-       editBtn.onclick = function() {
-         openEditClient(currentClientId);
-       };
-     }
+    if (editBtn) {
+      editBtn.onclick = function() {
+        openEditClient(currentClientId);
+      };
+    }
 
     // Tab navigation - make tabs clickable to navigate to respective pages
     document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2191,34 +2210,13 @@
         // Close the modal first
         closeClientDetailsModal();
         
-        // Navigate to the appropriate page with client filter
-        let url = '';
-        switch(tabType) {
-          case 'proposals':
-            url = '{{ route("life-proposals.index") }}?client_id=' + clientId;
-            break;
-          case 'policies':
-            url = '{{ route("policies.index") }}?client_id=' + clientId;
-            break;
-          case 'payments':
-            url = '{{ route("payments.index") }}?client_id=' + clientId;
-            break;
-          case 'vehicles':
-            url = '{{ route("vehicles.index") }}?client_id=' + clientId;
-            break;
-          case 'claims':
-            url = '{{ route("claims.index") }}?client_id=' + clientId;
-            break;
-          case 'documents':
-            url = '{{ route("documents.index") }}?client_id=' + clientId;
-            break;
-          default:
-            return;
-        }
+        // Get URL from data-url attribute
+        const baseUrl = this.getAttribute('data-url');
+        if (!baseUrl) return;
         
-        if (url) {
+        // Navigate to the appropriate page with client filter
+        const url = baseUrl + '?client_id=' + clientId;
           window.location.href = url;
-        }
       });
     });
   }
@@ -2865,6 +2863,197 @@
         if (pageMethodDiv && formMethod) {
           pageMethodDiv.innerHTML = formMethod.innerHTML;
         }
+        
+        // Ensure all fields in cloned form are visible
+        const clonedFields = formContentDiv.querySelectorAll('.detail-row, .detail-section, .detail-section-body');
+        clonedFields.forEach(field => {
+          field.style.display = '';
+          field.style.visibility = '';
+          field.style.opacity = '';
+        });
+        const clonedInputs = formContentDiv.querySelectorAll('input, select, textarea');
+        clonedInputs.forEach(input => {
+          input.style.display = '';
+          input.style.visibility = '';
+          if (input.closest('.detail-section')) {
+            input.closest('.detail-section').style.display = '';
+          }
+        });
+        
+        // If editing, populate the cloned form fields with client data
+        if (mode === 'edit' && client) {
+          const fields = ['salutation','first_name','other_names','surname','client_type','nin_bcrn','dob_dor','id_expiry_date','passport_no','mobile_no','alternate_no','email_address','occupation','employer','income_source','monthly_income','source','source_name','agent','agency','status','signed_up','location','district','island','country','po_box_no','spouses_name','contact_person','pep_comment','notes'];
+          fields.forEach(k => {
+            const el = formContentDiv.querySelector(`#${k}`);
+            if (!el) return;
+            if (el.type === 'checkbox') {
+              el.checked = !!client[k];
+            } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              if (el.type === 'date' && client[k]) {
+                // Format date for date inputs (YYYY-MM-DD)
+                const date = new Date(client[k]);
+                el.value = date.toISOString().split('T')[0];
+              } else {
+                el.value = client[k] ?? '';
+              }
+            }
+          });
+          
+          // Set checkboxes in cloned form
+          const marriedCheckbox = formContentDiv.querySelector('#married');
+          const pepCheckbox = formContentDiv.querySelector('#pep');
+          const waCheckbox = formContentDiv.querySelector('#wa');
+          const hasVehicleCheckbox = formContentDiv.querySelector('#has_vehicle');
+          const hasHouseCheckbox = formContentDiv.querySelector('#has_house');
+          const hasBusinessCheckbox = formContentDiv.querySelector('#has_business');
+          const hasBoatCheckbox = formContentDiv.querySelector('#has_boat');
+          
+          if (marriedCheckbox) marriedCheckbox.checked = !!client.married;
+          if (pepCheckbox) pepCheckbox.checked = !!client.pep;
+          if (waCheckbox) waCheckbox.checked = !!client.wa;
+          if (hasVehicleCheckbox) hasVehicleCheckbox.checked = !!client.has_vehicle;
+          if (hasHouseCheckbox) hasHouseCheckbox.checked = !!client.has_house;
+          if (hasBusinessCheckbox) hasBusinessCheckbox.checked = !!client.has_business;
+          if (hasBoatCheckbox) hasBoatCheckbox.checked = !!client.has_boat;
+          
+          // Set existing image if present
+          const imageInput = formContentDiv.querySelector('#image');
+          const existingImageInput = formContentDiv.querySelector('#existing_image');
+          if (client.image && existingImageInput) {
+            existingImageInput.value = client.image;
+            const photoImg = formContentDiv.querySelector('#clientPhotoImg');
+            const photoPreview = formContentDiv.querySelector('#clientPhotoPreview');
+            if (photoImg && photoPreview) {
+              photoImg.src = client.image.startsWith('http') ? client.image : `/storage/${client.image}`;
+              photoImg.style.display = 'block';
+              const photoSpan = photoPreview.querySelector('span');
+              if (photoSpan) photoSpan.style.display = 'none';
+            }
+            // Photo not required if existing image exists
+            if (imageInput) imageInput.required = false;
+          } else {
+            // Photo required if no existing image
+            if (imageInput) imageInput.required = true;
+          }
+          
+          // Calculate age and expiry days for cloned form
+          const dobInput = formContentDiv.querySelector('#dob_dor');
+          const ageInput = formContentDiv.querySelector('#dob_age');
+          const expiryInput = formContentDiv.querySelector('#id_expiry_date');
+          const daysInput = formContentDiv.querySelector('#id_expiry_days');
+          
+          if (dobInput && ageInput && dobInput.value) {
+            const birthDate = new Date(dobInput.value);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+              age--;
+            }
+            ageInput.value = age;
+          }
+          
+          if (expiryInput && daysInput && expiryInput.value) {
+            const expiryDate = new Date(expiryInput.value);
+            const today = new Date();
+            const diffTime = expiryDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            daysInput.value = diffDays;
+          }
+          
+          // Toggle Alternate No field visibility based on "On Wattsapp" checkbox in cloned form
+          if (waCheckbox) {
+            const alternateNoRow = formContentDiv.querySelector('#alternate_no_row');
+            if (alternateNoRow) {
+              if (waCheckbox.checked) {
+                alternateNoRow.style.display = 'none';
+              } else {
+                alternateNoRow.style.display = '';
+              }
+            }
+          }
+          
+          // Attach event listeners to cloned form elements
+          const clonedDobInput = formContentDiv.querySelector('#dob_dor');
+          const clonedExpiryInput = formContentDiv.querySelector('#id_expiry_date');
+          if (clonedDobInput) {
+            clonedDobInput.addEventListener('change', function() {
+              const dobInput = formContentDiv.querySelector('#dob_dor');
+              const ageInput = formContentDiv.querySelector('#dob_age');
+              if (dobInput && ageInput && dobInput.value) {
+                const birthDate = new Date(dobInput.value);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                  age--;
+                }
+                ageInput.value = age;
+              }
+            });
+          }
+          if (clonedExpiryInput) {
+            clonedExpiryInput.addEventListener('change', function() {
+              const expiryInput = formContentDiv.querySelector('#id_expiry_date');
+              const daysInput = formContentDiv.querySelector('#id_expiry_days');
+              if (expiryInput && daysInput && expiryInput.value) {
+                const expiryDate = new Date(expiryInput.value);
+                const today = new Date();
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                daysInput.value = diffDays;
+              }
+            });
+          }
+          
+          // Attach client type change listener to cloned form
+          const clonedClientTypeSelect = formContentDiv.querySelector('#client_type');
+          if (clonedClientTypeSelect) {
+            clonedClientTypeSelect.addEventListener('change', function() {
+              const selectedType = this.value;
+              const entityTypes = ['Business', 'Company'];
+              const shouldShowAllFields = selectedType === 'Individual' || entityTypes.includes(selectedType);
+              
+              if (shouldShowAllFields) {
+                // Ensure all form fields are visible
+                const allFields = formContentDiv.querySelectorAll('.detail-row, .detail-section, .detail-section-body');
+                allFields.forEach(field => {
+                  field.style.display = '';
+                  field.style.visibility = '';
+                  field.style.opacity = '';
+                });
+                
+                // Also ensure all inputs, selects, and textareas are visible
+                const allInputs = formContentDiv.querySelectorAll('input, select, textarea');
+                allInputs.forEach(input => {
+                  if (input.closest('.detail-section')) {
+                    input.closest('.detail-section').style.display = '';
+                  }
+                  input.style.display = '';
+                  input.style.visibility = '';
+                });
+              }
+            });
+            
+            // Trigger on initial load if a type is already selected
+            if (clonedClientTypeSelect.value === 'Individual' || ['Business', 'Company'].includes(clonedClientTypeSelect.value)) {
+              clonedClientTypeSelect.dispatchEvent(new Event('change'));
+            }
+          }
+          
+          // Attach WA checkbox listener to cloned form
+          const clonedWaCheckbox = formContentDiv.querySelector('#wa');
+          const clonedAlternateNoRow = formContentDiv.querySelector('#alternate_no_row');
+          if (clonedWaCheckbox && clonedAlternateNoRow) {
+            clonedWaCheckbox.addEventListener('change', function() {
+              if (this.checked) {
+                clonedAlternateNoRow.style.display = 'none';
+              } else {
+                clonedAlternateNoRow.style.display = '';
+              }
+            });
+          }
+        }
       }
     }
     
@@ -2989,23 +3178,47 @@
     const columnItems = columnSelection.querySelectorAll('.column-item');
     
     columnItems.forEach(item => {
+      // Skip if already initialized
+      if (item.dataset.dragInitialized === 'true') {
+        return;
+      }
+      item.dataset.dragInitialized = 'true';
+      // Prevent checkbox from interfering with drag
+      const checkbox = item.querySelector('.column-checkbox');
+      if (checkbox) {
+        checkbox.addEventListener('mousedown', function(e) {
+          e.stopPropagation();
+        });
+        checkbox.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+      
+      // Prevent label from interfering with drag
+      const label = item.querySelector('label');
+      if (label) {
+        label.addEventListener('mousedown', function(e) {
+          // Only prevent if clicking on the label text, not the checkbox
+          if (e.target === label) {
+            e.preventDefault();
+          }
+        });
+      }
+      
       // Drag start
       item.addEventListener('dragstart', function(e) {
         draggedElement = this;
         this.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', ''); // Required for Firefox
-        // Create a ghost image
-        const dragImage = this.cloneNode(true);
-        dragImage.style.opacity = '0.5';
-        document.body.appendChild(dragImage);
-        e.dataTransfer.setDragImage(dragImage, 0, 0);
-        setTimeout(() => document.body.removeChild(dragImage), 0);
+        e.dataTransfer.setData('text/html', this.outerHTML);
+        e.dataTransfer.setData('text/plain', this.dataset.column);
       });
       
       // Drag end
       item.addEventListener('dragend', function(e) {
         this.classList.remove('dragging');
+        // Remove drag-over from all items
+        columnItems.forEach(i => i.classList.remove('drag-over'));
         if (dragOverElement) {
           dragOverElement.classList.remove('drag-over');
           dragOverElement = null;
@@ -3016,6 +3229,7 @@
       // Drag over
       item.addEventListener('dragover', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
         
         if (draggedElement && this !== draggedElement) {
@@ -3029,7 +3243,8 @@
           dragOverElement = this;
           
           const rect = this.getBoundingClientRect();
-          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+          const midpoint = rect.top + (rect.height / 2);
+          const next = e.clientY > midpoint;
           
           if (next) {
             if (this.nextSibling && this.nextSibling !== draggedElement) {
@@ -3045,9 +3260,17 @@
         }
       });
       
+      // Drag enter
+      item.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        if (draggedElement && this !== draggedElement) {
+          this.classList.add('drag-over');
+        }
+      });
+      
       // Drag leave
       item.addEventListener('dragleave', function(e) {
-        // Only remove if we're not entering a child element
+        // Only remove if we're actually leaving the element
         if (!this.contains(e.relatedTarget)) {
           this.classList.remove('drag-over');
           if (dragOverElement === this) {
