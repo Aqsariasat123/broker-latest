@@ -3,6 +3,141 @@
 
 @include('partials.table-styles')
 
+<style>
+  /* Orange styling for radio buttons in policies table */
+  .bell-radio {
+    accent-color: #f3742a !important;
+    width: 18px !important;
+    height: 18px !important;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  .bell-radio:checked {
+    accent-color: #f3742a !important;
+  }
+  
+  .bell-radio.expired {
+    accent-color: #dc3545 !important;
+  }
+  
+  .bell-radio.dfr {
+    accent-color: #f3742a !important;
+  }
+  
+  .bell-radio.normal {
+    accent-color: #f3742a !important;
+  }
+  
+  /* Orange styling for checkboxes in policy forms */
+  #policyForm input[type="checkbox"],
+  .modal-body input[type="checkbox"],
+  #policyFormPageContent input[type="checkbox"],
+  .form-group input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #f3742a !important;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 2px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+    position: relative;
+    margin: 0;
+    margin-right: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  
+  #policyForm input[type="checkbox"]:checked,
+  .modal-body input[type="checkbox"]:checked,
+  #policyFormPageContent input[type="checkbox"]:checked,
+  .form-group input[type="checkbox"]:checked {
+    background-color: #f3742a !important;
+    border-color: #f3742a !important;
+    accent-color: #f3742a !important;
+  }
+  
+  #policyForm input[type="checkbox"]:checked::after,
+  .modal-body input[type="checkbox"]:checked::after,
+  #policyFormPageContent input[type="checkbox"]:checked::after,
+  .form-group input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+  }
+  
+  /* Style for checkbox labels */
+  .form-group label[for="renewable"] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Orange styling for checkboxes in detail view */
+  .detail-value.checkbox input[type="checkbox"] {
+    accent-color: #f3742a !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 18px !important;
+    height: 18px !important;
+    border: 2px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+    position: relative;
+    cursor: default;
+  }
+  
+  .detail-value.checkbox input[type="checkbox"]:checked {
+    background-color: #f3742a !important;
+    border-color: #f3742a !important;
+    accent-color: #f3742a !important;
+  }
+  
+  .detail-value.checkbox input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+  }
+  
+  /* Orange styling for all checkboxes in column selection and other modals */
+  .column-item input[type="checkbox"],
+  .column-selection input[type="checkbox"],
+  input[type="checkbox"]:checked {
+    accent-color: #f3742a !important;
+  }
+  
+  .column-item input[type="checkbox"]:checked,
+  .column-selection input[type="checkbox"]:checked {
+    background-color: #f3742a !important;
+    border-color: #f3742a !important;
+    accent-color: #f3742a !important;
+  }
+  
+  /* Ensure all checkboxes that are checked show orange */
+  input[type="checkbox"][checked],
+  input[type="checkbox"]:checked {
+    background-color: #f3742a !important;
+    border-color: #f3742a !important;
+    accent-color: #f3742a !important;
+  }
+</style>
+
 @php
   $config = \App\Helpers\TableConfigHelper::getConfig('policies');
   $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('policies');
@@ -162,7 +297,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; margin-top:0;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('policies.export', array_merge(request()->query(), ['page' => $policies->currentPage()])) }}">Export</a>
         <button class="btn btn-column" id="columnBtn" type="button">Column</button>
@@ -212,10 +347,10 @@
         <div id="policyFormPageContent" style="display:none;">
           <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
             <div style="display:flex; justify-content:flex-end; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
-              <div class="client-page-actions">
+              <div class="client-page-actions" style="display:flex; gap:8px;">
                 <button type="button" class="btn-delete" id="policyDeleteBtn" style="display:none; background:#dc3545; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;" onclick="deletePolicy()">Delete</button>
+                <button type="button" class="btn" id="closePolicyFormBtn" onclick="closePolicyPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Close</button>
                 <button type="submit" form="policyForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Save</button>
-                <button type="button" class="btn" id="closePolicyFormBtn" onclick="closePolicyPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Close</button>
               </div>
             </div>
             <form id="policyForm" method="POST" action="{{ route('policies.store') }}">
@@ -387,6 +522,15 @@
           </div>
           <div class="form-row">
             <div class="form-group">
+              <label for="channel_id">Channel</label>
+              <select id="channel_id" name="channel_id" class="form-control">
+                <option value="">Select</option>
+                @foreach($lookupData['channels'] ?? [] as $channel)
+                  <option value="{{ $channel['id'] }}">{{ $channel['name'] }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="form-group">
               <label for="agent">Agent</label>
               <input id="agent" name="agent" class="form-control">
             </div>
@@ -396,9 +540,9 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closePolicyModal()">Cancel</button>
-          <button type="button" class="btn-delete" id="policyDeleteBtn" style="display:none;" onclick="deletePolicy()">Delete</button>
+        <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end;">
+          <button type="button" class="btn-cancel" onclick="closePolicyModal()">Close</button>
+          <button type="button" class="btn-delete" id="policyModalDeleteBtn" style="display:none;" onclick="deletePolicy()">Delete</button>
           <button type="submit" class="btn-save">Save</button>
         </div>
       </form>
@@ -530,6 +674,10 @@
             <div class="detail-value">${policy.policy_no || '-'}</div>
           </div>
           <div class="detail-row">
+            <span class="detail-label">Policy Code</span>
+            <div class="detail-value">${policy.policy_code || policy.policy_id || '-'}</div>
+          </div>
+          <div class="detail-row">
             <span class="detail-label">Client</span>
             <div class="detail-value">${policy.client_name || (policy.client ? (policy.client.first_name + ' ' + policy.client.surname) : '-')}</div>
           </div>
@@ -637,6 +785,10 @@
         <div class="detail-section-header">ADDITIONAL INFO</div>
         <div class="detail-section-body">
           <div class="detail-row">
+            <span class="detail-label">Channel</span>
+            <div class="detail-value">${policy.channel_name || (policy.channel ? policy.channel.name : '-')}</div>
+          </div>
+          <div class="detail-row">
             <span class="detail-label">Agent</span>
             <div class="detail-value">${policy.agent || '-'}</div>
           </div>
@@ -706,7 +858,7 @@
       deleteBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
       if (closeBtn) closeBtn.style.display = 'none';
-      if (closeFormBtn) closeFormBtn.style.display = 'none';
+      if (closeFormBtn) closeFormBtn.style.display = 'inline-block';
       pageForm.reset();
           } else {
       const policyName = policy.policy_no || 'Unknown';
@@ -727,7 +879,7 @@
         'insured_item': 'insured_item', 'renewable': 'renewable', 'biz_type': 'business_type_id',
         'term': 'term', 'term_unit': 'term_unit', 'base_premium': 'base_premium',
         'premium': 'premium', 'frequency': 'frequency_id', 'pay_plan': 'pay_plan_lookup_id',
-        'agency': 'agency_id', 'agent': 'agent', 'notes': 'notes'
+        'agency': 'agency_id', 'agent': 'agent', 'notes': 'notes', 'channel': 'channel_id'
       };
 
       Object.keys(fieldMap).forEach(oldKey => {

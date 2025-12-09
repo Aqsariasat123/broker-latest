@@ -276,4 +276,18 @@ class Policy extends Model
         }
         return null;
     }
+
+    public function getChannelNameAttribute(): ?string
+    {
+        try {
+            $channel = $this->channel;
+            if ($channel && is_object($channel) && property_exists($channel, 'name')) {
+                $name = $channel->name;
+                return is_scalar($name) ? (string) $name : null;
+            }
+        } catch (\Exception $e) {
+            // Silently fail
+        }
+        return null;
+    }
 }

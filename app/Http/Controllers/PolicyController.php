@@ -102,6 +102,15 @@ class PolicyController extends Controller
     {
         $policy->load([
             'client',
+            'insurer',
+            'policyClass',
+            'policyPlan',
+            'policyStatus',
+            'businessType',
+            'frequency',
+            'payPlan',
+            'agency',
+            'channel',
             'schedules.paymentPlans.debitNotes.payments',
         ]);
 
@@ -229,6 +238,7 @@ class PolicyController extends Controller
             $policyData['frequency'] = $policy->frequency_id;
             $policyData['pay_plan'] = $policy->pay_plan_lookup_id;
             $policyData['agency'] = $policy->agency_id;
+            $policyData['channel'] = $policy->channel_id;
             $policyData['policy_id'] = $policy->policy_code;
             return response()->json($policyData);
         }
