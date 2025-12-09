@@ -482,6 +482,16 @@
       margin: 0;
     }
 
+    /* Drag and drop styles */
+    .column-item.dragging {
+      opacity: 0.5;
+    }
+
+    .column-item.drag-over {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+
     .column-actions {
       display: flex;
       gap: 8px;
@@ -1041,6 +1051,8 @@
       // prevent body scrollbar when modal open
       document.body.style.overflow = 'hidden';
       document.getElementById('columnModal').classList.add('show');
+      // Initialize drag and drop after modal is shown
+      setTimeout(initDragAndDrop, 100);
     }
 
     // Close Column Modal
@@ -1068,15 +1080,17 @@
 
     // Save Column Settings
     function saveColumnSettings() {
-      const checkboxes = document.querySelectorAll('.column-checkbox:checked');
-      const selected = Array.from(checkboxes).map(cb => cb.value);
+      const items = Array.from(document.querySelectorAll('#columnSelection .column-item'));
+      const order = items.map(item => item.querySelector('input').value);
+      const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(cb => cb.value);
+      const orderedChecked = order.filter(col => checked.includes(col));
       
-      // Update the form with selected columns
+      // Update the form with selected columns in the correct order
       const form = document.getElementById('columnForm');
       const existingInputs = form.querySelectorAll('input[name="columns[]"]');
       existingInputs.forEach(input => input.remove());
       
-      selected.forEach(column => {
+      orderedChecked.forEach(column => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'columns[]';
@@ -1085,6 +1099,123 @@
       });
       
       form.submit();
+    }
+
+    // Drag and drop functionality
+    let draggedElement = null;
+    let dragOverElement = null;
+
+    function initDragAndDrop() {
+      const columnSelection = document.getElementById('columnSelection');
+      if (!columnSelection) return;
+      const columnItems = columnSelection.querySelectorAll('.column-item');
+      columnItems.forEach(item => {
+        // Skip if already initialized
+        if (item.dataset.dragInitialized === 'true') {
+          return;
+        }
+        item.dataset.dragInitialized = 'true';
+        item.setAttribute('draggable', 'true');
+        
+        // Prevent checkbox from interfering with drag
+        const checkbox = item.querySelector('.column-checkbox');
+        if (checkbox) {
+          checkbox.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+          });
+          checkbox.addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+        }
+        
+        // Prevent label from interfering with drag
+        const label = item.querySelector('label');
+        if (label) {
+          label.addEventListener('mousedown', function(e) {
+            // Only prevent if clicking on the label text, not the checkbox
+            if (e.target === label) {
+              e.preventDefault();
+            }
+          });
+        }
+        
+        item.addEventListener('dragstart', function(e) {
+          draggedElement = this;
+          this.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/html', this.outerHTML);
+          e.dataTransfer.setData('text/plain', this.querySelector('.column-checkbox').value);
+        });
+        
+        item.addEventListener('dragend', function(e) {
+          this.classList.remove('dragging');
+          // Remove drag-over from all items
+          columnItems.forEach(i => i.classList.remove('drag-over'));
+          if (dragOverElement) {
+            dragOverElement.classList.remove('drag-over');
+            dragOverElement = null;
+          }
+          draggedElement = null;
+        });
+        
+        item.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          
+          if (draggedElement && this !== draggedElement) {
+            // Remove drag-over class from previous element
+            if (dragOverElement && dragOverElement !== this) {
+              dragOverElement.classList.remove('drag-over');
+            }
+            
+            // Add drag-over class to current element
+            this.classList.add('drag-over');
+            dragOverElement = this;
+            
+            const rect = this.getBoundingClientRect();
+            const midpoint = rect.top + (rect.height / 2);
+            const next = e.clientY > midpoint;
+            
+            if (next) {
+              if (this.nextSibling && this.nextSibling !== draggedElement) {
+                this.parentNode.insertBefore(draggedElement, this.nextSibling);
+              } else if (!this.nextSibling) {
+                this.parentNode.appendChild(draggedElement);
+              }
+            } else {
+              if (this.previousSibling !== draggedElement) {
+                this.parentNode.insertBefore(draggedElement, this);
+              }
+            }
+          }
+        });
+        
+        item.addEventListener('dragenter', function(e) {
+          e.preventDefault();
+          if (draggedElement && this !== draggedElement) {
+            this.classList.add('drag-over');
+          }
+        });
+        
+        item.addEventListener('dragleave', function(e) {
+          // Only remove if we're actually leaving the element
+          if (!this.contains(e.relatedTarget)) {
+            this.classList.remove('drag-over');
+            if (dragOverElement === this) {
+              dragOverElement = null;
+            }
+          }
+        });
+        
+        item.addEventListener('drop', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.classList.remove('drag-over');
+          dragOverElement = null;
+          return false;
+        });
+      });
     }
 
     // Delete Task
