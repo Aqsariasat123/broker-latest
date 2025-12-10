@@ -134,6 +134,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/policies/{policy}', [PolicyController::class, 'destroy'])->name('policies.destroy');
     Route::get('/policies/export', [PolicyController::class, 'export'])->name('policies.export');
     Route::post('/policies/save-column-settings', [PolicyController::class, 'saveColumnSettings'])->name('policies.save-column-settings');
+    Route::post('/policies/{policy}/upload-document', [PolicyController::class, 'uploadDocument'])->name('policies.upload-document');
+    Route::post('/policies/{policy}/renewal-schedule', [PolicyController::class, 'storeRenewalSchedule'])->name('policies.renewal-schedule');
 
     // Clients Routes
     Route::get('/clients/export', [ClientController::class, 'export'])->name('clients.export');

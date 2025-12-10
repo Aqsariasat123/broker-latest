@@ -32,11 +32,16 @@ class Policy extends Model
         'term_unit',
         'base_premium',
         'premium',
+        'wsc',
+        'lou',
+        'pa',
         'frequency_id',
         'pay_plan_lookup_id',
         'agency_id',
         'agent',
         'channel_id',
+        'cancelled_date',
+        'last_endorsement',
         'notes'
     ];
 
@@ -44,9 +49,13 @@ class Policy extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'date_registered' => 'date',
+        'cancelled_date' => 'date',
         'sum_insured' => 'decimal:2',
         'base_premium' => 'decimal:2',
         'premium' => 'decimal:2',
+        'wsc' => 'decimal:2',
+        'lou' => 'decimal:2',
+        'pa' => 'decimal:2',
         'renewable' => 'boolean',
     ];
 
@@ -129,10 +138,8 @@ class Policy extends Model
         return $this->belongsTo(LookupValue::class, 'channel_id');
     }
 
-    public function documents(): HasMany
-    {
-        return $this->hasMany(Document::class, 'tied_to', 'policy_no');
-    }
+    // Note: Documents are tied using 'tied_to' field which can be policy_code or policy_no
+    // We can't use a standard relationship here, so we'll load documents manually in controllers
 
     // Accessor methods to safely get relationship names
     public function getInsurerNameAttribute(): ?string

@@ -116,6 +116,13 @@ class LookupTableSeeder extends Seeder
                 ['seq' => 1, 'name' => 'Keystone', 'active' => true],
                 ['seq' => 2, 'name' => 'LIS', 'active' => true],
             ],
+            'Channel' => [
+                ['seq' => 1, 'name' => 'Direct', 'active' => true],
+                ['seq' => 2, 'name' => 'Online', 'active' => true],
+                ['seq' => 3, 'name' => 'Agent', 'active' => true],
+                ['seq' => 4, 'name' => 'Broker', 'active' => true],
+                ['seq' => 5, 'name' => 'Referral', 'active' => true],
+            ],
             'Payment Status' => [
                 ['seq' => 1, 'name' => 'Paid', 'active' => true],
                 ['seq' => 2, 'name' => 'Partly Paid', 'active' => true],
@@ -306,13 +313,20 @@ class LookupTableSeeder extends Seeder
         ];
 
         foreach ($lookupData as $categoryName => $values) {
-            $category = LookupCategory::create([
-                'name' => $categoryName,
-                'active' => true
-            ]);
+            $category = LookupCategory::firstOrCreate(
+                ['name' => $categoryName],
+                ['active' => true]
+            );
 
             foreach ($values as $value) {
+                // Check if value already exists to avoid duplicates
+                $existingValue = $category->values()
+                    ->where('name', $value['name'])
+                    ->first();
+                
+                if (!$existingValue) {
                 $category->values()->create($value);
+                }
             }
         }
     }

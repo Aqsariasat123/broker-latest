@@ -13,5 +13,7 @@ class Document extends Model
         'doc_id', 'tied_to', 'name', 'group', 'type', 'format', 'date_added', 'year', 'notes', 'file_path'
     ];
 
-    protected $dates = ['date_added'];
+    protected $casts = [
+        'date_added' => 'date',
+    ];
 }

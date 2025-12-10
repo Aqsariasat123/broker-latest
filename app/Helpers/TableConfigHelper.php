@@ -72,7 +72,7 @@ class TableConfigHelper
                     'start_date' => 'Start Date',
                     'end_date' => 'End Date',
                     'insured' => 'Insured',
-                    'policy_status' => 'Status',
+                    'policy_status' => 'Policy Status',
                     'date_registered' => 'Date Registered',
                     'policy_id' => 'Policy ID',
                     'insured_item' => 'Insured Item',
