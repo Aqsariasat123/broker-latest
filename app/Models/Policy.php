@@ -129,6 +129,11 @@ class Policy extends Model
         return $this->belongsTo(LookupValue::class, 'channel_id');
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class, 'tied_to', 'policy_no');
+    }
+
     // Accessor methods to safely get relationship names
     public function getInsurerNameAttribute(): ?string
     {

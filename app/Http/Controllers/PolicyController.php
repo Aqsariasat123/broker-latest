@@ -82,8 +82,12 @@ class PolicyController extends Controller
             'agency_id' => 'nullable|exists:lookup_values,id',
             'agent' => 'nullable|string|max:255',
             'channel_id' => 'nullable|exists:lookup_values,id',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'no_of_instalments' => 'nullable|integer' // Allow but don't save if not in table
         ]);
+
+        // Remove fields that don't exist in the table
+        unset($validated['no_of_instalments']);
 
         // Generate unique policy_code if not provided
         if (empty($validated['policy_code'])) {
@@ -111,6 +115,7 @@ class PolicyController extends Controller
             'payPlan',
             'agency',
             'channel',
+            'documents',
             'schedules.paymentPlans.debitNotes.payments',
         ]);
 
@@ -197,8 +202,50 @@ class PolicyController extends Controller
         ];
 
         if ($request->expectsJson()) {
+            // Add client source information to policy data
+            $policyData = $policy->toArray();
+            if ($policy->client) {
+                $policyData['client'] = [
+                    'id' => $policy->client->id,
+                    'client_name' => $policy->client->client_name,
+                    'source' => $policy->client->source,
+                    'source_name' => $policy->client->source_name,
+                    'first_name' => $policy->client->first_name,
+                    'surname' => $policy->client->surname,
+                ];
+                $policyData['client_name'] = $policy->client->client_name;
+                $policyData['source'] = $policy->client->source;
+                $policyData['source_name'] = $policy->client->source_name;
+            }
+            // Add relationship names
+            $policyData['insurer_name'] = $policy->insurer_name;
+            $policyData['policy_class_name'] = $policy->policy_class_name;
+            $policyData['policy_plan_name'] = $policy->policy_plan_name;
+            $policyData['policy_status_name'] = $policy->policy_status_name;
+            $policyData['business_type_name'] = $policy->business_type_name;
+            $policyData['frequency_name'] = $policy->frequency_name;
+            $policyData['pay_plan_name'] = $policy->pay_plan_name;
+            $policyData['agency_name'] = $policy->agency_name;
+            $policyData['channel_name'] = $policy->channel_name;
+            
+            // Include documents if they exist
+            if ($policy->documents) {
+                $policyData['documents'] = $policy->documents->map(function($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'name' => $doc->name,
+                        'file_name' => $doc->name,
+                        'type' => $doc->type,
+                        'file_path' => $doc->file_path,
+                        'date_added' => $doc->date_added ? $doc->date_added->toDateString() : null,
+                    ];
+                })->toArray();
+            } else {
+                $policyData['documents'] = [];
+            }
+            
             return response()->json([
-                'policy' => $policy,
+                'policy' => $policyData,
                 'coverage' => $coverage,
                 'payment_history' => $paymentHistory,
             ]);
@@ -214,6 +261,20 @@ class PolicyController extends Controller
 
     public function edit(Policy $policy)
     {
+        $policy->load([
+            'client',
+            'insurer',
+            'policyClass',
+            'policyPlan',
+            'policyStatus',
+            'businessType',
+            'frequency',
+            'payPlan',
+            'agency',
+            'channel',
+            'documents',
+        ]);
+        
         if (request()->expectsJson()) {
             // Return policy with both old and new field names for backward compatibility
             $policyData = $policy->toArray();
@@ -228,8 +289,31 @@ class PolicyController extends Controller
             $policyData['pay_plan_lookup_id'] = $policy->pay_plan_lookup_id;
             $policyData['agency_id'] = $policy->agency_id;
             $policyData['channel_id'] = $policy->channel_id;
+            // Add client data
+            if ($policy->client) {
+                $policyData['client'] = [
+                    'id' => $policy->client->id,
+                    'client_name' => $policy->client->client_name,
+                    'source' => $policy->client->source,
+                    'source_name' => $policy->client->source_name,
+                    'first_name' => $policy->client->first_name,
+                    'surname' => $policy->client->surname,
+                ];
+                $policyData['client_name'] = $policy->client->client_name;
+                $policyData['source'] = $policy->client->source;
+                $policyData['source_name'] = $policy->client->source_name;
+            }
+            // Add relationship names
+            $policyData['insurer_name'] = $policy->insurer_name;
+            $policyData['policy_class_name'] = $policy->policy_class_name;
+            $policyData['policy_plan_name'] = $policy->policy_plan_name;
+            $policyData['policy_status_name'] = $policy->policy_status_name;
+            $policyData['business_type_name'] = $policy->business_type_name;
+            $policyData['frequency_name'] = $policy->frequency_name;
+            $policyData['pay_plan_name'] = $policy->pay_plan_name;
+            $policyData['agency_name'] = $policy->agency_name;
+            $policyData['channel_name'] = $policy->channel_name;
             // Also include old field names for JavaScript compatibility
-            $policyData['client_name'] = $policy->client_id;
             $policyData['insurer'] = $policy->insurer_id;
             $policyData['policy_class'] = $policy->policy_class_id;
             $policyData['policy_plan'] = $policy->policy_plan_id;
