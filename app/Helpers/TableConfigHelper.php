@@ -118,6 +118,28 @@ class TableConfigHelper
                     'vehicle_id' => 'Vehicle ID',
                 ],
             ],
+            'nominees' => [
+                'module' => 'nominees',
+                'route_prefix' => 'nominees',
+                'session_key' => 'nominee_columns',
+                'default_columns' => [
+                    'full_name','date_of_birth','age','nin_passport_no','relationship','share_percentage',
+                    'date_added','date_removed','notes','nominee_code'
+                ],
+                'mandatory_columns' => ['full_name'],
+                'column_definitions' => [
+                    'full_name' => 'Full Name',
+                    'date_of_birth' => 'DOB',
+                    'age' => 'Age',
+                    'nin_passport_no' => 'NIN/Passport No',
+                    'relationship' => 'Relationship',
+                    'share_percentage' => 'Shares',
+                    'date_added' => 'Date Added',
+                    'date_removed' => 'Date Removed',
+                    'notes' => 'Notes',
+                    'nominee_code' => 'Nominee Code',
+                ],
+            ],
             'documents' => [
                 'module' => 'documents',
                 'route_prefix' => 'documents',
@@ -406,7 +428,25 @@ class TableConfigHelper
             return [];
         }
 
-        return session($config['session_key'], $config['default_columns']);
+        $columns = session($config['session_key'], $config['default_columns']);
+        
+        // Handle case where session value might be a JSON string
+        if (is_string($columns)) {
+            $decoded = json_decode($columns, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $columns = $decoded;
+            } else {
+                // If it's not valid JSON, use default columns
+                $columns = $config['default_columns'];
+            }
+        }
+        
+        // Ensure it's always an array
+        if (!is_array($columns)) {
+            $columns = $config['default_columns'];
+        }
+        
+        return $columns;
     }
 }
 

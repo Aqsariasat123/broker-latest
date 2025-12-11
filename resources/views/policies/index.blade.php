@@ -704,7 +704,7 @@
               <h4 id="policyFormTitle" style="margin:0; font-size:16px; font-weight:600; color:#333;">Policy - Add New</h4>
               <div class="client-page-actions" id="policyFormHeaderActions">
                 <button type="submit" form="policyForm" class="btn-save" id="policySaveBtnHeader" style="display:inline-block; background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;">Save</button>
-                <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Cancel</button>
+                <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Close</button>
               </div>
             </div>
           </div>
@@ -982,7 +982,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-cancel" onclick="closePolicyDocumentUploadModal()">Cancel</button>
+        <button type="button" class="btn-cancel" onclick="closePolicyDocumentUploadModal()">Close</button>
         <button type="button" class="btn-save" onclick="handlePolicyDocumentUpload()">Upload</button>
       </div>
     </div>
@@ -993,7 +993,6 @@
     <div class="modal-content" style="max-width:800px;" onclick="event.stopPropagation();">
       <div class="modal-header">
         <h4>Renewal Schedule Details</h4>
-        <button type="button" class="modal-close" onclick="closeRenewalModal()">×</button>
       </div>
       <form id="renewalScheduleForm">
         <div class="modal-body" style="padding:20px;">
@@ -1069,8 +1068,127 @@
 
         </div>
         <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
-          <button type="button" class="btn-cancel" onclick="closeRenewalModal()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeRenewalModal()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Close</button>
           <button type="submit" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vehicle Details Modal -->
+  <div class="modal" id="vehicleModal" style="display:none;" onclick="if(event.target === this) closeVehicleDialog();">
+    <div class="modal-content" style="max-width:600px;" onclick="event.stopPropagation();">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="margin:0;">Add Vehicle Details</h4>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" onclick="saveVehicle()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Save</button>
+          <button type="button" onclick="closeVehicleDialog()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Close</button>
+        </div>
+      </div>
+      <form id="vehicleForm">
+        <div class="modal-body" style="padding:20px;">
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Registration No.</label>
+              <input type="text" name="regn_no" id="vehicle_regn_no" class="form-control" required style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Make</label>
+              <input type="text" name="make" id="vehicle_make" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Model</label>
+              <input type="text" name="model" id="vehicle_model" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Model Year</label>
+              <input type="text" name="year" id="vehicle_year" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Type</label>
+              <input type="text" name="type" id="vehicle_type" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Engine Type</label>
+              <input type="text" name="engine_type" id="vehicle_engine_type" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Engine CC</label>
+              <input type="text" name="cc" id="vehicle_cc" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Engine No.</label>
+              <input type="text" name="engine_no" id="vehicle_engine_no" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Chassis No.</label>
+              <input type="text" name="chassis_no" id="vehicle_chassis_no" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Value</label>
+              <input type="number" step="0.01" name="value" id="vehicle_value" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Usage</label>
+              <input type="text" name="useage" id="vehicle_useage" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Comment</label>
+            <textarea name="notes" id="vehicle_notes" class="form-control" rows="3" style="padding:6px; font-size:12px;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
+          <button type="button" class="btn-save" onclick="saveVehicleAndAddAnother()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Upload VRC</button>
+          <button type="button" class="btn-save" onclick="saveVehicleAndAddAnother()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Add Another Vehicle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Nominee Details Modal -->
+  <div class="modal" id="nomineeModal" style="display:none;" onclick="if(event.target === this) closeNomineeDialog();">
+    <div class="modal-content" style="max-width:500px;" onclick="event.stopPropagation();">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="margin:0;">Add Nominee</h4>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" onclick="saveNominee()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Save</button>
+          <button type="button" onclick="closeNomineeDialog()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Close</button>
+        </div>
+      </div>
+      <form id="nomineeForm">
+        <input type="hidden" name="policy_id" id="nominee_policy_id">
+        <div class="modal-body" style="padding:20px;">
+          <div class="form-group" style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Full Name</label>
+            <input type="text" name="full_name" id="nominee_full_name" class="form-control" required style="padding:6px; font-size:12px;">
+          </div>
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Date Of Birth</label>
+              <input type="date" name="date_of_birth" id="nominee_date_of_birth" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">NIN/Passport No</label>
+              <input type="text" name="nin_passport_no" id="nominee_nin_passport_no" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Relationship</label>
+              <input type="text" name="relationship" id="nominee_relationship" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Share</label>
+              <input type="number" step="0.01" name="share_percentage" id="nominee_share_percentage" class="form-control" style="padding:6px; font-size:12px;" placeholder="%">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Notes</label>
+            <textarea name="notes" id="nominee_notes" class="form-control" rows="3" style="padding:6px; font-size:12px;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
+          <button type="button" class="btn-save" onclick="saveNomineeAndAddAnother()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Upload ID</button>
+          <button type="button" class="btn-save" onclick="saveNomineeAndAddAnother()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Add Another</button>
         </div>
       </form>
     </div>
@@ -1965,6 +2083,10 @@
             <select name="policy_class_id" id="policy_class_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
               ${createSelectOptions(lookupData.policy_classes || [])}
             </select>
+            <div style="display:flex; gap:5px; margin-top:4px;">
+              <button type="button" onclick="openVehicleDialog()" style="flex:1; padding:3px 8px; font-size:10px; background:#f3742a; color:#fff; border:none; border-radius:2px; cursor:pointer; font-weight:500;">Add Vehicle</button>
+              <button type="button" onclick="openNomineeDialog()" style="flex:1; padding:3px 8px; font-size:10px; background:#f3742a; color:#fff; border:none; border-radius:2px; cursor:pointer; font-weight:500;">Add Nominee</button>
+            </div>
           </div>
           <div>
             <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Insurer</label>
@@ -2957,6 +3079,161 @@
     } else {
       window.open(fileUrl, '_blank');
     }
+  }
+
+  // Vehicle Dialog Functions
+  function openVehicleDialog() {
+    const modal = document.getElementById('vehicleModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+      // Get current policy ID if available
+      const policyId = currentPolicyId || document.getElementById('policy_id')?.value;
+      if (policyId) {
+        document.getElementById('vehicleForm').dataset.policyId = policyId;
+      }
+    }
+  }
+
+  function closeVehicleDialog() {
+    const modal = document.getElementById('vehicleModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.getElementById('vehicleForm').reset();
+    }
+  }
+
+  async function saveVehicle(addAnother = false) {
+    const form = document.getElementById('vehicleForm');
+    const formData = new FormData(form);
+    
+    // Add policy_id if available
+    const policyId = currentPolicyId || form.dataset.policyId || document.getElementById('policy_id')?.value;
+    if (policyId) {
+      formData.append('policy_id', policyId);
+    }
+
+    try {
+      const response = await fetch('{{ route("vehicles.store") }}', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Vehicle saved successfully!');
+        if (!addAnother) {
+          closeVehicleDialog();
+        } else {
+          form.reset();
+        }
+      } else {
+        alert('Error: ' + (data.message || 'Failed to save vehicle'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error saving vehicle: ' + error.message);
+    }
+  }
+
+  function saveVehicleAndAddAnother() {
+    saveVehicle(true);
+  }
+
+  // Nominee Dialog Functions
+  function openNomineeDialog() {
+    const modal = document.getElementById('nomineeModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+      // Get current policy ID if available
+      const policyId = currentPolicyId || document.getElementById('policy_id')?.value;
+      if (policyId) {
+        document.getElementById('nominee_policy_id').value = policyId;
+        document.getElementById('nomineeForm').dataset.policyId = policyId;
+      }
+    }
+  }
+
+  function closeNomineeDialog() {
+    const modal = document.getElementById('nomineeModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.getElementById('nomineeForm').reset();
+    }
+  }
+
+  async function saveNominee(addAnother = false) {
+    const form = document.getElementById('nomineeForm');
+    const formData = new FormData(form);
+    
+    // Add policy_id if available
+    const policyId = currentPolicyId || form.dataset.policyId || document.getElementById('policy_id')?.value;
+    if (policyId) {
+      formData.append('policy_id', policyId);
+    }
+
+    // Add client_id if available
+    const clientId = document.getElementById('client_id')?.value;
+    if (clientId) {
+      formData.append('client_id', clientId);
+    }
+
+    try {
+      const response = await fetch('{{ route("nominees.store") }}', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        if (!addAnother) {
+          closeNomineeDialog();
+          window.location.href = `/nominees`;
+
+          // // Redirect to nominees page only if policy_id exists
+          // if (policyId) {
+          //   window.location.href = `/nominees?policy_id=${policyId}`;
+          // } else {
+          //   alert('Nominee saved successfully! Note: Please save the policy first to link this nominee to the policy.');
+          // }
+        } else {
+          form.reset();
+          if (policyId) {
+            document.getElementById('nominee_policy_id').value = policyId;
+          }
+        }
+      } else {
+        // Handle validation errors
+        if (data.errors) {
+          const errorMessages = Object.values(data.errors).flat().join('\n');
+          alert('Validation errors:\n' + errorMessages);
+        } else {
+          alert('Error: ' + (data.message || 'Failed to save nominee'));
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error saving nominee: ' + error.message);
+    }
+  }
+
+  function saveNomineeAndAddAnother() {
+    saveNominee(true);
   }
   
 </script>

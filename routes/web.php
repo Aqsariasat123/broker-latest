@@ -25,6 +25,7 @@ use App\Http\Controllers\PaymentPlanController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\NomineeController;
 
 
 
@@ -187,6 +188,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
     Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
     Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+
+    // Nominees Routes
+    Route::get('/nominees/export', [NomineeController::class, 'export'])->name('nominees.export');
+    Route::post('/nominees/save-column-settings', [NomineeController::class, 'saveColumnSettings'])->name('nominees.save-column-settings');
+    Route::get('/nominees/documents', [NomineeController::class, 'getDocuments'])->name('nominees.get-documents');
+    Route::post('/nominees/upload-document', [NomineeController::class, 'uploadDocument'])->name('nominees.upload-document');
+    Route::get('/nominees', [NomineeController::class, 'index'])->name('nominees.index');
+    Route::post('/nominees', [NomineeController::class, 'store'])->name('nominees.store');
+    Route::get('/nominees/{nominee}', [NomineeController::class, 'show'])->name('nominees.show');
+    Route::put('/nominees/{nominee}', [NomineeController::class, 'update'])->name('nominees.update');
+    Route::delete('/nominees/{nominee}', [NomineeController::class, 'destroy'])->name('nominees.destroy');
 
     // Claims Routes
     Route::get('/claims/export', [ClaimController::class, 'export'])->name('claims.export');

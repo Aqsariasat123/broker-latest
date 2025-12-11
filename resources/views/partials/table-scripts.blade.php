@@ -1,7 +1,12 @@
 <script>
   // Drag and drop functionality
-  let draggedElement = null;
-  let dragOverElement = null;
+  // Only declare if not already declared (to avoid duplicate declaration errors)
+  if (typeof draggedElement === 'undefined') {
+    var draggedElement = null;
+  }
+  if (typeof dragOverElement === 'undefined') {
+    var dragOverElement = null;
+  }
   
   // Initialize drag and drop when column modal opens
   function initDragAndDrop() {

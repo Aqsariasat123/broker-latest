@@ -3,19 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
+use App\Models\Policy;
 use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $vehicles = Vehicle::orderBy('created_at', 'desc')->paginate(10);
+        $policyId = $request->get('policy_id');
+        $policy = null;
+        
+        if ($policyId) {
+            $policy = Policy::with('client')->findOrFail($policyId);
+            $vehicles = Vehicle::where('policy_id', $policyId)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        } else {
+            // Show all vehicles without a policy_id or all vehicles
+            $vehicles = Vehicle::whereNull('policy_id')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        }
         
         // Use TableConfigHelper for selected columns
         $config = \App\Helpers\TableConfigHelper::getConfig('vehicles');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('vehicles');
         
-        return view('vehicles.index', compact('vehicles', 'selectedColumns'));
+        return view('vehicles.index', compact('vehicles', 'selectedColumns', 'policy', 'policyId'));
     }
 
     public function store(Request $request)
@@ -41,12 +55,27 @@ class VehicleController extends Controller
 
         // Generate unique VehicleID
         $latest = Vehicle::orderBy('id', 'desc')->first();
-        $nextId = $latest ? (int)str_replace('VH', '', $latest->vehicle_id) + 1 : 1001;
+        $nextId = $latest ? (int)str_replace('VH', '', $latest->vehicle_id ?? 'VH0') + 1 : 1001;
         $validated['vehicle_id'] = 'VH' . $nextId;
 
-        Vehicle::create($validated);
+        $vehicle = Vehicle::create($validated);
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehicle created successfully.',
+                'vehicle' => $vehicle
+            ]);
+        }
+
+        if (isset($validated['policy_id']) && $validated['policy_id']) {
+            return redirect()->route('vehicles.index', ['policy_id' => $validated['policy_id']])
+                ->with('success', 'Vehicle created successfully.');
+        }
+
+        // Redirect to vehicles index without policy_id to show unlinked vehicles
+        return redirect()->route('vehicles.index')
+            ->with('success', 'Vehicle created successfully. Please save the policy to link this vehicle.');
     }
 
     public function show(Request $request, Vehicle $vehicle)
@@ -88,13 +117,23 @@ class VehicleController extends Controller
 
         $vehicle->update($validated);
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
+        $redirectParams = $vehicle->policy_id 
+            ? ['policy_id' => $vehicle->policy_id] 
+            : [];
+        
+        return redirect()->route('vehicles.index', $redirectParams)
+            ->with('success', 'Vehicle updated successfully.');
     }
 
     public function destroy(Vehicle $vehicle)
     {
+        $policyId = $vehicle->policy_id;
         $vehicle->delete();
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully.');
+
+        $redirectParams = $policyId ? ['policy_id' => $policyId] : [];
+        
+        return redirect()->route('vehicles.index', $redirectParams)
+            ->with('success', 'Vehicle deleted successfully.');
     }
 
     public function export(Request $request)

@@ -3,6 +3,63 @@
 
 @include('partials.table-styles')
 
+<style>
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #f3742a;
+  }
+  
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+  
+  .column-filter {
+    display: none;
+  }
+</style>
+
 @php
   $config = \App\Helpers\TableConfigHelper::getConfig('vehicles');
   $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('vehicles');
@@ -18,11 +75,28 @@
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
-        <h3>Vehicles</h3>
+        <h3>
+          @if($policy)
+            {{ $policy->policy_no }} - 
+          @endif
+          <span style="color:#f3742a;">Vehicles</span>
+        </h3>
         <div class="records-found">Records Found - {{ $vehicles->total() }}</div>
+        <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+          <div class="filter-group">
+            <div class="filter-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" id="filterToggle" onchange="toggleFilter()">
+                <span class="toggle-slider"></span>
+              </label>
+              <span style="font-size:13px; color:#555;">Filter</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="action-buttons">
-        <button class="btn btn-add" id="addVehicleBtn">Add</button>
+        <!-- <button class="btn btn-add" id="addVehicleBtn">Add</button> -->
+        <a href="{{ $policy ? route('policies.show', $policy->id) : route('policies.index') }}" class="btn" style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">Back</a>
       </div>
     </div>
 
@@ -37,6 +111,12 @@
       <table id="vehiclesTable">
         <thead>
           <tr>
+            <th style="text-align:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
+                <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff"/>
+              </svg>
+            </th>
             <th>Action</th>
             @foreach($selectedColumns as $col)
               @if(isset($columnDefinitions[$col]))
@@ -47,9 +127,17 @@
         </thead>
         <tbody>
           @foreach($vehicles as $vh)
+            @php
+              $hasNoPolicy = empty($vh->policy_id);
+            @endphp
             <tr>
-              <td class="action-cell">
-                <svg class="action-expand" onclick="openVehicleDetails({{ $vh->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+            <td class="bell-cell {{ $hasNoPolicy ? 'no-policy' : '' }}">
+                <div style="display:flex; align-items:center; justify-content:center;">
+                  <div class="status-indicator {{ $hasNoPolicy ? 'no-policy' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasNoPolicy ? '#555' : '#f3742a' }}; background-color:{{ $hasNoPolicy ? '#555' : 'transparent' }};"></div>
+                </div>
+              </td>
+              <td class="action-cell"><!-- onclick="openVehicleDetails({{ $vh->id }})" -->
+                <svg class="action-expand" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
                   <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
                   <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -106,6 +194,7 @@
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('vehicles.export') }}">Export</a>
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
+        <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
       </div>
       <div class="paginator">
         @php
@@ -344,6 +433,210 @@
     return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  // Print function
+  function printTable() {
+    const table = document.getElementById('vehiclesTable');
+    if (!table) return;
+    
+    // Get table headers - preserve order
+    const headers = [];
+    const headerCells = table.querySelectorAll('thead th');
+    headerCells.forEach(th => {
+      let headerText = '';
+      const clone = th.cloneNode(true);
+      const filterInput = clone.querySelector('.column-filter');
+      if (filterInput) filterInput.remove();
+      headerText = clone.textContent.trim();
+      // Handle bell icon column
+      if (clone.querySelector('svg')) {
+        headerText = '🔔';
+      }
+      if (headerText) {
+        headers.push(headerText);
+      }
+    });
+    
+    // Get table rows data
+    const rows = [];
+    const tableRows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
+    tableRows.forEach(row => {
+      if (row.style.display === 'none') return;
+      
+      const cells = [];
+      const rowCells = row.querySelectorAll('td');
+      rowCells.forEach((cell) => {
+        let cellContent = '';
+        
+        // Handle radio button column
+        if (cell.querySelector('input[type="radio"]')) {
+          const radio = cell.querySelector('input[type="radio"]');
+          cellContent = radio && radio.checked ? '●' : '○';
+        } 
+        // Handle action column
+        else if (cell.classList.contains('action-cell')) {
+          const expandIcon = cell.querySelector('.action-expand');
+          if (expandIcon) cellContent = '⤢';
+        } 
+        // Handle regular cells
+        else {
+          const link = cell.querySelector('a');
+          if (link) {
+            cellContent = link.textContent.trim();
+          } else {
+            cellContent = cell.textContent.trim();
+          }
+        }
+        
+        cells.push(cellContent || '-');
+      });
+      rows.push(cells);
+    });
+    
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Build headers HTML
+    const headersHTML = headers.map(h => '<th>' + escapeHtml(h) + '</th>').join('');
+    
+    // Build rows HTML
+    const rowsHTML = rows.map(row => {
+      const cellsHTML = row.map(cell => {
+        const cellText = escapeHtml(String(cell || '-'));
+        return '<td>' + cellText + '</td>';
+      }).join('');
+      return '<tr>' + cellsHTML + '</tr>';
+    }).join('');
+    
+    // Create print window
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    const printHTML = '<!DOCTYPE html>' +
+      '<html>' +
+      '<head>' +
+      '<title>Vehicles - Print</title>' +
+      '<style>' +
+      '@page { margin: 1cm; size: A4 landscape; }' +
+      'html, body { margin: 0; padding: 0; background: #fff !important; }' +
+      'body { font-family: Arial, sans-serif; font-size: 10px; }' +
+      'table { width: 100%; border-collapse: collapse; page-break-inside: auto; }' +
+      'thead { display: table-header-group; }' +
+      'thead th { background-color: #000 !important; color: #fff !important; padding: 8px 5px; text-align: left; border: 1px solid #333; font-weight: normal; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+      'tbody tr { page-break-inside: avoid; border-bottom: 1px solid #ddd; }' +
+      'tbody tr:nth-child(even) { background-color: #f8f8f8; }' +
+      'tbody td { padding: 6px 5px; border: 1px solid #ddd; white-space: nowrap; }' +
+      '</style>' +
+      '</head>' +
+      '<body>' +
+      '<table>' +
+      '<thead><tr>' + headersHTML + '</tr></thead>' +
+      '<tbody>' + rowsHTML + '</tbody>' +
+      '</table>' +
+      '<scr' + 'ipt>' +
+      'window.onload = function() {' +
+      '  setTimeout(function() {' +
+      '    window.print();' +
+      '  }, 100);' +
+      '};' +
+      'window.onafterprint = function() {' +
+      '  window.close();' +
+      '};' +
+      '</scr' + 'ipt>' +
+      '</body>' +
+      '</html>';
+    
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(printHTML);
+      printWindow.document.close();
+    }
+  }
+
+  // Toggle filter function
+  function toggleFilter() {
+    const toggle = document.getElementById('filterToggle');
+    const table = document.getElementById('vehiclesTable');
+    if (!table || !toggle) return;
+    
+    const headers = table.querySelectorAll('thead th');
+    headers.forEach((th, index) => {
+      if (index === 0) return; // Skip bell icon column
+      if (index === 1) return; // Skip action column
+      
+      let filterInput = th.querySelector('.column-filter');
+      if (toggle.checked) {
+        if (!filterInput) {
+          filterInput = document.createElement('input');
+          filterInput.type = 'text';
+          filterInput.className = 'column-filter';
+          filterInput.placeholder = 'Filter...';
+          filterInput.style.cssText = 'width:100%; padding:4px; margin-top:4px; border:1px solid #ddd; border-radius:2px; font-size:12px;';
+          filterInput.addEventListener('input', function() {
+            filterTable();
+          });
+          th.appendChild(filterInput);
+        }
+        filterInput.style.display = 'block';
+      } else {
+        if (filterInput) {
+          filterInput.style.display = 'none';
+          filterInput.value = '';
+          filterTable();
+        }
+      }
+    });
+  }
+
+  // Filter table function
+  function filterTable() {
+    const table = document.getElementById('vehiclesTable');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    const headers = table.querySelectorAll('thead th');
+    
+    rows.forEach(row => {
+      let showRow = true;
+      const cells = row.querySelectorAll('td');
+      
+      headers.forEach((th, index) => {
+        if (index === 0 || index === 1) return; // Skip bell and action columns
+        
+        const filterInput = th.querySelector('.column-filter');
+        if (filterInput && filterInput.value) {
+          const cell = cells[index];
+          if (cell) {
+            const cellText = cell.textContent.trim().toLowerCase();
+            const filterText = filterInput.value.toLowerCase();
+            if (!cellText.includes(filterText)) {
+              showRow = false;
+            }
+          }
+        }
+      });
+      
+      row.style.display = showRow ? '' : 'none';
+    });
+  }
+
+  // Select vehicle function
+  function selectVehicle(id) {
+    currentVehicleId = id;
+    // You can add additional logic here if needed
+  }
+
+  // Add event listener for print button
+  document.addEventListener('DOMContentLoaded', function() {
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+      printBtn.addEventListener('click', printTable);
+    }
+  });
+
   // Open vehicle details (full page view) - MUST be defined before HTML onclick handlers
   async function openVehicleDetails(id) {
     try {
@@ -515,8 +808,15 @@
   }
 
   // Add Vehicle Button
-  document.getElementById('addVehicleBtn').addEventListener('click', () => openVehiclePage('add'));
-  document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
+  const addVehicleBtn = document.getElementById('addVehicleBtn');
+  if (addVehicleBtn) {
+    addVehicleBtn.addEventListener('click', () => openVehiclePage('add'));
+  }
+  
+  const columnBtn2 = document.getElementById('columnBtn2');
+  if (columnBtn2) {
+    columnBtn2.addEventListener('click', () => openColumnModal());
+  }
 
   async function openEditVehicle(id) {
     try {
@@ -725,10 +1025,9 @@
     closeVehiclePageView();
   }
 
+  // Initialize drag and drop when column modal opens
   let draggedElement = null;
   let dragOverElement = null;
-
-  // Initialize drag and drop when column modal opens
   let dragInitialized = false;
 
   function initDragAndDrop() {

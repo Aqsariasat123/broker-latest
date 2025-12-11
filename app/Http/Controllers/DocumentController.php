@@ -95,9 +95,17 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')->with('success', 'Document updated successfully.');
     }
 
-    public function destroy(Document $document)
+    public function destroy(Request $request, Document $document)
     {
         $document->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Document deleted successfully.'
+            ]);
+        }
+
         return redirect()->route('documents.index')->with('success', 'Document deleted successfully.');
     }
 

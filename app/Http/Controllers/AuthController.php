@@ -160,7 +160,7 @@ class AuthController extends Controller
             ->orderBy('end_date')
             ->with('client')
             ->get()
-            ->groupBy(function($policy) {
+            ->groupBy(function($policy) use ($today) {
                 $daysUntil = $today->diffInDays($policy->end_date);
                 if ($daysUntil <= 7) return 'This Week';
                 if ($daysUntil <= 30) return 'This Month';
@@ -240,7 +240,8 @@ class AuthController extends Controller
             'incomeYear',
             'incomeMonthlyData',
             'expenseYear',
-            'expenseMonthlyData'
+            'expenseMonthlyData',
+            'today'
         ));
     }
     
