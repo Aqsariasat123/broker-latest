@@ -33,17 +33,48 @@ class LifeProposal extends Model
         'agency',
         'prid',
         'class',
-        'is_submitted'
+        'is_submitted',
+        'sex',
+        'anb',
+        'riders',
+        'rider_premiums',
+        'annual_premium',
+        'base_premium',
+        'admin_fee',
+        'total_premium',
+        'medical_examination_required',
+        'clinic',
+        'date_referred',
+        'exam_notes',
+        'policy_no',
+        'loading_premium',
+        'start_date',
+        'maturity_date',
+        'method_of_payment',
+        'source_name',
+        'contact_id',
+        'client_id'
     ];
 
     protected $casts = [
         'sum_assured' => 'decimal:2',
         'premium' => 'decimal:2',
+        'annual_premium' => 'decimal:2',
+        'base_premium' => 'decimal:2',
+        'admin_fee' => 'decimal:2',
+        'total_premium' => 'decimal:2',
+        'loading_premium' => 'decimal:2',
         'offer_date' => 'date',
         'date' => 'date',
         'date_sent' => 'date',
         'date_completed' => 'date',
-        'is_submitted' => 'boolean'
+        'date_referred' => 'date',
+        'start_date' => 'date',
+        'maturity_date' => 'date',
+        'is_submitted' => 'boolean',
+        'medical_examination_required' => 'boolean',
+        'riders' => 'array',
+        'rider_premiums' => 'array'
     ];
 
     public function hasExpired()

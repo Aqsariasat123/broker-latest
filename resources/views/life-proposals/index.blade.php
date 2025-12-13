@@ -100,6 +100,37 @@
     #filterToggle:checked::before {
       left: 28px;
     }
+    /* Form Styles - Compact */
+    .modal-content { max-width: 98%; width: 98%; max-height: 95vh; }
+    .modal-body { padding: 10px 15px; max-height: calc(95vh - 100px); overflow-y: auto; }
+    .form-group { margin-bottom: 8px; }
+    .form-group label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 12px; color: #2d2d2d; }
+    .form-control { width: 100%; padding: 4px 6px; border: 1px solid #ccc; border-radius: 2px; font-size: 12px; background: #f8f8f8; height: 28px; }
+    .form-control:focus { outline: none; border-color: #007bff; background: #fff; }
+    .form-control[readonly] { background-color: #f5f5f5; cursor: not-allowed; }
+    textarea.form-control { height: auto; min-height: 50px; resize: vertical; }
+    .form-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: flex-start; }
+    .form-row .form-group { flex: 0 0 calc((100% - 24px) / 4); margin-bottom: 0; }
+    .form-row .form-group.full-width { flex: 0 0 100%; }
+    .form-row .form-group.half-width { flex: 0 0 calc((100% - 8px) / 2); }
+    .form-row .form-group.quarter-width { flex: 0 0 calc((100% - 24px) / 4); }
+    .form-section { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0; }
+    .form-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .form-section-title { font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #2d2d2d; }
+    .rider-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+    .rider-item { display: flex; align-items: center; gap: 6px; }
+    .rider-item label { margin: 0; font-weight: normal; font-size: 12px; }
+    .rider-checkbox { width: 16px; height: 16px; cursor: pointer; margin: 0; }
+    .rider-checkbox:checked { accent-color: #f3742a; }
+    .rider-premium { width: 70px !important; padding: 2px 4px !important; font-size: 11px !important; }
+    .btn-save { background: #f3742a; color: white; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
+    .btn-cancel { background: #e0e0e0; color: #000; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 2px; cursor: pointer; }
+    .field-required { border: 2px dashed #dc3545 !important; }
+    .readonly-field { background-color: #f5f5f5; cursor: not-allowed; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #ddd; }
+    .modal-header h4 { margin: 0; font-size: 16px; font-weight: bold; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; line-height: 1; padding: 0; width: 24px; height: 24px; }
 </style>
 
 @php
@@ -343,156 +374,278 @@
   <div class="modal" id="proposalModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 id="proposalModalTitle">Add Life Proposal</h4>
-        <button type="button" class="modal-close" onclick="closeProposalModal()">×</button>
+        <h4 id="proposalModalTitle">Life Proposal - New/Update</h4>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-cancel" onclick="closeProposalModal()">Cancel</button>
+          <button type="submit" form="proposalForm" class="btn-save">Save</button>
+        </div>
       </div>
       <form id="proposalForm" method="POST" action="{{ route('life-proposals.store') }}">
         @csrf
         <div id="proposalFormMethod" style="display:none;"></div>
         <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="proposers_name">Proposer's Name *</label>
-              <input id="proposers_name" name="proposers_name" class="form-control" required>
+          <!-- Proposer's Details Section -->
+          <div class="form-section">
+            <div class="form-section-title">Proposer's Details</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact_id">Proposer's Name *</label>
+                <select id="contact_id" name="contact_id" class="form-control" required>
+                  <option value="">Select Contact</option>
+                  @foreach($lookupData['contacts'] as $contact)
+                    <option value="{{ $contact->id }}" data-salutation="{{ $contact->salutation }}" data-dob="{{ $contact->dob }}">{{ $contact->contact_name }}</option>
+                  @endforeach
+                </select>
+                <input type="hidden" id="proposers_name" name="proposers_name">
+              </div>
+              <div class="form-group">
+                <label for="salutation">Salutation</label>
+                <select id="salutation" name="salutation" class="form-control">
+                  <option value="">Select</option>
+                  @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dob">DOB</label>
+                <input id="dob" name="dob" type="date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="insurer">Insurer *</label>
+                <select id="insurer" name="insurer" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['insurers'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="insurer">Insurer *</label>
-              <select id="insurer" name="insurer" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['insurers'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="policy_plan">Policy Plan *</label>
+                <select id="policy_plan" name="policy_plan" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="term">Term *</label>
+                <input id="term" name="term" type="number" min="1" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="sum_assured">Sum Assured</label>
+                <input id="sum_assured" name="sum_assured" type="number" step="0.01" class="form-control" oninput="formatNumberInput(this)">
+              </div>
+              <div class="form-group">
+                <label for="age">Age</label>
+                <input id="age" name="age" type="number" min="1" max="120" class="form-control readonly-field" readonly>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="policy_plan">Policy Plan *</label>
-              <select id="policy_plan" name="policy_plan" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="sum_assured">Sum Assured</label>
-              <input id="sum_assured" name="sum_assured" type="number" step="0.01" class="form-control">
-            </div>
-            <div class="form-group">
-              <label for="term">Term *</label>
-              <input id="term" name="term" type="number" min="1" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="add_ons">Add Ons</label>
-              <select id="add_ons" name="add_ons" class="form-control">
-                <option value="">Select</option>
-                @foreach($lookupData['add_ons'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="offer_date">Offer Date *</label>
-              <input id="offer_date" name="offer_date" type="date" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="premium">Premium *</label>
-              <input id="premium" name="premium" type="number" step="0.01" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="frequency">Frequency *</label>
-              <select id="frequency" name="frequency" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['frequencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="stage">Stage *</label>
-              <select id="stage" name="stage" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['stages'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="date">Date *</label>
-              <input id="date" name="date" type="date" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="age">Age *</label>
-              <input id="age" name="age" type="number" min="1" max="120" class="form-control" required>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sex">Sex</label>
+                <select id="sex" name="sex" class="form-control">
+                  <option value="">Select</option>
+                  @foreach($lookupData['sex_options'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="anb">ANB</label>
+                <input id="anb" name="anb" type="number" class="form-control readonly-field" readonly>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="status">Status *</label>
-              <select id="status" name="status" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['statuses'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
+
+          <!-- Additional Riders Section -->
+          <div class="form-section">
+            <div class="form-section-title">Additional Riders</div>
+            <div class="rider-grid">
+              @foreach($lookupData['riders'] as $rider)
+                <div class="rider-item">
+                  <input type="checkbox" class="rider-checkbox" id="rider_{{ $rider }}" name="riders[]" value="{{ $rider }}" data-rider="{{ $rider }}">
+                  <label for="rider_{{ $rider }}" style="margin:0; font-weight:normal;">{{ $rider }}</label>
+                  <input type="number" step="0.01" class="form-control rider-premium" id="rider_premium_{{ $rider }}" name="rider_premiums[{{ $rider }}]" style="width:80px; padding:4px;" placeholder="0.00" disabled>
+                </div>
+              @endforeach
             </div>
-            <div class="form-group">
-              <label for="source_of_payment">Source Of Payment *</label>
-              <select id="source_of_payment" name="source_of_payment" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['sources_of_payment'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="mcr">MCR</label>
-              <input id="mcr" name="mcr" class="form-control">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="doctor">Doctor</label>
-              <select id="doctor" name="doctor" class="form-control">
-                <option value="">Select</option>
-                @foreach($lookupData['doctors'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="date_sent">Date Sent</label>
-              <input id="date_sent" name="date_sent" type="date" class="form-control">
-            </div>
-            <div class="form-group">
-              <label for="date_completed">Date Completed</label>
-              <input id="date_completed" name="date_completed" type="date" class="form-control">
+            <div class="form-row" style="margin-top:15px;">
+              <div class="form-group">
+                <label for="annual_premium">Annual Premium</label>
+                <input id="annual_premium" name="annual_premium" type="number" step="0.01" class="form-control" oninput="calculateTotalPremium()">
+              </div>
+              <div class="form-group">
+                <label for="total_rider_premium">Total</label>
+                <input id="total_rider_premium" type="number" step="0.01" class="form-control readonly-field" readonly>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="notes">Notes</label>
-              <textarea id="notes" name="notes" class="form-control" rows="2"></textarea>
+
+          <!-- Proposal & Payment Details -->
+          <div class="form-section">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="offer_date">Offer Date *</label>
+                <input id="offer_date" name="offer_date" type="date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="stage">Proposal Stage *</label>
+                <select id="stage" name="stage" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['stages'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="agency">Agency</label>
+                <select id="agency" name="agency" class="form-control">
+                  <option value="">Select</option>
+                  @foreach($lookupData['agencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="source">Source</label>
+                <select id="source" name="source" class="form-control">
+                  <option value="">Select</option>
+                  @foreach($lookupData['sources'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="agency">Agency</label>
-              <select id="agency" name="agency" class="form-control">
-                <option value="">Select</option>
-                @foreach($lookupData['agencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="client_id">Source Name</label>
+                <select id="client_id" name="client_id" class="form-control field-required">
+                  <option value="">Select Client</option>
+                  @foreach($lookupData['clients'] as $client)
+                    <option value="{{ $client->id }}">{{ $client->client_name }}</option>
+                  @endforeach
+                </select>
+                <input type="hidden" id="source_name" name="source_name">
+              </div>
             </div>
-            <div class="form-group">
-              <label for="class">Class *</label>
-              <select id="class" name="class" class="form-control" required>
-                <option value="">Select</option>
-                @foreach($lookupData['classes'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-              </select>
+            <div class="form-section-title" style="margin-top:15px;">Payment Plan</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="frequency">Frequency Of Payment *</label>
+                <select id="frequency" name="frequency" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['frequencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="method_of_payment">Method Of Payment</label>
+                <select id="method_of_payment" name="method_of_payment" class="form-control">
+                  <option value="">Select</option>
+                  @foreach($lookupData['method_of_payment_options'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="source_of_payment">Source Of Payment *</label>
+                <select id="source_of_payment" name="source_of_payment" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['sources_of_payment'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="base_premium">Base Premium</label>
+                <input id="base_premium" name="base_premium" type="number" step="0.01" class="form-control" oninput="calculateTotalPremium()">
+              </div>
+              <div class="form-group">
+                <label for="admin_fee">Admin Fee</label>
+                <input id="admin_fee" name="admin_fee" type="number" step="0.01" class="form-control" oninput="calculateTotalPremium()">
+              </div>
+              <div class="form-group">
+                <label for="total_premium">Total Premium</label>
+                <input id="total_premium" name="total_premium" type="number" step="0.01" class="form-control readonly-field" readonly>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prid">PRID</label>
-              <input id="prid" name="prid" class="form-control" readonly>
+
+          <!-- Medical Examination Required Section -->
+          <div class="form-section">
+            <div class="form-row">
+              <div class="form-group">
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" id="medical_examination_required" name="medical_examination_required" value="1" class="rider-checkbox" onchange="toggleMedicalFields()">
+                  <span>Medical Examination Required?</span>
+                </label>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="is_submitted" style="display:block;">Submitted</label>
-              <input id="is_submitted" name="is_submitted" type="checkbox" value="1">
+            <div id="medicalFields" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="clinic">Clinic</label>
+                  <select id="clinic" name="clinic" class="form-control field-required">
+                    <option value="">Select</option>
+                    @foreach($lookupData['clinics'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="date_referred">Date Referred</label>
+                  <input id="date_referred" name="date_referred" type="date" class="form-control field-required">
+                </div>
+                <div class="form-group">
+                  <label for="date_completed">Date Completed</label>
+                  <input id="date_completed" name="date_completed" type="date" class="form-control field-required">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="exam_notes">Exam Notes</label>
+                  <textarea id="exam_notes" name="exam_notes" class="form-control field-required" rows="2"></textarea>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeProposalModal()">Cancel</button>
-          <button type="button" class="btn-delete" id="proposalDeleteBtn" style="display:none;" onclick="deleteProposal()">Delete</button>
-          <button type="submit" class="btn-save">Save</button>
+
+          <!-- Application Details Section -->
+          <div class="form-section">
+            <div class="form-section-title">Application Details</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="date">Date *</label>
+                <input id="date" name="date" type="date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="status">Proposal Status *</label>
+                <select id="status" name="status" class="form-control" required>
+                  <option value="">Select</option>
+                  @foreach($lookupData['statuses'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="policy_no">Policy No</label>
+                <input id="policy_no" name="policy_no" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="loading_premium">Loading Premium</label>
+                <input id="loading_premium" name="loading_premium" type="number" step="0.01" class="form-control">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input id="start_date" name="start_date" type="date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="maturity_date">Maturity Date</label>
+                <input id="maturity_date" name="maturity_date" type="date" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents Section -->
+          <div class="form-section">
+            <div class="form-section-title">Documents</div>
+            <div class="form-row">
+              <div class="form-group full-width" style="display:flex; justify-content:flex-end;">
+                <button type="button" class="btn" style="background:#000; color:#fff; padding:6px 16px;">Upload</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden Fields -->
+          <input type="hidden" id="prid" name="prid">
+          <input type="hidden" id="premium" name="premium">
+          <input type="hidden" id="class" name="class" value="">
+          <input type="hidden" id="is_submitted" name="is_submitted" value="0">
         </div>
       </form>
     </div>
@@ -509,6 +662,97 @@
   let currentProposalId = null;
   const lookupData = @json($lookupData);
   const selectedColumns = @json($selectedColumns);
+
+  // Format number input with commas
+  function formatNumberInput(input) {
+    if (!input.value) return;
+    let value = input.value.replace(/,/g, '');
+    input.value = parseFloat(value).toLocaleString('en-US');
+  }
+
+  // Calculate age from DOB
+  function calculateAge(dob) {
+    if (!dob) return null;
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  // Calculate ANB (Age Next Birthday)
+  function calculateANB(age) {
+    if (!age) return null;
+    return parseInt(age) + 1;
+  }
+
+  // Calculate total rider premium
+  function calculateTotalRiderPremium() {
+    let total = 0;
+    document.querySelectorAll('.rider-premium:not([disabled])').forEach(input => {
+      const value = parseFloat(input.value) || 0;
+      total += value;
+    });
+    document.getElementById('total_rider_premium').value = total.toFixed(2);
+    calculateTotalPremium();
+  }
+
+  // Calculate total premium
+  function calculateTotalPremium() {
+    const basePremium = parseFloat(document.getElementById('base_premium')?.value || 0);
+    const adminFee = parseFloat(document.getElementById('admin_fee')?.value || 0);
+    const totalRider = parseFloat(document.getElementById('total_rider_premium')?.value || 0);
+    const total = basePremium + adminFee + totalRider;
+    document.getElementById('total_premium').value = total.toFixed(2);
+    document.getElementById('premium').value = total.toFixed(2);
+  }
+
+  // Toggle medical fields
+  function toggleMedicalFields() {
+    const checkbox = document.getElementById('medical_examination_required');
+    const fields = document.getElementById('medicalFields');
+    if (checkbox.checked) {
+      fields.style.display = 'block';
+      fields.querySelectorAll('input, select, textarea').forEach(field => {
+        field.required = true;
+      });
+    } else {
+      fields.style.display = 'none';
+      fields.querySelectorAll('input, select, textarea').forEach(field => {
+        field.required = false;
+        field.value = '';
+      });
+    }
+  }
+
+  // Toggle rider premium input
+  function toggleRiderPremium(checkbox) {
+    const riderName = checkbox.dataset.rider;
+    const premiumInput = document.getElementById('rider_premium_' + riderName);
+    if (checkbox.checked) {
+      premiumInput.disabled = false;
+      premiumInput.required = true;
+    } else {
+      premiumInput.disabled = true;
+      premiumInput.required = false;
+      premiumInput.value = '';
+      calculateTotalRiderPremium();
+    }
+  }
+
+  // Calculate maturity date from start date and term
+  function calculateMaturityDate() {
+    const startDate = document.getElementById('start_date')?.value;
+    const term = parseInt(document.getElementById('term')?.value || 0);
+    if (startDate && term) {
+      const start = new Date(startDate);
+      start.setFullYear(start.getFullYear() + term);
+      document.getElementById('maturity_date').value = start.toISOString().split('T')[0];
+    }
+  }
 
   // Format date helper function
   function formatDate(dateStr) {
@@ -824,6 +1068,68 @@
         });
       });
     });
+
+    // Contact selection handler
+    const contactSelect = document.getElementById('contact_id');
+    if (contactSelect) {
+      contactSelect.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+          document.getElementById('salutation').value = option.dataset.salutation || '';
+          document.getElementById('dob').value = option.dataset.dob || '';
+          const age = calculateAge(option.dataset.dob);
+          if (age !== null) {
+            document.getElementById('age').value = age;
+            document.getElementById('anb').value = calculateANB(age);
+          }
+          document.getElementById('proposers_name').value = option.text;
+        }
+      });
+    }
+
+    // DOB change handler
+    const dobInput = document.getElementById('dob');
+    if (dobInput) {
+      dobInput.addEventListener('change', function() {
+        const age = calculateAge(this.value);
+        if (age !== null) {
+          document.getElementById('age').value = age;
+          document.getElementById('anb').value = calculateANB(age);
+        }
+      });
+    }
+
+    // Rider checkbox handlers
+    document.querySelectorAll('.rider-checkbox[data-rider]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        toggleRiderPremium(this);
+        if (this.checked) {
+          calculateTotalRiderPremium();
+        }
+      });
+    });
+
+    // Rider premium input handlers
+    document.querySelectorAll('.rider-premium').forEach(input => {
+      input.addEventListener('input', calculateTotalRiderPremium);
+    });
+
+    // Client selection handler
+    const clientSelect = document.getElementById('client_id');
+    if (clientSelect) {
+      clientSelect.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+          document.getElementById('source_name').value = option.text;
+        }
+      });
+    }
+
+    // Term and start date handlers for maturity date
+    const termInput = document.getElementById('term');
+    const startDateInput = document.getElementById('start_date');
+    if (termInput) termInput.addEventListener('change', calculateMaturityDate);
+    if (startDateInput) startDateInput.addEventListener('change', calculateMaturityDate);
   });
 
   async function openEditProposal(id) {
