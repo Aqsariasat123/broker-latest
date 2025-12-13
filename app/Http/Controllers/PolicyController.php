@@ -8,6 +8,7 @@ use App\Models\LookupValue;
 use App\Models\LookupCategory;
 use App\Models\Schedule;
 use App\Models\PaymentPlan;
+use App\Models\LifeProposal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -53,7 +54,13 @@ class PolicyController extends Controller
         // Get lookup data for dropdowns
         $lookupData = $this->getLookupData();
         
-        return view('policies.index', compact('policies', 'lookupData'));
+        // Get life proposal data if generating from proposal
+        $lifeProposal = null;
+        if ($request->has('life_proposal_id')) {
+            $lifeProposal = LifeProposal::find($request->life_proposal_id);
+        }
+        
+        return view('policies.index', compact('policies', 'lookupData', 'lifeProposal'));
     }
 
     public function create(Request $request)
@@ -127,11 +134,11 @@ class PolicyController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Policy created successfully.',
-                    'redirect' => route('policies.index')
+                    'redirect' => route('policies.index', ['policy_id' => $policy->id])
                 ]);
             }
 
-            return redirect()->route('policies.index')
+            return redirect()->route('policies.index', ['policy_id' => $policy->id])
                 ->with('success', 'Policy created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson()) {

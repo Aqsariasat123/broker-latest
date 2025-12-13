@@ -1043,7 +1043,7 @@
                     $isExpired = $client->hasExpired ?? false;
                     $isExpiring = $client->hasExpiring ?? false;
                   @endphp
-                  <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : ($isExpiring ? '#f3742a' : 'transparent') }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                  <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
                 </div>
               </td>
               <td class="action-cell">

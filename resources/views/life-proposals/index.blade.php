@@ -102,35 +102,73 @@
     }
     /* Form Styles - Compact */
     .modal-content { max-width: 98%; width: 98%; max-height: 95vh; }
-    .modal-body { padding: 10px 15px; max-height: calc(95vh - 100px); overflow-y: auto; }
-    .form-group { margin-bottom: 8px; }
-    .form-group label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 12px; color: #2d2d2d; }
-    .form-control { width: 100%; padding: 4px 6px; border: 1px solid #ccc; border-radius: 2px; font-size: 12px; background: #f8f8f8; height: 28px; }
+    .modal-body { padding: 6px 12px; max-height: calc(95vh - 80px); overflow-y: auto; }
+    .form-group { margin-bottom: 4px; }
+    .form-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 11px; color: #2d2d2d; }
+    .form-control { width: 100%; padding: 3px 5px; border: 1px solid #ccc; border-radius: 2px; font-size: 11px; background: #f8f8f8; height: 24px; }
     .form-control:focus { outline: none; border-color: #007bff; background: #fff; }
     .form-control[readonly] { background-color: #f5f5f5; cursor: not-allowed; }
-    textarea.form-control { height: auto; min-height: 50px; resize: vertical; }
-    .form-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: flex-start; }
-    .form-row .form-group { flex: 0 0 calc((100% - 24px) / 4); margin-bottom: 0; }
+    textarea.form-control { height: auto; min-height: 40px; resize: vertical; padding: 3px 5px; font-size: 11px; }
+    .form-row { display: flex; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; align-items: flex-start; }
+    .form-row .form-group { flex: 0 0 calc((100% - 18px) / 4); margin-bottom: 0; }
     .form-row .form-group.full-width { flex: 0 0 100%; }
-    .form-row .form-group.half-width { flex: 0 0 calc((100% - 8px) / 2); }
-    .form-row .form-group.quarter-width { flex: 0 0 calc((100% - 24px) / 4); }
-    .form-section { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0; }
+    .form-row .form-group.half-width { flex: 0 0 calc((100% - 6px) / 2); }
+    .form-row .form-group.quarter-width { flex: 0 0 calc((100% - 18px) / 4); }
+    .form-section { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #e0e0e0; }
     .form-section:last-child { border-bottom: none; margin-bottom: 0; }
-    .form-section-title { font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #2d2d2d; }
-    .rider-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
-    .rider-item { display: flex; align-items: center; gap: 6px; }
-    .rider-item label { margin: 0; font-weight: normal; font-size: 12px; }
-    .rider-checkbox { width: 16px; height: 16px; cursor: pointer; margin: 0; }
+    .form-section-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; color: #2d2d2d; }
+    .rider-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 4px; }
+    .rider-item { display: flex; align-items: center; gap: 4px; }
+    .rider-item label { margin: 0; font-weight: normal; font-size: 11px; }
+    .rider-checkbox { width: 14px; height: 14px; cursor: pointer; margin: 0; }
     .rider-checkbox:checked { accent-color: #f3742a; }
-    .rider-premium { width: 70px !important; padding: 2px 4px !important; font-size: 11px !important; }
+    .rider-premium { width: 65px !important; padding: 2px 3px !important; font-size: 10px !important; height: 22px !important; }
     .btn-save { background: #f3742a; color: white; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
     .btn-cancel { background: #e0e0e0; color: #000; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
     .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 2px; cursor: pointer; }
     .field-required { border: 2px dashed #dc3545 !important; }
     .readonly-field { background-color: #f5f5f5; cursor: not-allowed; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #ddd; }
-    .modal-header h4 { margin: 0; font-size: 16px; font-weight: bold; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; border-bottom: 1px solid #ddd; }
+    .modal-header h4 { margin: 0; font-size: 14px; font-weight: bold; }
     .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; line-height: 1; padding: 0; width: 24px; height: 24px; }
+    
+    /* Detail View Styles - Matching Image Design */
+    #proposalPageView .client-page-header { background: #fff; padding: 15px 20px; border-bottom: 1px solid #ddd; box-shadow: none; display: flex; justify-content: space-between; align-items: center; }
+    #proposalPageView .client-page-title { font-size: 20px; font-weight: bold; flex-shrink: 0; }
+    #proposalPageView .client-page-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .proposal-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 0; background: #fff; border: 1px solid #ddd; }
+    .detail-section { background: #fff; margin: 0; border-right: 1px solid #ddd; }
+    .detail-section:last-child { border-right: none; }
+    .detail-section-header { background: #a0a0a0; color: #fff; padding: 8px 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+    .detail-section-body { padding: 10px; }
+    .detail-row { display: flex; flex-direction: row; align-items: center; margin-bottom: 8px; gap: 10px; }
+    .detail-row:last-child { margin-bottom: 0; }
+    .detail-label { font-size: 11px; color: #555; font-weight: 600; min-width: 110px; flex-shrink: 0; }
+    .detail-value { font-size: 11px; color: #000; padding: 4px 8px; border: 1px solid #ddd; background: #fff; border-radius: 2px; min-height: 24px; display: flex; align-items: center; flex: 1; }
+    .detail-value input[type="checkbox"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+    .detail-value textarea { width: 100%; min-height: 50px; padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 2px; resize: vertical; }
+    
+    /* Navigation Tabs */
+    .proposal-nav-tabs { display: flex; gap: 8px; align-items: center; }
+    .proposal-nav-tab { background: #000; color: #fff; border: none; padding: 8px 16px; cursor: pointer; font-size: 13px; border-radius: 4px; }
+    .proposal-nav-tab.active { background: #000; }
+    .proposal-nav-tab:hover { background: #333; }
+    
+    /* Documents Section */
+    .documents-section { background: #fff; padding: 20px; border-top: 1px solid #ddd; }
+    .documents-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .documents-title { font-weight: bold; font-size: 14px; color: #2d2d2d; }
+    .btn-add-document { background: #f3742a; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
+    .documents-list { min-height: 100px; background: #fff; border: 1px solid #ddd; border-radius: 2px; padding: 0; }
+    .document-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #ddd; }
+    .document-item:last-child { border-bottom: none; }
+    .document-info { flex: 1; }
+    .document-name { font-weight: bold; font-size: 12px; color: #2d2d2d; margin-bottom: 4px; }
+    .document-meta { font-size: 11px; color: #666; }
+    .document-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-view-doc { background: none; border: none; color: #007bff; text-decoration: none; font-size: 12px; cursor: pointer; padding: 0; }
+    .btn-view-doc:hover { text-decoration: underline; }
+    .btn-delete-doc { background: #dc3545; color: #fff; border: none; padding: 4px 12px; border-radius: 2px; cursor: pointer; font-size: 11px; }
 </style>
 
 @php
@@ -226,7 +264,7 @@
               <td class="action-cell">
        
                
-                <svg class="action-expand" onclick="openEditProposal({{ $proposal->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                <svg class="action-expand" onclick="openProposalDetails({{ $proposal->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
                   <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
                   <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -244,11 +282,11 @@
               @foreach($selectedColumns as $col)
                 @if($col == 'proposers_name')
                   <td data-column="proposers_name">
-                    <a href="javascript:void(0)" onclick="openEditProposal({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->proposers_name }}</a>
+                    <a href="javascript:void(0)" onclick="openProposalDetails({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->proposers_name }}</a>
                   </td>
                 @elseif($col == 'prid')
                   <td data-column="prid">
-                    <a href="javascript:void(0)" onclick="openEditProposal({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->prid }}</a>
+                    <a href="javascript:void(0)" onclick="openProposalDetails({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->prid }}</a>
                   </td>
                 @elseif($col == 'insurer')
                   <td data-column="insurer">{{ $proposal->insurer }}</td>
@@ -331,36 +369,54 @@
       <div class="client-page-title">
         <span id="proposalPageTitle">Life Proposal</span> - <span class="client-name" id="proposalPageName"></span>
       </div>
-      <div class="client-page-actions">
-        <button class="btn btn-edit" id="editProposalFromPageBtn" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Edit</button>
-        <button class="btn" id="closeProposalPageBtn" onclick="closeProposalPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Close</button>
-      </div>
     </div>
     <div class="client-page-body">
-      <div class="client-page-content">
-        <!-- Proposal Details View -->
-        <div id="proposalDetailsPageContent" style="display:none;">
-          <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
-            <div id="proposalDetailsContent" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0; align-items:start; padding:12px;">
-              <!-- Content will be loaded via JavaScript -->
-            </div>
-          </div>
-        </div>
+      
+       <div class="client-page-content">
+         <!-- Proposal Details View -->
+         <div id="proposalDetailsPageContent" style="display:none;">
+           <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
+             <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid #ddd;">
+               <div class="proposal-nav-tabs" id="proposalNavTabs" style="display:none;">
+                 <button class="proposal-nav-tab active" data-tab="details">Nominees</button>
+                 <button class="proposal-nav-tab" data-tab="followups">Follow Ups</button>
+               </div>
+               <div class="client-page-actions">
+                 <button class="btn" id="generatePolicyBtn" onclick="generatePolicyFromProposal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Generate Policy</button>
+                 <button class="btn btn-edit" id="editProposalFromPageBtn" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Update</button>
+                 <button class="btn" id="closeProposalPageBtn" onclick="closeProposalPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Close</button>
+               </div>
+             </div>
+             <div class="proposal-detail-grid" id="proposalDetailsContent">
+               <!-- Content will be loaded via JavaScript -->
+             </div>
+           </div>
+           <!-- Documents Section -->
+           <div class="documents-section" style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
+             <div class="documents-header">
+               <div class="documents-title">Documents</div>
+               <button class="btn-add-document" onclick="openDocumentUpload()">Add Document</button>
+             </div>
+             <div class="documents-list" id="documentsList">
+               <!-- Documents will be loaded here -->
+             </div>
+           </div>
+         </div>
         
         <!-- Proposal Edit/Add Form -->
         <div id="proposalFormPageContent" style="display:none;">
           <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
-            <div style="display:flex; justify-content:flex-end; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
+            <div style="display:flex; justify-content:flex-end; align-items:center; padding:6px 12px; border-bottom:1px solid #ddd; background:#fff;">
               <div class="client-page-actions">
                 <button type="button" class="btn-delete" id="proposalDeleteBtn" style="display:none; background:#dc3545; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;" onclick="deleteProposal()">Delete</button>
                 <button type="submit" form="proposalPageForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Save</button>
-                <button type="button" class="btn" id="closeProposalFormBtn" onclick="closeProposalPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Close</button>
+                <button type="button" class="btn" id="closeProposalFormBtn" onclick="closeProposalPageView()" style="background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Close</button>
               </div>
             </div>
             <form id="proposalPageForm" method="POST" action="{{ route('life-proposals.store') }}">
               @csrf
               <div id="proposalPageFormMethod" style="display:none;"></div>
-              <div style="padding:12px;">
+              <div id="proposalPageFormContent" style="padding:6px 12px;">
                 <!-- Form content will be cloned from modal -->
               </div>
             </form>
@@ -389,14 +445,8 @@
             <div class="form-section-title">Proposer's Details</div>
             <div class="form-row">
               <div class="form-group">
-                <label for="contact_id">Proposer's Name *</label>
-                <select id="contact_id" name="contact_id" class="form-control" required>
-                  <option value="">Select Contact</option>
-                  @foreach($lookupData['contacts'] as $contact)
-                    <option value="{{ $contact->id }}" data-salutation="{{ $contact->salutation }}" data-dob="{{ $contact->dob }}">{{ $contact->contact_name }}</option>
-                  @endforeach
-                </select>
-                <input type="hidden" id="proposers_name" name="proposers_name">
+                <label for="proposers_name">Proposer's Name *</label>
+                <input type="text" id="proposers_name" name="proposers_name" class="form-control" required>
               </div>
               <div class="form-group">
                 <label for="salutation">Salutation</label>
@@ -465,7 +515,7 @@
                 </div>
               @endforeach
             </div>
-            <div class="form-row" style="margin-top:15px;">
+            <div class="form-row" style="margin-top:6px;">
               <div class="form-group">
                 <label for="annual_premium">Annual Premium</label>
                 <input id="annual_premium" name="annual_premium" type="number" step="0.01" class="form-control" oninput="calculateTotalPremium()">
@@ -509,7 +559,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="client_id">Source Name</label>
-                <select id="client_id" name="client_id" class="form-control field-required">
+                <select id="client_id" class="form-control field-required">
                   <option value="">Select Client</option>
                   @foreach($lookupData['clients'] as $client)
                     <option value="{{ $client->id }}">{{ $client->client_name }}</option>
@@ -518,7 +568,7 @@
                 <input type="hidden" id="source_name" name="source_name">
               </div>
             </div>
-            <div class="form-section-title" style="margin-top:15px;">Payment Plan</div>
+            <div class="form-section-title" style="margin-top:6px;">Payment Plan</div>
             <div class="form-row">
               <div class="form-group">
                 <label for="frequency">Frequency Of Payment *</label>
@@ -589,7 +639,7 @@
               <div class="form-row">
                 <div class="form-group full-width">
                   <label for="exam_notes">Exam Notes</label>
-                  <textarea id="exam_notes" name="exam_notes" class="form-control field-required" rows="2"></textarea>
+                  <textarea id="exam_notes" name="exam_notes" class="form-control field-required" rows="1"></textarea>
                 </div>
               </div>
             </div>
@@ -658,6 +708,40 @@
   'columnSettingsRoute' => route('life-proposals.save-column-settings'),
 ])
 
+<!-- Document Upload Modal -->
+<div class="modal" id="documentUploadModal" style="display:none;">
+  <div class="modal-content" style="max-width:500px;">
+    <div class="modal-header">
+      <h4>Upload Document</h4>
+      <button class="modal-close" onclick="closeDocumentUploadModal()">&times;</button>
+    </div>
+    <form id="documentUploadForm" onsubmit="uploadDocument(event)">
+      @csrf
+      <input type="hidden" name="proposal_id" id="documentProposalId">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Document Type *</label>
+          <select name="document_type" class="form-control" required>
+            <option value="">Select Type</option>
+            <option value="proposal_document">Proposal Document</option>
+            <option value="medical_report">Medical Report</option>
+            <option value="id_document">ID Document</option>
+            <option value="other">Other Document</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Document File *</label>
+          <input type="file" name="document" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+        </div>
+      </div>
+      <div style="padding:10px 15px; border-top:1px solid #ddd; display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="btn-cancel" onclick="closeDocumentUploadModal()">Cancel</button>
+        <button type="submit" class="btn-save">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   let currentProposalId = null;
   const lookupData = @json($lookupData);
@@ -712,19 +796,23 @@
 
   // Toggle medical fields
   function toggleMedicalFields() {
-    const checkbox = document.getElementById('medical_examination_required');
-    const fields = document.getElementById('medicalFields');
-    if (checkbox.checked) {
-      fields.style.display = 'block';
-      fields.querySelectorAll('input, select, textarea').forEach(field => {
-        field.required = true;
-      });
-    } else {
-      fields.style.display = 'none';
-      fields.querySelectorAll('input, select, textarea').forEach(field => {
-        field.required = false;
-        field.value = '';
-      });
+    const formContentDiv = document.getElementById('proposalPageFormContent');
+    const searchScope = formContentDiv || document;
+    const checkbox = searchScope.querySelector('#medical_examination_required');
+    const fields = searchScope.querySelector('#medicalFields');
+    if (checkbox && fields) {
+      if (checkbox.checked) {
+        fields.style.display = 'block';
+        fields.querySelectorAll('input, select, textarea').forEach(field => {
+          field.required = true;
+        });
+      } else {
+        fields.style.display = 'none';
+        fields.querySelectorAll('input, select, textarea').forEach(field => {
+          field.required = false;
+          field.value = '';
+        });
+      }
     }
   }
 
@@ -811,8 +899,24 @@
       proposalPageView.classList.add('show');
       proposalDetailsPageContent.style.display = 'block';
       proposalFormPageContent.style.display = 'none';
+      
+      // Show all buttons in detail view - Generate Policy, Update, and Close
+      const generateBtn = document.getElementById('generatePolicyBtn');
+      if (generateBtn) generateBtn.style.display = 'inline-block';
       if (editProposalFromPageBtn) editProposalFromPageBtn.style.display = 'inline-block';
       if (closeProposalPageBtn) closeProposalPageBtn.style.display = 'inline-block';
+      
+      // Show navigation tabs
+      const navTabs = document.getElementById('proposalNavTabs');
+      if (navTabs) navTabs.style.display = 'flex';
+      
+      // Store PRID for document loading
+      if (proposalPageView) {
+        proposalPageView.setAttribute('data-prid', proposal.prid);
+      }
+      
+      // Load documents
+      loadProposalDocuments(proposal.prid);
     } catch (e) {
       console.error(e);
       alert('Error loading proposal details: ' + e.message);
@@ -824,18 +928,11 @@
     const content = document.getElementById('proposalDetailsContent');
     if (!content) return;
 
+    // PROPOSED PLAN (Column 1)
     const col1 = `
       <div class="detail-section">
-        <div class="detail-section-header">PROPOSAL DETAILS</div>
+        <div class="detail-section-header">PROPOSED PLAN</div>
         <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">PRID</span>
-            <div class="detail-value">${proposal.prid || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Proposer's Name</span>
-            <div class="detail-value">${proposal.proposers_name || '-'}</div>
-          </div>
           <div class="detail-row">
             <span class="detail-label">Insurer</span>
             <div class="detail-value">${proposal.insurer || '-'}</div>
@@ -845,111 +942,108 @@
             <div class="detail-value">${proposal.policy_plan || '-'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Class</span>
-            <div class="detail-value">${proposal.class || '-'}</div>
+            <span class="detail-label">Term</span>
+            <div class="detail-value">${proposal.term || '-'}</div>
           </div>
-        </div>
-      </div>
-    `;
-
-    const col2 = `
-      <div class="detail-section">
-        <div class="detail-section-header">COVERAGE</div>
-        <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Sum Assured</span>
             <div class="detail-value">${formatNumber(proposal.sum_assured)}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Term</span>
-            <div class="detail-value">${proposal.term || '-'}</div>
-          </div>
-          <div class="detail-row">
             <span class="detail-label">Add Ons</span>
             <div class="detail-value">${proposal.add_ons || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Premium</span>
-            <div class="detail-value">${formatNumber(proposal.premium)}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Frequency</span>
-            <div class="detail-value">${proposal.frequency || '-'}</div>
           </div>
         </div>
       </div>
     `;
 
-    const col3 = `
+    // PROVISIONAL PAYMENT PLAN (Column 2)
+    const col2 = `
       <div class="detail-section">
-        <div class="detail-section-header">STATUS & DATES</div>
+        <div class="detail-section-header">PROVISIONAL PAYMENT PLAN</div>
         <div class="detail-section-body">
           <div class="detail-row">
-            <span class="detail-label">Status</span>
-            <div class="detail-value">${proposal.status || '-'}</div>
+            <span class="detail-label">Pay Plan</span>
+            <div class="detail-value">${proposal.frequency || '-'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Stage</span>
-            <div class="detail-value">${proposal.stage || '-'}</div>
+            <span class="detail-label">Base Premium</span>
+            <div class="detail-value">${formatNumber(proposal.base_premium || 0)}</div>
           </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Premium</span>
+            <div class="detail-value">${formatNumber(proposal.premium || 0)}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Payment Method</span>
+            <div class="detail-value">${proposal.method_of_payment || '-'}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Premium Source</span>
+            <div class="detail-value">${proposal.source_of_payment || '-'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // PROPOSAL STATUS (Column 3)
+    const col3 = `
+      <div class="detail-section">
+        <div class="detail-section-header">PROPOSAL STATUS</div>
+        <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Offer Date</span>
             <div class="detail-value">${formatDate(proposal.offer_date)}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Date</span>
-            <div class="detail-value">${formatDate(proposal.date)}</div>
+            <span class="detail-label">Proposal Stage</span>
+            <div class="detail-value">${proposal.stage || '-'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Age</span>
-            <div class="detail-value">${proposal.age || '-'}</div>
+            <span class="detail-label">Submitted Date</span>
+            <div class="detail-value">${proposal.is_submitted && proposal.date ? formatDate(proposal.date) : '-'}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Application Status</span>
+            <div class="detail-value">${proposal.status || '-'}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Close Date</span>
+            <div class="detail-value">${proposal.maturity_date ? formatDate(proposal.maturity_date) : '-'}</div>
           </div>
         </div>
       </div>
     `;
 
+    // MEDICAL DETAILS (Column 4)
+    const medicalRequired = proposal.medical_examination_required || false;
     const col4 = `
       <div class="detail-section">
-        <div class="detail-section-header">MEDICAL & PAYMENT</div>
+        <div class="detail-section-header">MEDICAL DETAILS</div>
         <div class="detail-section-body">
           <div class="detail-row">
-            <span class="detail-label">Source Of Payment</span>
-            <div class="detail-value">${proposal.source_of_payment || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">MCR</span>
-            <div class="detail-value">${proposal.mcr || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Doctor</span>
-            <div class="detail-value">${proposal.doctor || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date Sent</span>
-            <div class="detail-value">${formatDate(proposal.date_sent)}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date Completed</span>
-            <div class="detail-value">${formatDate(proposal.date_completed)}</div>
-          </div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header">ADDITIONAL INFO</div>
-        <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Agency</span>
-            <div class="detail-value">${proposal.agency || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Submitted</span>
+            <span class="detail-label">Medical Required</span>
             <div class="detail-value">
-              <input type="checkbox" ${proposal.is_submitted ? 'checked' : ''} disabled>
+              <input type="checkbox" ${medicalRequired ? 'checked' : ''} disabled>
             </div>
           </div>
+          <div class="detail-row">
+            <span class="detail-label">Clinic</span>
+            <div class="detail-value">${proposal.clinic || '-'}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Referred Date</span>
+            <div class="detail-value">${formatDate(proposal.date_referred)}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Completion Date</span>
+            <div class="detail-value">${formatDate(proposal.date_completed)}</div>
+          </div>
           <div class="detail-row" style="align-items:flex-start;">
-            <span class="detail-label">Notes</span>
-            <textarea class="detail-value" style="min-height:40px; resize:vertical; flex:1; font-size:11px; padding:4px 6px;" readonly>${proposal.notes || ''}</textarea>
+            <span class="detail-label">Exam Notes</span>
+            <div class="detail-value">
+              <textarea readonly style="width:100%; min-height:40px; padding:3px 6px; font-size:11px; border:1px solid #ddd; border-radius:2px; resize:vertical;">${proposal.exam_notes || ''}</textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -1069,23 +1163,7 @@
       });
     });
 
-    // Contact selection handler
-    const contactSelect = document.getElementById('contact_id');
-    if (contactSelect) {
-      contactSelect.addEventListener('change', function() {
-        const option = this.options[this.selectedIndex];
-        if (option.value) {
-          document.getElementById('salutation').value = option.dataset.salutation || '';
-          document.getElementById('dob').value = option.dataset.dob || '';
-          const age = calculateAge(option.dataset.dob);
-          if (age !== null) {
-            document.getElementById('age').value = age;
-            document.getElementById('anb').value = calculateANB(age);
-          }
-          document.getElementById('proposers_name').value = option.text;
-        }
-      });
-    }
+    // Contact selection handler removed - Proposer's Name is now a text input
 
     // DOB change handler
     const dobInput = document.getElementById('dob');
@@ -1150,16 +1228,87 @@
     }
   }
 
+  // Reattach event listeners after cloning form
+  function reattachFormEventListeners() {
+    const formContentDiv = document.getElementById('proposalPageFormContent');
+    if (!formContentDiv) return;
+
+    // Contact selection handler removed - Proposer's Name is now a text input
+
+    // DOB change handler
+    const dobInput = formContentDiv.querySelector('#dob');
+    if (dobInput) {
+      dobInput.addEventListener('change', function() {
+        const age = calculateAge(this.value);
+        if (age !== null) {
+          const ageEl = formContentDiv.querySelector('#age');
+          const anbEl = formContentDiv.querySelector('#anb');
+          if (ageEl) ageEl.value = age;
+          if (anbEl) anbEl.value = calculateANB(age);
+        }
+      });
+    }
+
+    // Rider checkbox handlers
+    formContentDiv.querySelectorAll('.rider-checkbox[data-rider]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        toggleRiderPremium(this);
+        if (this.checked) {
+          calculateTotalRiderPremium();
+        }
+      });
+    });
+
+    // Rider premium input handlers
+    formContentDiv.querySelectorAll('.rider-premium').forEach(input => {
+      input.addEventListener('input', calculateTotalRiderPremium);
+    });
+
+    // Client selection handler
+    const clientSelect = formContentDiv.querySelector('#client_id');
+    if (clientSelect) {
+      clientSelect.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+          const sourceNameEl = formContentDiv.querySelector('#source_name');
+          if (sourceNameEl) sourceNameEl.value = option.text;
+        }
+      });
+    }
+
+    // Term and start date handlers for maturity date
+    const termInput = formContentDiv.querySelector('#term');
+    const startDateInput = formContentDiv.querySelector('#start_date');
+    if (termInput) termInput.addEventListener('change', calculateMaturityDate);
+    if (startDateInput) startDateInput.addEventListener('change', calculateMaturityDate);
+
+    // Medical examination checkbox
+    const medicalCheckbox = formContentDiv.querySelector('#medical_examination_required');
+    if (medicalCheckbox) {
+      medicalCheckbox.addEventListener('change', toggleMedicalFields);
+    }
+
+    // Premium calculation inputs
+    const basePremiumInput = formContentDiv.querySelector('#base_premium');
+    const adminFeeInput = formContentDiv.querySelector('#admin_fee');
+    const annualPremiumInput = formContentDiv.querySelector('#annual_premium');
+    if (basePremiumInput) basePremiumInput.addEventListener('input', calculateTotalPremium);
+    if (adminFeeInput) adminFeeInput.addEventListener('input', calculateTotalPremium);
+    if (annualPremiumInput) annualPremiumInput.addEventListener('input', calculateTotalPremium);
+  }
+
   function openProposalForm(mode, proposal = null) {
     // Clone form from modal
     const modalForm = document.getElementById('proposalModal').querySelector('form');
     const pageForm = document.getElementById('proposalPageForm');
-    const formContentDiv = pageForm.querySelector('div[style*="padding:12px"]');
+    const formContentDiv = document.getElementById('proposalPageFormContent');
     
     // Clone the modal form body
     const modalBody = modalForm.querySelector('.modal-body');
     if (modalBody && formContentDiv) {
       formContentDiv.innerHTML = modalBody.innerHTML;
+      // Reattach event listeners after cloning
+      reattachFormEventListeners();
     }
 
     const formMethod = document.getElementById('proposalPageFormMethod');
@@ -1175,8 +1324,8 @@
       formMethod.innerHTML = '';
       deleteBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
-      if (closeBtn) closeBtn.style.display = 'inline-block';
-      if (closeFormBtn) closeFormBtn.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'none';
+      if (closeFormBtn) closeFormBtn.style.display = 'inline-block';
       pageForm.reset();
     } else {
       const proposalName = proposal.proposers_name || proposal.prid || 'Unknown';
@@ -1219,6 +1368,10 @@
     proposalPageView.classList.add('show');
     document.getElementById('proposalDetailsPageContent').style.display = 'none';
     document.getElementById('proposalFormPageContent').style.display = 'block';
+    
+    // Hide navigation tabs when in edit/add mode
+    const navTabs = document.getElementById('proposalNavTabs');
+    if (navTabs) navTabs.style.display = 'none';
   }
 
   function closeProposalPageView() {
@@ -1228,6 +1381,8 @@
     document.getElementById('clientsTableView').classList.remove('hidden');
     document.getElementById('proposalDetailsPageContent').style.display = 'none';
     document.getElementById('proposalFormPageContent').style.display = 'none';
+    const navTabs = document.getElementById('proposalNavTabs');
+    if (navTabs) navTabs.style.display = 'none';
     currentProposalId = null;
   }
 
@@ -1254,6 +1409,138 @@
     closeProposalPageView();
   }
 
+  // Load proposal documents
+  async function loadProposalDocuments(prid) {
+    if (!prid) return;
+    try {
+      const res = await fetch(`/documents?tied_to=${prid}`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      if (res.ok) {
+        const documents = await res.json();
+        const documentsList = document.getElementById('documentsList');
+        if (documentsList) {
+          if (documents.length === 0) {
+            documentsList.innerHTML = '<div style="text-align:center; color:#999; padding:40px 20px; background:#f8f8f8;">No documents uploaded</div>';
+          } else {
+            documentsList.innerHTML = documents.map(doc => {
+              const dateStr = doc.date_added ? (typeof doc.date_added === 'string' ? doc.date_added : doc.date_added.date || doc.date_added) : '';
+              const formattedDate = dateStr ? formatDate(dateStr) : '';
+              return `
+              <div class="document-item">
+                <div class="document-info">
+                  <div class="document-name">${doc.name || 'Document'}</div>
+                  <div class="document-meta">${doc.doc_id || ''}${formattedDate ? ' - ' + formattedDate : ''}</div>
+                </div>
+                <div class="document-actions">
+                  <a href="/storage/${doc.file_path}" target="_blank" class="btn-view-doc">View</a>
+                  <button onclick="deleteDocument(${doc.id})" class="btn-delete-doc">Delete</button>
+                </div>
+              </div>
+            `;
+            }).join('');
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading documents:', e);
+    }
+  }
+
+  // Open document upload modal
+  function openDocumentUpload() {
+    const modal = document.getElementById('documentUploadModal');
+    const proposalIdInput = document.getElementById('documentProposalId');
+    if (modal) {
+      if (proposalIdInput && currentProposalId) {
+        proposalIdInput.value = currentProposalId;
+      }
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+    }
+  }
+
+  // Close document upload modal
+  function closeDocumentUploadModal() {
+    const modal = document.getElementById('documentUploadModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.getElementById('documentUploadForm').reset();
+    }
+  }
+
+  // Upload document
+  async function uploadDocument(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const proposalPageView = document.getElementById('proposalPageView');
+    const prid = proposalPageView ? proposalPageView.getAttribute('data-prid') : null;
+    
+    if (!prid) {
+      alert('Proposal PRID not found');
+      return;
+    }
+
+    formData.append('prid', prid);
+
+    try {
+      const res = await fetch('/life-proposals/upload-document', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert('Document uploaded successfully');
+        closeDocumentUploadModal();
+        // Reload documents
+        loadProposalDocuments(prid);
+      } else {
+        const error = await res.json();
+        alert('Error uploading document: ' + (error.message || 'Unknown error'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error uploading document: ' + e.message);
+    }
+  }
+
+  // Delete document
+  async function deleteDocument(docId) {
+    if (!confirm('Delete this document?')) return;
+    try {
+      const res = await fetch(`/documents/${docId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      });
+
+      if (res.ok) {
+        alert('Document deleted successfully');
+        // Reload documents
+        const proposalPageView = document.getElementById('proposalPageView');
+        const prid = proposalPageView ? proposalPageView.getAttribute('data-prid') : null;
+        if (prid) loadProposalDocuments(prid);
+      } else {
+        alert('Error deleting document');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error deleting document: ' + e.message);
+    }
+  }
+
   function deleteProposal() {
     if (!currentProposalId) return;
     if (!confirm('Delete this proposal?')) return;
@@ -1264,6 +1551,16 @@
     const method = document.createElement('input'); method.type='hidden'; method.name='_method'; method.value='DELETE'; form.appendChild(method);
     document.body.appendChild(form);
     form.submit();
+  }
+
+  // Generate Policy from Life Proposal
+  function generatePolicyFromProposal() {
+    if (!currentProposalId) {
+      alert('No proposal selected');
+      return;
+    }
+    // Redirect to policy creation page with life proposal ID
+    window.location.href = `/life-proposals/${currentProposalId}/generate-policy`;
   }
 </script>
 

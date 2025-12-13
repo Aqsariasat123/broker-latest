@@ -22,7 +22,7 @@ class LookupValue extends Model
 
     public function category()
     {
-        return $this->belongsTo(LookupCategory::class);
+        return $this->belongsTo(LookupCategory::class, 'lookup_category_id');
     }
 
     public function lookupCategory()

@@ -119,11 +119,18 @@ Route::middleware('auth')->group(function () {
         Route::put('/categories/{lookupCategory}', [LookupCategoryController::class, 'update'])->name('lookup-categories.update');
         Route::delete('/categories/{lookupCategory}', [LookupCategoryController::class, 'destroy'])->name('lookup-categories.destroy');
         Route::get('/categories/{lookupCategory}/values/create', [LookupValueController::class, 'create'])->name('lookup-values.create');
-        Route::post('/categories/{lookupCategory}/values', [LookupValueController::class, 'store'])->name('lookup-values.store');
+        Route::post('/categories/{lookupCategory}/values', [LookupValueController::class, 'store'])->name('lookup-values.store-old');
         Route::get('/values/{lookupValue}/edit', [LookupValueController::class, 'edit'])->name('lookup-values.edit');
         Route::put('/values/{lookupValue}', [LookupValueController::class, 'update'])->name('lookup-values.update');
         Route::delete('/values/{lookupValue}', [LookupValueController::class, 'destroy'])->name('lookup-values.destroy');
     });
+
+    // Lookup Categories Routes
+    Route::get('/lookup-categories', [LookupCategoryController::class, 'index'])->name('lookup-categories.index');
+    
+    // Lookup Values Routes
+    Route::get('/lookup-values', [LookupValueController::class, 'index'])->name('lookup-values.index');
+    Route::post('/lookup-values', [LookupValueController::class, 'store'])->name('lookup-values.store');
 
     // Policies Routes
     Route::get('/policies', [PolicyController::class, 'index'])->name('policies.index');
@@ -156,6 +163,8 @@ Route::middleware('auth')->group(function () {
     // Life Proposals Routes
     Route::get('/life-proposals/export', [LifeProposalController::class, 'export'])->name('life-proposals.export');
     Route::post('/life-proposals/save-column-settings', [LifeProposalController::class, 'saveColumnSettings'])->name('life-proposals.save-column-settings');
+    Route::post('/life-proposals/upload-document', [LifeProposalController::class, 'uploadDocument'])->name('life-proposals.upload-document');
+    Route::get('/life-proposals/{lifeProposal}/generate-policy', [LifeProposalController::class, 'generatePolicy'])->name('life-proposals.generate-policy');
     Route::get('/life-proposals/{lifeProposal}/edit', [LifeProposalController::class, 'edit'])->name('life-proposals.edit');
     Route::resource('life-proposals', LifeProposalController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
 

@@ -51,9 +51,7 @@ class LifeProposal extends Model
         'start_date',
         'maturity_date',
         'method_of_payment',
-        'source_name',
-        'contact_id',
-        'client_id'
+        'source_name'
     ];
 
     protected $casts = [

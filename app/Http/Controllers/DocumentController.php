@@ -7,8 +7,16 @@ use Illuminate\Http\Request;
 
 class DocumentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // If tied_to parameter is provided and request expects JSON, return JSON
+        if ($request->has('tied_to') && $request->expectsJson()) {
+            $documents = Document::where('tied_to', $request->tied_to)
+                ->orderBy('created_at', 'desc')
+                ->get();
+            return response()->json($documents);
+        }
+        
         $documents = Document::orderBy('created_at', 'desc')->paginate(10);
         
         // Use TableConfigHelper for selected columns

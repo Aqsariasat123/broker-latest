@@ -704,15 +704,16 @@
               <h4 id="policyFormTitle" style="margin:0; font-size:16px; font-weight:600; color:#333;">Policy - Add New</h4>
               <div class="client-page-actions" id="policyFormHeaderActions">
                 <button type="submit" form="policyForm" class="btn-save" id="policySaveBtnHeader" style="display:inline-block; background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;">Save</button>
-                <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Close</button>
+                <button type="button" class="btn" id="backPolicyFormBtnHeader" style="display:none; background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;" onclick="window.history.back()">Back</button>
+                <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#e0e0e0; color:#000; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Close</button>
               </div>
             </div>
           </div>
           
-          <!-- Navigation Tabs (only for Edit mode) -->
+          <!-- Navigation Tabs (only for Edit mode or Life Proposal generated) -->
           <div id="policyFormTabs" style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden; display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
-              <div class="client-page-nav">
+              <div class="client-page-nav" id="policyFormTabsNav">
                 <a href="{{ route('schedules.index') }}" class="policy-tab active">Schedules</a>
                 <a href="{{ route('payments.index') }}" class="policy-tab">Payments</a>
                 <a href="{{ route('vehicles.index') }}" class="policy-tab">Vehicles</a>
@@ -1206,6 +1207,7 @@
   let currentPolicyData = null;
   const lookupData = @json($lookupData);
   const selectedColumns = @json($selectedColumns);
+  const lifeProposalData = @json($lifeProposal ?? null);
 
   // Open policy details (full page view) - MUST be defined before event listeners
   async function openPolicyDetails(id){
@@ -1255,6 +1257,16 @@
       if (policyPageTitleEl) policyPageTitleEl.textContent = 'Policy No';
       if (policyPageName) policyPageName.textContent = policyName;
       
+      // Update navigation tabs to match image (Nominees, Payments, Commission)
+      const policyDetailsNav = document.querySelector('#policyDetailsContentWrapper .client-page-nav');
+      if (policyDetailsNav) {
+        policyDetailsNav.innerHTML = `
+          <button type="button" class="policy-tab active" style="background:#000; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px; margin-right:8px;">Nominees</button>
+          <button type="button" class="policy-tab" style="background:#fff; color:#000; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px; margin-right:8px;">Payments</button>
+          <button type="button" class="policy-tab" style="background:#fff; color:#000; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px;">Commission</button>
+        `;
+      }
+      
       populatePolicyDetails(policy);
       
       // Update documents display
@@ -1274,7 +1286,7 @@
       const editPolicyFromPageBtn = document.getElementById('editPolicyFromPageBtn');
       const renewPolicyBtn = document.getElementById('renewPolicyBtn');
       if (editPolicyFromPageBtn) editPolicyFromPageBtn.style.display = 'inline-block';
-      if (renewPolicyBtn) renewPolicyBtn.style.display = 'inline-block';
+      if (renewPolicyBtn) renewPolicyBtn.style.display = 'none'; // Hide renew button to match image
       if (closePolicyPageBtn) closePolicyPageBtn.style.display = 'inline-block';
     } catch (e) {
       console.error(e);
@@ -1319,10 +1331,46 @@
   
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeEventListeners);
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeEventListeners();
+      
+      // Auto-open add form if life proposal ID is in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const lifeProposalId = urlParams.get('life_proposal_id');
+      const policyId = urlParams.get('policy_id');
+      
+      if (policyId) {
+        // Auto-open policy detail view
+        setTimeout(() => {
+          openPolicyDetails(policyId);
+        }, 100);
+      } else if (lifeProposalId && lifeProposalData) {
+        // Open the add form with life proposal data
+        setTimeout(() => {
+          openPolicyForm('add', lifeProposalData);
+        }, 100);
+      }
+    });
   } else {
     // DOM is already ready
     initializeEventListeners();
+    
+    // Auto-open add form if life proposal ID is in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lifeProposalId = urlParams.get('life_proposal_id');
+    const policyId = urlParams.get('policy_id');
+    
+    if (policyId) {
+      // Auto-open policy detail view
+      setTimeout(() => {
+        openPolicyDetails(policyId);
+      }, 100);
+    } else if (lifeProposalId && lifeProposalData) {
+      // Open the add form with life proposal data
+      setTimeout(() => {
+        openPolicyForm('add', lifeProposalData);
+      }, 100);
+    }
   }
   
   // Tab switching functionality removed - tabs now navigate to separate pages
@@ -1564,7 +1612,7 @@
     const applicationDate = formatDate(policy.date_registered);
     const channelName = policy.channel_name || (policy.channel ? policy.channel.name : '');
     
-    // Top Section: 4 columns
+    // Top Section: 4 columns - matching image design
     const col1 = `
       <div class="detail-section-card">
         <div class="detail-section-header">PARTIES AND CLASS</div>
@@ -1582,12 +1630,8 @@
             <input type="text" class="detail-value" value="${policy.policy_class_name || (policy.policyClass ? policy.policyClass.name : '') || ''}" readonly>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Insured</span>
-            <input type="text" class="detail-value" value="${policy.insured || ''}" readonly>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Insured Item</span>
-            <input type="text" class="detail-value" value="${policy.insured_item || ''}" readonly>
+            <span class="detail-label">Policy Type</span>
+            <input type="text" class="detail-value" value="Fixed Term" readonly>
           </div>
         </div>
       </div>
@@ -1595,16 +1639,8 @@
 
     const col2 = `
       <div class="detail-section-card">
-        <div class="detail-section-header">POLICY DETAILS</div>
+        <div class="detail-section-header">POLICY NOTE</div>
         <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Policy No</span>
-            <input type="text" class="detail-value" value="${policy.policy_no || ''}" readonly>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Policy Code</span>
-              <input type="text" class="detail-value" value="${policy.policy_code || ''}" readonly>
-          </div>
           <div class="detail-row">
             <span class="detail-label">Application Date</span>
             <input type="text" class="detail-value" value="${applicationDate || ''}" readonly>
@@ -1615,17 +1651,18 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Policy Status</span>
-            <div style="display:flex; align-items:center; gap:4px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <input type="text" class="detail-value" value="${policy.policy_status_name || (policy.policyStatus ? policy.policyStatus.name : '') || ''}" readonly style="flex:1;">
-              <button class="btn-dfr">DFR</button>
+              <button type="button" style="background:#ffc107; color:#000; border:none; padding:6px 12px; border-radius:3px; cursor:pointer; font-size:11px; white-space:nowrap;">DFR</button>
             </div>
           </div>
           <div class="detail-row">
-            <div class="renewal-checkbox">
-              <input type="checkbox" ${policy.renewable ? 'checked' : ''} disabled style="margin:0;">
-              <span style="font-size:10px; color:#666;">Renewal Notices</span>
-              <span style="font-size:10px; color:#666; margin-left:6px;">Channel</span>
-              <button class="btn-sms">SMS</button>
+            <span class="detail-label">Renewal Notices</span>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button type="button" style="background:${policy.renewable ? '#fff' : '#f3742a'}; color:${policy.renewable ? '#000' : '#fff'}; border:${policy.renewable ? '1px solid #ddd' : 'none'}; padding:4px 12px; border-radius:3px; font-size:11px; cursor:default;">No</button>
+              <button type="button" style="background:${policy.renewable ? '#f3742a' : '#fff'}; color:${policy.renewable ? '#fff' : '#000'}; border:${policy.renewable ? 'none' : '1px solid #ddd'}; padding:4px 12px; border-radius:3px; font-size:11px; cursor:default;">Yes</button>
+              <span style="font-size:11px; color:#555;">Channel</span>
+              <button type="button" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:3px; font-size:11px; cursor:default;">Email</button>
             </div>
           </div>
         </div>
@@ -1661,7 +1698,15 @@
         <div class="detail-section-header">OTHER DETAILS</div>
         <div class="detail-section-body">
           <div class="detail-row">
-            <textarea class="detail-value" readonly style="min-height:50px;">${policy.notes || ''}</textarea>
+            <span class="detail-label">Loading Applied</span>
+            <div style="display:flex; gap:8px;">
+              <button type="button" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:3px; font-size:11px; cursor:default;">Yes</button>
+              <button type="button" style="background:#fff; color:#000; border:1px solid #ddd; padding:4px 12px; border-radius:3px; font-size:11px; cursor:default;">No</button>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Reason</span>
+            <input type="text" class="detail-value" value="${policy.loading_reason || ''}" readonly>
           </div>
         </div>
       </div>
@@ -1745,9 +1790,9 @@
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Term</span>
-            <div style="display:flex; gap:6px; align-items:center;">
+            <div style="display:flex; gap:4px; align-items:center;">
               <input type="text" class="detail-value" value="${termNumber}" readonly style="flex:0 0 50px;">
-              <input type="text" class="detail-value" value="${termUnit}" readonly style="flex:1;">
+              <span style="font-size:12px; color:#555;">Years</span>
             </div>
           </div>
           <div class="detail-row">
@@ -1755,7 +1800,7 @@
             <input type="text" class="detail-value" value="${policy.start_date ? formatDate(policy.start_date) : ''}" readonly>
           </div>
           <div class="detail-row">
-            <span class="detail-label">End Date</span>
+            <span class="detail-label">Maturity Date</span>
             <input type="text" class="detail-value" value="${policy.end_date ? formatDate(policy.end_date) : ''}" readonly>
           </div>
           <div class="detail-row">
@@ -1768,20 +1813,16 @@
 
     const scheduleCol3 = `
       <div class="detail-section-card">
-        <div class="detail-section-header">ADD ONS (Motor)</div>
+        <div class="detail-section-header">ADD ONS</div>
         <div class="detail-section-body">
           <div class="detail-row">
-            <span class="detail-label">WSC</span>
-            <input type="text" class="detail-value" value="${policy.wsc ? formatNumber(policy.wsc) : '10,000'}" readonly>
+            <span class="detail-label">TPD</span>
+            <input type="text" class="detail-value" value="${policy.tpd ? formatNumber(policy.tpd) : ''}" readonly>
           </div>
           <div class="detail-row">
-            <span class="detail-label">LOU</span>
-            <input type="text" class="detail-value" value="${policy.lou ? formatNumber(policy.lou) : '15,000'}" readonly>
-        </div>
-          <div class="detail-row">
-            <span class="detail-label">PA</span>
-            <input type="text" class="detail-value" value="${policy.pa ? formatNumber(policy.pa) : '250,000'}" readonly>
-      </div>
+            <span class="detail-label">FIBT</span>
+            <input type="text" class="detail-value" value="${policy.fibt ? formatNumber(policy.fibt) : ''}" readonly>
+          </div>
         </div>
       </div>
     `;
@@ -1795,19 +1836,19 @@
             <input type="text" class="detail-value" value="${formatNumber(policy.base_premium)}" readonly>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Total Premium</span>
+            <span class="detail-label">Premium</span>
             <input type="text" class="detail-value" value="${formatNumber(policy.premium)}" readonly>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Payment Plan</span>
-            <input type="text" class="detail-value" value="${payPlan || (policy.payPlan ? policy.payPlan.name : '') || ''}" readonly>
+            <span class="detail-label">FOP / MOP</span>
+            <div style="display:flex; gap:4px;">
+              <input type="text" class="detail-value" value="M" readonly style="width:60px;">
+              <input type="text" class="detail-value" value="${policy.method_of_payment || ''}" readonly style="flex:1;">
+            </div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">NOP & Interval</span>
-            <div style="display:flex; gap:6px; align-items:center;">
-              <input type="text" class="detail-value" value="${nop || ''}" readonly style="flex:0 0 50px;">
-              <input type="text" class="detail-value" value="${interval || ''}" readonly style="flex:1;">
-            </div>
+            <span class="detail-label">SOP</span>
+            <input type="text" class="detail-value" value="${policy.sop || ''}" readonly>
           </div>
         </div>
       </div>
@@ -1922,12 +1963,9 @@
       // Set header
       const policyPageTitleEl = document.getElementById('policyPageTitle');
       const policyPageNameEl = document.getElementById('policyPageName');
-      if (policyPageTitleEl) policyPageTitleEl.textContent = 'Policy';
+      if (policyPageTitleEl) policyPageTitleEl.textContent = 'Policy No';
       if (policyPageNameEl) policyPageNameEl.textContent = 'Add New';
-      if (policyFormTitle) policyFormTitle.textContent = 'Policy - Add New';
-      
-      // Hide tabs for Add mode
-      if (policyFormTabs) policyFormTabs.style.display = 'none';
+      if (policyFormTitle) policyFormTitle.textContent = 'Policy No : Add New';
       
       // Set form action
       pageForm.action = '{{ route("policies.store") }}';
@@ -1937,8 +1975,20 @@
       if (closeBtn) closeBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
       
-      // Populate form with empty data - use compact layout for Add
-      populatePolicyForm(null, formContent, formScheduleContent, formDocumentsContent, true);
+      // Populate form - if life proposal data exists, use special design
+      if (lifeProposalData) {
+        // Show tabs for life proposal generated policy
+        if (policyFormTabs) policyFormTabs.style.display = 'block';
+        // Show Back button
+        const backBtn = document.getElementById('backPolicyFormBtnHeader');
+        if (backBtn) backBtn.style.display = 'inline-block';
+        // Use special form layout for life proposal
+        populateLifeProposalPolicyForm(lifeProposalData, formContent, formScheduleContent, formDocumentsContent);
+      } else {
+        // Hide tabs for regular Add mode
+        if (policyFormTabs) policyFormTabs.style.display = 'none';
+        populatePolicyForm(null, formContent, formScheduleContent, formDocumentsContent, true);
+      }
           } else {
       // Edit mode - use detailed design (keep current design)
       // Set header
@@ -2024,8 +2074,416 @@
     }
   }
   
+  // Life Proposal Generated Policy Form Layout (matches image design)
+  function populateLifeProposalPolicyForm(lifeProposal, formContent, formScheduleContent, formDocumentsContent) {
+    function formatDateForInput(dateStr) {
+      if (!dateStr) return '';
+      try {
+        let date;
+        if (typeof dateStr === 'string') {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            return dateStr;
+          }
+          date = new Date(dateStr);
+        } else {
+          date = new Date(dateStr);
+        }
+        if (isNaN(date.getTime())) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      } catch (e) {
+        return '';
+      }
+    }
+    
+    function createSelectOptions(options, selectedValue, includeEmpty = true) {
+      let html = includeEmpty ? '<option value="">Select</option>' : '';
+      options.forEach(opt => {
+        let value = opt.id !== null && opt.id !== undefined ? opt.id : (opt.name || opt);
+        let name = opt.client_name || opt.name || String(value);
+        if (opt.clid && opt.client_name) {
+          name = `${opt.client_name} (${opt.clid})`;
+        }
+        const selected = value == selectedValue ? 'selected' : '';
+        html += `<option value="${value}" ${selected}>${name}</option>`;
+      });
+      return html;
+    }
+    
+    // Update tabs to show only Nominees, Payments, Commission
+    const tabsNav = document.getElementById('policyFormTabsNav');
+    if (tabsNav) {
+      tabsNav.innerHTML = `
+        <button type="button" class="policy-tab active" style="background:#000; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px; margin-right:8px;">Nominees</button>
+        <button type="button" class="policy-tab" style="background:#fff; color:#000; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px; margin-right:8px;">Payments</button>
+        <button type="button" class="policy-tab" style="background:#fff; color:#000; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:12px;">Commission</button>
+      `;
+    }
+    
+    const lp = lifeProposal || {};
+    const currentYear = new Date().getFullYear();
+    
+    // Main Policy Details - 4 columns layout
+    const policyDetails = `
+      <div style="background:#fff; border:1px solid #ddd; border-radius:4px; padding:12px; margin-bottom:12px;">
+        <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #eee;">
+          <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Policy Number *</label>
+          <input type="text" name="policy_no" id="policy_no" class="form-control" required style="width:200px; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+          <!-- PARTIES AND CLASS -->
+          <div>
+            <h4 style="margin:0 0 10px 0; font-size:12px; font-weight:600; color:#333; text-transform:uppercase;">PARTIES AND CLASS</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Policyholder</label>
+                <select name="client_id" id="client_id" class="form-control" required style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.clients || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Insurer</label>
+                <select name="insurer_id" id="insurer_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.insurers || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Insurance Class</label>
+                <select name="policy_class_id" id="policy_class_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.policy_classes || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Policy Type</label>
+                <input type="text" name="policy_type" id="policy_type" value="Fixed Term" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- POLICY NOTE -->
+          <div>
+            <h4 style="margin:0 0 10px 0; font-size:12px; font-weight:600; color:#333; text-transform:uppercase;">POLICY NOTE</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Application Date</label>
+                <input type="date" name="date_registered" id="date_registered" value="${formatDateForInput(lp.date || lp.offer_date)}" class="form-control" required style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Business Type</label>
+                <select name="business_type_id" id="business_type_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.business_types || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Policy Status</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <select name="policy_status_id" id="policy_status_id" class="form-control" style="flex:1; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                    ${createSelectOptions(lookupData.policy_statuses || [])}
+                  </select>
+                  <button type="button" style="background:#ffc107; color:#000; border:none; padding:6px 12px; border-radius:3px; cursor:pointer; font-size:11px; white-space:nowrap;">DFR</button>
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Renewal Notices</label>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <button type="button" class="renewal-notice-btn active" data-value="0" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:3px; cursor:pointer; font-size:11px;">No</button>
+                  <button type="button" class="renewal-notice-btn" data-value="1" style="background:#fff; color:#000; border:1px solid #ddd; padding:4px 12px; border-radius:3px; cursor:pointer; font-size:11px;">Yes</button>
+                  <span style="font-size:11px; color:#555;">Channel</span>
+                  <button type="button" class="channel-btn active" data-value="email" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:3px; cursor:pointer; font-size:11px;">Email</button>
+                  <input type="hidden" name="renewable" id="renewable" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- BUSINESS DETAILS -->
+          <div>
+            <h4 style="margin:0 0 10px 0; font-size:12px; font-weight:600; color:#333; text-transform:uppercase;">BUSINESS DETAILS</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Agency</label>
+                <select name="agency_id" id="agency_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.agencies || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Agent</label>
+                <input type="text" name="agent" id="agent" value="${lp.agency || ''}" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Source</label>
+                <input type="text" name="source" id="source" value="${lp.source_of_payment || ''}" class="form-control" readonly style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px; background:#f5f5f5;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Source Name</label>
+                <input type="text" name="source_name" id="source_name" value="${lp.source_name || ''}" class="form-control" readonly style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px; background:#f5f5f5;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- OTHER DETAIL -->
+          <div>
+            <h4 style="margin:0 0 10px 0; font-size:12px; font-weight:600; color:#333; text-transform:uppercase;">OTHER DETAIL</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Loading Applied</label>
+                <div style="display:flex; gap:8px;">
+                  <button type="button" class="loading-btn" data-value="1" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:3px; cursor:pointer; font-size:11px;">Yes</button>
+                  <button type="button" class="loading-btn active" data-value="0" style="background:#fff; color:#000; border:1px solid #ddd; padding:4px 12px; border-radius:3px; cursor:pointer; font-size:11px;">No</button>
+                  <input type="hidden" name="loading_applied" id="loading_applied" value="0">
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Reason</label>
+                <input type="text" name="loading_reason" id="loading_reason" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Policy Schedule Section - 4 columns
+    const scheduleDetails = `
+      <div style="background:#fff; border:1px solid #ddd; border-radius:4px; padding:12px; margin-bottom:12px;">
+        <h4 style="margin:0 0 12px 0; font-size:13px; font-weight:600; color:#333;">Policy Schedule</h4>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+          <!-- PLAN & VALUE DETAILS -->
+          <div>
+            <h5 style="margin:0 0 8px 0; font-size:11px; font-weight:600; color:#555; text-transform:uppercase;">PLAN & VALUE DETAILS</h5>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Year</label>
+                <input type="text" value="${currentYear}" class="form-control" readonly style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px; background:#f5f5f5;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Policy Plan</label>
+                <select name="policy_plan_id" id="policy_plan_id" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  ${createSelectOptions(lookupData.policy_plans || [])}
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Sum Insured</label>
+                <input type="number" step="0.01" name="sum_insured" id="sum_insured" value="${lp.sum_assured || ''}" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Last Endorsement</label>
+                <input type="text" name="last_endorsement" id="last_endorsement" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- PERIOD OF COVER -->
+          <div>
+            <h5 style="margin:0 0 8px 0; font-size:11px; font-weight:600; color:#555; text-transform:uppercase;">PERIOD OF COVER</h5>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Term</label>
+                <div style="display:flex; gap:4px;">
+                  <input type="number" name="term" id="term" value="${lp.term || ''}" class="form-control" style="flex:1; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  <select name="term_unit" id="term_unit" class="form-control" style="width:80px; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                    <option value="Years">Years</option>
+                    <option value="Months">Months</option>
+                    <option value="Days">Days</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="${formatDateForInput(lp.start_date)}" class="form-control" required style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Maturity Date</label>
+                <input type="date" name="end_date" id="end_date" value="${formatDateForInput(lp.maturity_date)}" class="form-control" required style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Cancelled Date</label>
+                <input type="date" name="cancelled_date" id="cancelled_date" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- ADD ONS -->
+          <div>
+            <h5 style="margin:0 0 8px 0; font-size:11px; font-weight:600; color:#555; text-transform:uppercase;">ADD ONS</h5>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">TPD</label>
+                <input type="number" step="0.01" name="tpd" id="tpd" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">FIBT</label>
+                <input type="number" step="0.01" name="fibt" id="fibt" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- PREMIUM & PAYMENT PLAN -->
+          <div>
+            <h5 style="margin:0 0 8px 0; font-size:11px; font-weight:600; color:#555; text-transform:uppercase;">PREMIUM & PAYMENT PLAN</h5>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Base Premium</label>
+                <input type="number" step="0.01" name="base_premium" id="base_premium" value="${lp.base_premium || ''}" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">Premium</label>
+                <input type="number" step="0.01" name="premium" id="premium" value="${lp.premium || ''}" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">FOP / MOP</label>
+                <div style="display:flex; gap:4px;">
+                  <input type="text" name="fop_mop" id="fop_mop" value="M" class="form-control" style="width:60px; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                  <input type="text" name="mop_detail" id="mop_detail" value="${lp.method_of_payment || ''}" class="form-control" style="flex:1; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:4px; color:#555;">SOP</label>
+                <input type="text" name="sop" id="sop" class="form-control" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Set content
+    if (formContent) {
+      formContent.innerHTML = policyDetails;
+      formContent.style.display = 'block';
+    }
+    
+    if (formScheduleContent) {
+      formScheduleContent.innerHTML = scheduleDetails;
+      formScheduleContent.style.display = 'block';
+    }
+    
+    // Add event listeners for toggle buttons
+    setTimeout(() => {
+      // Renewal notice buttons
+      document.querySelectorAll('.renewal-notice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.renewal-notice-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.background = '#fff';
+            b.style.color = '#000';
+            b.style.border = '1px solid #ddd';
+          });
+          this.classList.add('active');
+          this.style.background = '#f3742a';
+          this.style.color = '#fff';
+          this.style.border = 'none';
+          document.getElementById('renewable').value = this.dataset.value;
+        });
+      });
+      
+      // Loading buttons
+      document.querySelectorAll('.loading-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.loading-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.background = '#fff';
+            b.style.color = '#000';
+            b.style.border = '1px solid #ddd';
+          });
+          this.classList.add('active');
+          this.style.background = '#f3742a';
+          this.style.color = '#fff';
+          this.style.border = 'none';
+          document.getElementById('loading_applied').value = this.dataset.value;
+        });
+      });
+      
+      // Channel buttons
+      document.querySelectorAll('.channel-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.channel-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.background = '#fff';
+            b.style.color = '#000';
+            b.style.border = '1px solid #ddd';
+          });
+          this.classList.add('active');
+          this.style.background = '#f3742a';
+          this.style.color = '#fff';
+          this.style.border = 'none';
+        });
+      });
+      
+      // Pre-fill data from life proposal
+      if (lp.proposers_name) {
+        const clientSelect = document.getElementById('client_id');
+        if (clientSelect) {
+          const clients = lookupData.clients || [];
+          const matchingClient = clients.find(c => 
+            c.client_name && c.client_name.toLowerCase().includes(lp.proposers_name.toLowerCase())
+          );
+          if (matchingClient) {
+            clientSelect.value = matchingClient.id;
+            clientSelect.dispatchEvent(new Event('change'));
+          }
+        }
+      }
+      
+      if (lp.insurer) {
+        const insurerSelect = document.getElementById('insurer_id');
+        if (insurerSelect) {
+          const insurers = lookupData.insurers || [];
+          const matchingInsurer = insurers.find(i => 
+            (i.name || i).toLowerCase() === lp.insurer.toLowerCase()
+          );
+          if (matchingInsurer) {
+            insurerSelect.value = matchingInsurer.id || matchingInsurer;
+          }
+        }
+      }
+      
+      if (lp.policy_plan) {
+        const planSelect = document.getElementById('policy_plan_id');
+        if (planSelect) {
+          const plans = lookupData.policy_plans || [];
+          const matchingPlan = plans.find(p => 
+            (p.name || p).toLowerCase() === lp.policy_plan.toLowerCase()
+          );
+          if (matchingPlan) {
+            planSelect.value = matchingPlan.id || matchingPlan;
+          }
+        }
+      }
+      
+      // Handle client selection to populate source fields
+      const clientSelect = document.getElementById('client_id');
+      if (clientSelect) {
+        clientSelect.addEventListener('change', async function() {
+          const clientId = this.value;
+          if (clientId) {
+            try {
+              const response = await fetch(`/clients/${clientId}`, {
+                headers: { 'Accept': 'application/json' }
+              });
+              if (response.ok) {
+                const data = await response.json();
+                const client = data.client || data;
+                const sourceInput = document.getElementById('source');
+                const sourceNameInput = document.getElementById('source_name');
+                if (sourceInput) sourceInput.value = client.source || '';
+                if (sourceNameInput && !sourceNameInput.value) {
+                  sourceNameInput.value = client.source_name || '';
+                }
+              }
+            } catch (e) {
+              console.error('Error fetching client:', e);
+            }
+          }
+        });
+      }
+    }, 100);
+  }
+
   // Compact Add Policy Form Layout
-  function populateCompactAddForm(formContent, formScheduleContent, formDocumentsContent) {
+  function populateCompactAddForm(formContent, formScheduleContent, formDocumentsContent, lifeProposal = null) {
     function formatDateForInput(dateStr) {
       if (!dateStr) return '';
       try {
@@ -2254,6 +2712,130 @@
       formScheduleContent.style.display = 'block';
     }
     
+    // Pre-fill form with life proposal data if available
+    if (lifeProposal) {
+      setTimeout(() => {
+        // Find client by proposer name
+        if (lifeProposal.proposers_name) {
+          const clientSelect = document.getElementById('client_id');
+          if (clientSelect) {
+            const clients = lookupData.clients || [];
+            const matchingClient = clients.find(c => 
+              c.client_name && c.client_name.toLowerCase().includes(lifeProposal.proposers_name.toLowerCase())
+            );
+            if (matchingClient) {
+              clientSelect.value = matchingClient.id;
+              clientSelect.dispatchEvent(new Event('change'));
+            }
+          }
+        }
+        
+        // Pre-fill insurer
+        if (lifeProposal.insurer) {
+          const insurerSelect = document.getElementById('insurer_id');
+          if (insurerSelect) {
+            const insurers = lookupData.insurers || [];
+            const matchingInsurer = insurers.find(i => 
+              (i.name || i).toLowerCase() === lifeProposal.insurer.toLowerCase()
+            );
+            if (matchingInsurer) {
+              insurerSelect.value = matchingInsurer.id || matchingInsurer;
+            }
+          }
+        }
+        
+        // Pre-fill policy plan
+        if (lifeProposal.policy_plan) {
+          const planSelect = document.getElementById('policy_plan_id');
+          if (planSelect) {
+            const plans = lookupData.policy_plans || [];
+            const matchingPlan = plans.find(p => 
+              (p.name || p).toLowerCase() === lifeProposal.policy_plan.toLowerCase()
+            );
+            if (matchingPlan) {
+              planSelect.value = matchingPlan.id || matchingPlan;
+            }
+          }
+        }
+        
+        // Pre-fill other fields
+        const sumInsuredInput = document.getElementById('sum_insured');
+        if (sumInsuredInput && lifeProposal.sum_assured) {
+          sumInsuredInput.value = lifeProposal.sum_assured;
+        }
+        
+        const termInput = document.getElementById('term');
+        if (termInput && lifeProposal.term) {
+          termInput.value = lifeProposal.term;
+        }
+        
+        const basePremiumInput = document.getElementById('base_premium');
+        if (basePremiumInput && lifeProposal.base_premium) {
+          basePremiumInput.value = lifeProposal.base_premium;
+        }
+        
+        const premiumInput = document.getElementById('premium');
+        if (premiumInput && lifeProposal.premium) {
+          premiumInput.value = lifeProposal.premium;
+        }
+        
+        const startDateInput = document.getElementById('start_date');
+        if (startDateInput && lifeProposal.start_date) {
+          startDateInput.value = formatDateForInput(lifeProposal.start_date);
+        }
+        
+        const endDateInput = document.getElementById('end_date');
+        if (endDateInput && lifeProposal.maturity_date) {
+          endDateInput.value = formatDateForInput(lifeProposal.maturity_date);
+        }
+        
+        const dateRegisteredInput = document.getElementById('date_registered');
+        if (dateRegisteredInput && lifeProposal.date) {
+          dateRegisteredInput.value = formatDateForInput(lifeProposal.date);
+        }
+        
+        // Pre-fill frequency
+        if (lifeProposal.frequency) {
+          const frequencySelect = document.getElementById('frequency_id');
+          if (frequencySelect) {
+            const frequencies = lookupData.frequencies || [];
+            const matchingFreq = frequencies.find(f => 
+              (f.name || f).toLowerCase() === lifeProposal.frequency.toLowerCase()
+            );
+            if (matchingFreq) {
+              frequencySelect.value = matchingFreq.id || matchingFreq;
+            }
+          }
+        }
+        
+        // Pre-fill agency
+        if (lifeProposal.agency) {
+          const agencySelect = document.getElementById('agency_id');
+          if (agencySelect) {
+            const agencies = lookupData.agencies || [];
+            const matchingAgency = agencies.find(a => 
+              (a.name || a).toLowerCase() === lifeProposal.agency.toLowerCase()
+            );
+            if (matchingAgency) {
+              agencySelect.value = matchingAgency.id || matchingAgency;
+            }
+          }
+        }
+        
+        // Pre-fill source name
+        const sourceNameInput = document.getElementById('source_name');
+        if (sourceNameInput && lifeProposal.source_name) {
+          sourceNameInput.value = lifeProposal.source_name;
+        }
+        
+        // Pre-fill notes
+        const notesInput = document.getElementById('notes');
+        if (notesInput && lifeProposal.notes) {
+          notesInput.value = lifeProposal.notes;
+        }
+      }, 100);
+    }
+    
     // Handle client selection to populate source fields
     const clientSelect = document.getElementById('client_id');
     if (clientSelect) {
@@ -2270,7 +2852,9 @@
               const sourceInput = document.getElementById('source');
               const sourceNameInput = document.getElementById('source_name');
               if (sourceInput) sourceInput.value = client.source || '';
-              if (sourceNameInput) sourceNameInput.value = client.source_name || '';
+              if (sourceNameInput && !sourceNameInput.value) {
+                sourceNameInput.value = client.source_name || '';
+              }
             }
           } catch (e) {
             console.error('Error fetching client:', e);
@@ -2297,8 +2881,8 @@
     formDocumentsContent.innerHTML = '';
     
     // If compact mode (for Add), use compact layout
-    if (isCompact && !policy) {
-      populateCompactAddForm(formContent, formScheduleContent, formDocumentsContent);
+    if (isCompact) {
+      populateCompactAddForm(formContent, formScheduleContent, formDocumentsContent, policy);
       return;
     }
     

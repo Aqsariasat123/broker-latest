@@ -7,6 +7,7 @@ use App\Models\LifeProposal;
 use App\Models\LookupCategory;
 use App\Models\Contact;
 use App\Models\Client;
+use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -48,8 +49,6 @@ class LifeProposalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'contact_id' => 'nullable|exists:contacts,id',
-            'client_id' => 'nullable|exists:clients,id',
             'proposers_name' => 'required|string|max:255',
             'salutation' => 'nullable|string|max:50',
             'dob' => 'nullable|date',
@@ -128,8 +127,6 @@ class LifeProposalController extends Controller
     public function update(Request $request, LifeProposal $lifeProposal)
     {
         $validated = $request->validate([
-            'contact_id' => 'nullable|exists:contacts,id',
-            'client_id' => 'nullable|exists:clients,id',
             'proposers_name' => 'required|string|max:255',
             'salutation' => 'nullable|string|max:50',
             'dob' => 'nullable|date',
@@ -261,6 +258,61 @@ class LifeProposalController extends Controller
         
         return redirect()->route('life-proposals.index')
             ->with('success', 'Column settings saved successfully.');
+    }
+
+    public function uploadDocument(Request $request)
+    {
+        $request->validate([
+            'document' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+            'document_type' => 'required|in:proposal_document,medical_report,id_document,other',
+            'prid' => 'required|string',
+        ]);
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $documentType = $request->document_type;
+            $prid = $request->prid;
+            
+            // Map document types to names
+            $documentNames = [
+                'proposal_document' => 'Proposal Document',
+                'medical_report' => 'Medical Report',
+                'id_document' => 'ID Document',
+                'other' => 'Other Document'
+            ];
+            
+            $filename = 'life_proposal_' . $prid . '_' . $documentType . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('documents', $filename, 'public');
+            
+            // Generate unique DOC ID
+            $latest = Document::orderBy('id', 'desc')->first();
+            $nextId = $latest ? (int)str_replace('DOC', '', $latest->doc_id ?? 'DOC0') + 1 : 1001;
+            $docId = 'DOC' . $nextId;
+
+            // Store in documents table
+            Document::create([
+                'doc_id' => $docId,
+                'tied_to' => $prid,
+                'name' => $documentNames[$documentType] ?? 'Document',
+                'group' => 'Life Proposal Document',
+                'type' => $documentType,
+                'format' => $file->getClientOriginalExtension(),
+                'date_added' => now(),
+                'year' => now()->format('Y'),
+                'file_path' => $path,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document uploaded successfully.'
+        ]);
+    }
+
+    public function generatePolicy(LifeProposal $lifeProposal)
+    {
+        // Redirect to policies index page with life proposal ID to pre-fill the form
+        return redirect()->route('policies.index', ['life_proposal_id' => $lifeProposal->id]);
     }
 
     private function getLookupData()
