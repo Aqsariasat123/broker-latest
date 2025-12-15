@@ -3,6 +3,19 @@
 
 @include('partials.table-styles')
 
+<style>
+  /* Bell cell styles matching clients page */
+  .bell-cell { text-align:center; padding:8px 5px; vertical-align:middle; min-width:50px; }
+  .bell-cell.expired { background-color:#ffebee !important; }
+  .bell-cell.expiring { background-color:#fff8e1 !important; }
+  .bell-cell:not(.expired):not(.expiring) { background-color:#fff !important; }
+  tbody tr.has-expired { background-color:#ffebee !important; }
+  tbody tr.has-expired td { background-color:#ffebee !important; }
+  tbody tr.has-expiring { background-color:#fff8e1 !important; }
+  tbody tr.has-expiring td { background-color:#fff8e1 !important; }
+  .footer { background-color:#fff !important; }
+</style>
+
 @php
   $config = \App\Helpers\TableConfigHelper::getConfig('expenses');
   $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('expenses');
@@ -22,7 +35,9 @@
         <div class="records-found">Records Found - {{ $expenses->total() }}</div>
       </div>
       <div class="action-buttons">
+        @if(auth()->check() && (auth()->user()->hasPermission('expenses.create') || auth()->user()->isAdmin()))
         <button class="btn btn-add" id="addExpenseBtn">Add</button>
+        @endif
       </div>
     </div>
 
@@ -37,6 +52,12 @@
       <table id="expensesTable">
         <thead>
           <tr>
+            <th style="text-align:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
+                <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff"/>
+              </svg>
+            </th>
             <th>Action</th>
             @foreach($selectedColumns as $col)
               @if(isset($columnDefinitions[$col]))
@@ -47,18 +68,35 @@
         </thead>
         <tbody>
           @foreach($expenses as $expense)
-            <tr>
+            <tr class="{{ $expense->hasExpired ?? false ? 'has-expired' : ($expense->hasExpiring ?? false ? 'has-expiring' : '') }}">
+              <td class="bell-cell {{ $expense->hasExpired ?? false ? 'expired' : ($expense->hasExpiring ?? false ? 'expiring' : '') }}">
+                <div style="display:flex; align-items:center; justify-content:center;">
+                  @php
+                    $isExpired = $expense->hasExpired ?? false;
+                    $isExpiring = $expense->hasExpiring ?? false;
+                  @endphp
+                  <div class="status-indicator {{ $isExpired ? 'expired' : ($isExpiring ? 'expiring' : 'normal') }}" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : ($isExpiring ? '#ffc107' : 'transparent') }};"></div>
+                </div>
+              </td>
               <td class="action-cell">
+                @if(auth()->check() && (auth()->user()->hasPermission('expenses.view') || auth()->user()->hasPermission('expenses.edit') || auth()->user()->isAdmin()))
                 <svg class="action-expand" onclick="openExpenseDetails({{ $expense->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
+                @endif
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'expense_id')
                   <td data-column="expense_id">
-                    <a href="javascript:void(0)" onclick="openExpenseDetails({{ $expense->id }})" style="color:#007bff; text-decoration:underline;">{{ $expense->expense_id }}</a>
+                    {{ $expense->expense_id }}
                   </td>
                 @elseif($col == 'payee')
                   <td data-column="payee">{{ $expense->payee ?? '-' }}</td>
@@ -68,10 +106,10 @@
                   <td data-column="amount_paid">{{ $expense->amount_paid ? number_format($expense->amount_paid, 2) : '-' }}</td>
                 @elseif($col == 'description')
                   <td data-column="description">{{ $expense->description ?? '-' }}</td>
-                @elseif($col == 'category')
-                  <td data-column="category">{{ $expense->category ?? '-' }}</td>
+                @elseif($col == 'category_id')
+                  <td data-column="category_id">{{ $expense->expenseCategory ? $expense->expenseCategory->name : '-' }}</td>
                 @elseif($col == 'mode_of_payment')
-                  <td data-column="mode_of_payment">{{ $expense->mode_of_payment ?? '-' }}</td>
+                  <td data-column="mode_of_payment">{{ $expense->modeOfPayment ? $expense->modeOfPayment->name : '-' }}</td>
                 @elseif($col == 'expense_notes')
                   <td data-column="expense_notes">{{ $expense->expense_notes ?? '-' }}</td>
                 @endif
@@ -84,6 +122,8 @@
 
     </div>
 
+ 
+    </div>
     <div class="footer">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('expenses.export', array_merge(request()->query(), ['page' => $expenses->currentPage()])) }}">Export</a>
@@ -108,10 +148,10 @@
 
         <a class="btn-page" href="{{ $current < $last ? page_url($base, $q, $current + 1) : '#' }}" @if($current >= $last) disabled @endif>&rsaquo;</a>
         <a class="btn-page" href="{{ $current < $last ? page_url($base, $q, $last) : '#' }}" @if($current >= $last) disabled @endif>&raquo;</a>
-      </div>
     </div>
     </div>
   </div>
+
 
   <!-- Expense Page View (Full Page) -->
   <div class="client-page-view" id="expensePageView" style="display:none;">
@@ -158,58 +198,120 @@
     </div>
   </div>
 
-  <!-- Add/Edit Expense Modal (hidden, used for form structure) -->
+  <!-- Add/Edit Expense Modal -->
   <div class="modal" id="expenseModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 id="expenseModalTitle">Add Expense</h4>
-        <button type="button" class="modal-close" onclick="closeExpenseModal()">×</button>
+    <div class="modal-content" style="max-width:800px; max-height:90vh; overflow-y:auto;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-bottom:1px solid #ddd; background:#fff;">
+        <h4 id="expenseModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Add Expense</h4>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" form="expenseForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
+          <button type="button" class="btn-cancel" onclick="closeExpenseModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
       </div>
-      <form id="expenseForm" method="POST" action="{{ route('expenses.store') }}">
+      </div>
+      <form id="expenseForm" method="POST" action="{{ route('expenses.store') }}" enctype="multipart/form-data">
         @csrf
         <div id="expenseFormMethod" style="display:none;"></div>
-        <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="payee">Payee *</label>
-              <input type="text" class="form-control" name="payee" id="payee" required>
+        <input type="file" name="receipt" id="receiptFileInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+        <div class="modal-body" style="padding:20px;">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="payee" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Payee</label>
+              <input type="text" class="form-control" name="payee" id="payee" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
-            <div class="form-group">
-              <label for="date_paid">Date Paid *</label>
-              <input type="date" class="form-control" name="date_paid" id="date_paid" required>
+            <div class="form-group" style="flex:1;">
+              <label for="date_paid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Date Paid</label>
+              <input type="date" class="form-control" name="date_paid" id="date_paid" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
-            <div class="form-group">
-              <label for="amount_paid">Amount Paid *</label>
-              <input type="number" step="0.01" class="form-control" name="amount_paid" id="amount_paid" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="description">Description</label>
-              <input type="text" class="form-control" name="description" id="description">
-            </div>
-            <div class="form-group">
-              <label for="category">Category *</label>
-              <input type="text" class="form-control" name="category" id="category" required>
-            </div>
-            <div class="form-group">
-              <label for="mode_of_payment">Mode Of Payment *</label>
-              <input type="text" class="form-control" name="mode_of_payment" id="mode_of_payment" required>
+            <div class="form-group" style="flex:1;">
+              <label for="amount_paid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Amount Paid</label>
+              <input type="number" step="0.01" class="form-control" name="amount_paid" id="amount_paid" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
           </div>
-          <div class="form-row">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="category_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Category</label>
+              <select class="form-control" name="category_id" id="category_id" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">Select Category</option>
+                @if(isset($expenseCategories))
+                  @foreach($expenseCategories as $cat)
+                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                  @endforeach
+                @endif
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="description" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Description</label>
+              <input type="text" class="form-control" name="description" id="description" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="mode_of_payment_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Mode Of Payment</label>
+              <select class="form-control" name="mode_of_payment_id" id="mode_of_payment_id" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">Select Mode Of Payment</option>
+                @if(isset($modesOfPayment))
+                  @foreach($modesOfPayment as $mode)
+                    <option value="{{ $mode->id }}">{{ $mode->name }}</option>
+                  @endforeach
+                @endif
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="receipt_no" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Receipt No.</label>
+              <input type="text" class="form-control" name="receipt_no" id="receipt_no" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+          </div>
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
-              <label for="expense_notes">Expense Notes</label>
-              <textarea class="form-control" name="expense_notes" id="expense_notes" rows="2"></textarea>
+              <label for="expense_notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Expense Notes</label>
+              <textarea class="form-control" name="expense_notes" id="expense_notes" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
             </div>
+          </div>
+          <div id="selectedReceiptPreview" style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:4px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <p style="margin:0; font-size:12px; color:#666; font-weight:500;">Selected Receipt:</p>
+                <p id="selectedReceiptName" style="margin:5px 0 0 0; font-size:13px; color:#000;"></p>
+        </div>
+              <button type="button" onclick="removeSelectedReceipt()" style="background:#dc3545; color:#fff; border:none; padding:4px 10px; border-radius:2px; cursor:pointer; font-size:11px;">Remove</button>
+            </div>
+            <div id="selectedReceiptImagePreview" style="margin-top:10px; max-width:200px; max-height:200px;"></div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeExpenseModal()">Cancel</button>
-          <button type="button" class="btn-delete" id="expenseDeleteBtn" style="display: none;" onclick="deleteExpense()">Delete</button>
-          <button type="submit" class="btn-save">Save</button>
+        <div class="modal-footer" style="padding:15px 20px; border-top:1px solid #ddd; background:#fff; display:flex; justify-content:center;">
+          <button type="button" class="btn-upload" onclick="openReceiptUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Upload Receipt</button>
+          <button type="button" class="btn-delete" id="expenseDeleteBtnModal" style="display: none; background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px; margin-left:10px;" onclick="deleteExpense()">Delete</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Receipt Upload Modal -->
+  <div class="modal" id="receiptUploadModal">
+    <div class="modal-content" style="max-width:500px;">
+      <div class="modal-header">
+        <h4>Select Receipt</h4>
+        <button type="button" class="modal-close" onclick="closeReceiptUploadModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="receiptFile">Select Receipt File</label>
+          <input type="file" class="form-control" name="receipt" id="receiptFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleReceiptFileSelect(event)">
+          <small style="color:#666; font-size:11px;">Accepted formats: PDF, JPG, JPEG, PNG, DOC, DOCX (Max 5MB)</small>
+        </div>
+        <div id="receiptPreview" style="margin-top:15px; display:none;">
+          <p style="font-size:12px; color:#666; font-weight:500;">Preview:</p>
+          <div id="receiptPreviewContent" style="margin-top:10px;"></div>
+        </div>
+        <div id="existingReceiptPreview" style="margin-top:15px; display:none;">
+          <p style="font-size:12px; color:#666;">Current receipt:</p>
+          <div id="existingReceiptPreviewContent"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeReceiptUploadModal()">Cancel</button>
+        <button type="button" class="btn-save" onclick="confirmReceiptSelection()">Select</button>
+      </div>
     </div>
   </div>
 
@@ -270,6 +372,8 @@
   const lookupData = @json($lookupData);
   const selectedColumns = @json($selectedColumns);
   const mandatoryColumns = @json($mandatoryColumns);
+  const canDeleteExpense = @json(auth()->check() && (auth()->user()->hasPermission('expenses.delete') || auth()->user()->isAdmin()));
+  const canEditExpense = @json(auth()->check() && (auth()->user()->hasPermission('expenses.edit') || auth()->user()->isAdmin()));
 
   // Helper function for date formatting
   function formatDate(dateStr) {
@@ -285,55 +389,9 @@
     return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // Open expense details (full page view) - MUST be defined before HTML onclick handlers
-  async function openExpenseDetails(id) {
-    try {
-      const res = await fetch(`/expenses/${id}`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const expense = await res.json();
-      currentExpenseId = id;
-      
-      // Get all required elements
-      const expensePageName = document.getElementById('expensePageName');
-      const expensePageTitle = document.getElementById('expensePageTitle');
-      const clientsTableView = document.getElementById('clientsTableView');
-      const expensePageView = document.getElementById('expensePageView');
-      const expenseDetailsPageContent = document.getElementById('expenseDetailsPageContent');
-      const expenseFormPageContent = document.getElementById('expenseFormPageContent');
-      const editExpenseFromPageBtn = document.getElementById('editExpenseFromPageBtn');
-      const closeExpensePageBtn = document.getElementById('closeExpensePageBtn');
-      
-      if (!expensePageName || !expensePageTitle || !clientsTableView || !expensePageView || 
-          !expenseDetailsPageContent || !expenseFormPageContent) {
-        console.error('Required elements not found');
-        alert('Error: Page elements not found');
-        return;
-      }
-      
-      // Set expense name in header
-      const expenseName = expense.expense_id || 'Unknown';
-      expensePageName.textContent = expenseName;
-      expensePageTitle.textContent = 'Expense';
-      
-      populateExpenseDetails(expense);
-      
-      // Hide table view, show page view
-      clientsTableView.classList.add('hidden');
-      expensePageView.style.display = 'block';
-      expensePageView.classList.add('show');
-      expenseDetailsPageContent.style.display = 'block';
-      expenseFormPageContent.style.display = 'none';
-      if (editExpenseFromPageBtn) editExpenseFromPageBtn.style.display = 'inline-block';
-      if (closeExpensePageBtn) closeExpensePageBtn.style.display = 'inline-block';
-    } catch (e) {
-      console.error(e);
-      alert('Error loading expense details: ' + e.message);
-    }
+  // Open expense details - opens edit modal
+  function openExpenseDetails(id) {
+    openExpenseModal('edit', id);
   }
 
   // Populate expense details view
@@ -375,11 +433,11 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Category</span>
-            <div class="detail-value">${expense.category || '-'}</div>
+            <div class="detail-value">${expense.expense_category ? expense.expense_category.name : (expense.category || '-')}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Mode Of Payment</span>
-            <div class="detail-value">${expense.mode_of_payment || '-'}</div>
+            <div class="detail-value">${expense.mode_of_payment ? expense.mode_of_payment.name : (expense.modeOfPayment ? expense.modeOfPayment.name : '-')}</div>
           </div>
         </div>
       </div>
@@ -414,8 +472,8 @@
     }
   }
 
-  // Add Expense Button
-  document.getElementById('addExpenseBtn').addEventListener('click', () => openExpensePage('add'));
+  // Add Expense Button - Open Modal
+  document.getElementById('addExpenseBtn').addEventListener('click', () => openExpenseModal('add'));
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditExpense(id) {
@@ -480,18 +538,15 @@
       if (closeBtn) closeBtn.style.display = 'none';
       if (closeFormBtn) closeFormBtn.style.display = 'inline-block';
 
-      const fields = ['payee','date_paid','amount_paid','description','category','mode_of_payment','expense_notes'];
-      fields.forEach(k => {
-        const el = formContentDiv ? formContentDiv.querySelector(`#${k}`) : null;
-        if (!el) return;
-        if (el.type === 'date') {
-          el.value = expense[k] ? (typeof expense[k] === 'string' ? expense[k].substring(0,10) : expense[k]) : '';
-        } else if (el.tagName === 'TEXTAREA') {
-          el.value = expense[k] ?? '';
-        } else {
-          el.value = expense[k] ?? '';
-        }
-      });
+      // Populate form fields
+      if (expense.payee) document.getElementById('payee').value = expense.payee;
+      if (expense.date_paid) document.getElementById('date_paid').value = expense.date_paid ? (typeof expense.date_paid === 'string' ? expense.date_paid.substring(0,10) : expense.date_paid) : '';
+      if (expense.amount_paid) document.getElementById('amount_paid').value = expense.amount_paid;
+      if (expense.description) document.getElementById('description').value = expense.description;
+      if (expense.category_id) document.getElementById('category_id').value = expense.category_id;
+      if (expense.mode_of_payment_id) document.getElementById('mode_of_payment_id').value = expense.mode_of_payment_id;
+      if (expense.receipt_no) document.getElementById('receipt_no').value = expense.receipt_no;
+      if (expense.expense_notes) document.getElementById('expense_notes').value = expense.expense_notes;
     }
 
     // Hide table view, show page view
@@ -612,17 +667,286 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openExpenseModal(mode, expense = null) {
-    if (mode === 'add') {
-      openExpensePage('add');
-    } else if (expense && currentExpenseId) {
-      openEditExpense(currentExpenseId);
+  // Open Expense Modal
+  async function openExpenseModal(mode, expenseId = null) {
+    const modal = document.getElementById('expenseModal');
+    const form = document.getElementById('expenseForm');
+    const formMethod = document.getElementById('expenseFormMethod');
+    const title = document.getElementById('expenseModalTitle');
+    const deleteBtn = document.getElementById('expenseDeleteBtnModal');
+    
+    if (!modal || !form || !formMethod || !title) {
+      console.error('Required modal elements not found');
+      alert('Error: Modal elements not found');
+      return;
     }
+    
+    if (mode === 'add') {
+      title.textContent = 'Add Expense';
+      form.action = '{{ route("expenses.store") }}';
+      formMethod.innerHTML = '';
+      if (deleteBtn) deleteBtn.style.display = 'none';
+      form.reset();
+      currentExpenseId = null;
+      // Reset receipt preview
+      document.getElementById('selectedReceiptPreview').style.display = 'none';
+      document.getElementById('receiptFileInput').value = '';
+    } else if (mode === 'edit' && expenseId) {
+      try {
+        const res = await fetch(`/expenses/${expenseId}/edit`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        if (!res.ok) throw new Error('Network error');
+        const expense = await res.json();
+        currentExpenseId = expenseId;
+        
+        title.textContent = 'Edit Expense';
+        form.action = `/expenses/${expenseId}`;
+        formMethod.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+        if (deleteBtn) deleteBtn.style.display = canDeleteExpense ? 'inline-block' : 'none';
+        
+        // Populate form fields
+        document.getElementById('payee').value = expense.payee || '';
+        document.getElementById('date_paid').value = expense.date_paid ? (typeof expense.date_paid === 'string' ? expense.date_paid.substring(0,10) : expense.date_paid) : '';
+        document.getElementById('amount_paid').value = expense.amount_paid || '';
+        document.getElementById('category_id').value = expense.category_id || (expense.expense_category ? expense.expense_category.id : '');
+        document.getElementById('description').value = expense.description || '';
+        document.getElementById('mode_of_payment_id').value = expense.mode_of_payment_id || (expense.mode_of_payment ? expense.mode_of_payment.id : (expense.modeOfPayment ? expense.modeOfPayment.id : ''));
+        document.getElementById('receipt_no').value = expense.receipt_no || '';
+        document.getElementById('expense_notes').value = expense.expense_notes || '';
+        
+        // Show existing receipt preview if available (from documents table)
+        const previewDiv = document.getElementById('selectedReceiptPreview');
+        const receiptName = document.getElementById('selectedReceiptName');
+        const imagePreview = document.getElementById('selectedReceiptImagePreview');
+        
+        if (expense.documents && expense.documents.length > 0) {
+          const receipt = expense.documents.find(doc => doc.type === 'receipt') || expense.documents[0];
+          if (receipt && receipt.file_path) {
+            previewDiv.style.display = 'block';
+            const fileName = receipt.file_path.split('/').pop();
+            receiptName.textContent = receipt.name || fileName;
+            // Show link to view receipt
+            imagePreview.innerHTML = `
+              <a href="/storage/${receipt.file_path}" target="_blank" style="color:#007bff; text-decoration:underline; font-size:12px;">
+                View Current Receipt
+              </a>
+            `;
+          } else {
+            previewDiv.style.display = 'none';
+          }
+        } else {
+          previewDiv.style.display = 'none';
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Error loading expense data');
+        return;
+      }
+    }
+    
+    // Show the modal
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeExpenseModal() {
-    closeExpensePageView();
+    const modal = document.getElementById('expenseModal');
+    if (modal) {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+      currentExpenseId = null;
+    }
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('expenseModal');
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeExpenseModal();
+        }
+      });
+    }
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const expenseModal = document.getElementById('expenseModal');
+        const receiptModal = document.getElementById('receiptUploadModal');
+        if (expenseModal && expenseModal.classList.contains('show')) {
+          closeExpenseModal();
+        } else if (receiptModal && receiptModal.classList.contains('show')) {
+          closeReceiptUploadModal();
+        }
+      }
+    });
+
+    // Close receipt upload modal when clicking outside
+    const receiptModal = document.getElementById('receiptUploadModal');
+    if (receiptModal) {
+      receiptModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeReceiptUploadModal();
+        }
+      });
+    }
+  });
+
+  // Receipt Upload Modal
+  function openReceiptUploadModal() {
+    const modal = document.getElementById('receiptUploadModal');
+    if (modal) {
+      // If in edit mode and expense has a receipt, show existing receipt
+      if (currentExpenseId) {
+        // Fetch expense to check for existing receipt
+        fetch(`/expenses/${currentExpenseId}`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(res => res.json())
+        .then(expense => {
+          const existingPreview = document.getElementById('existingReceiptPreview');
+          const existingPreviewContent = document.getElementById('existingReceiptPreviewContent');
+          if (expense.documents && expense.documents.length > 0) {
+            const receipt = expense.documents.find(doc => doc.type === 'receipt') || expense.documents[0];
+            if (receipt && receipt.file_path) {
+              existingPreview.style.display = 'block';
+              existingPreviewContent.innerHTML = `
+                <a href="/storage/${receipt.file_path}" target="_blank" style="color:#007bff; text-decoration:underline; font-size:12px;">
+                  View Current Receipt
+                </a>
+              `;
+            } else {
+              existingPreview.style.display = 'none';
+            }
+          } else {
+            existingPreview.style.display = 'none';
+          }
+        })
+        .catch(err => {
+          console.error('Error loading expense:', err);
+        });
+      } else {
+        // Add mode - no existing receipt
+        document.getElementById('existingReceiptPreview').style.display = 'none';
+      }
+      
+      // Reset file input
+      document.getElementById('receiptFile').value = '';
+      document.getElementById('receiptPreview').style.display = 'none';
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeReceiptUploadModal() {
+    const modal = document.getElementById('receiptUploadModal');
+    if (modal) {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+      document.getElementById('receiptFile').value = '';
+      document.getElementById('receiptPreview').style.display = 'none';
+    }
+  }
+
+  function handleReceiptFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById('receiptPreview');
+    const previewContent = document.getElementById('receiptPreviewContent');
+    
+    // Show preview
+    preview.style.display = 'block';
+    
+    // Check if it's an image
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewContent.innerHTML = `
+          <img src="${e.target.result}" style="max-width:100%; max-height:300px; border:1px solid #ddd; border-radius:4px;" alt="Receipt preview">
+          <p style="margin-top:5px; font-size:11px; color:#666;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</p>
+        `;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For PDF and other files, show file info
+      previewContent.innerHTML = `
+        <div style="padding:20px; text-align:center; border:1px solid #ddd; border-radius:4px; background:#f9f9f9;">
+          <p style="margin:0; font-size:14px; color:#666;">📄 ${file.name}</p>
+          <p style="margin:5px 0 0 0; font-size:11px; color:#999;">${(file.size / 1024).toFixed(2)} KB</p>
+        </div>
+      `;
+    }
+  }
+
+  function confirmReceiptSelection() {
+    const fileInput = document.getElementById('receiptFile');
+    const hiddenInput = document.getElementById('receiptFileInput');
+    const previewDiv = document.getElementById('selectedReceiptPreview');
+    const receiptName = document.getElementById('selectedReceiptName');
+    const imagePreview = document.getElementById('selectedReceiptImagePreview');
+    
+    if (!fileInput.files || !fileInput.files[0]) {
+      alert('Please select a file first');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    
+    // Copy file to hidden input in expense form
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    hiddenInput.files = dataTransfer.files;
+    
+    // Show preview in expense form
+    receiptName.textContent = file.name;
+    previewDiv.style.display = 'block';
+    
+    // Show image preview if it's an image
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:150px; border:1px solid #ddd; border-radius:4px;" alt="Receipt preview">`;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      imagePreview.innerHTML = '';
+    }
+    
+    // Close modal
+    closeReceiptUploadModal();
+  }
+
+  function removeSelectedReceipt() {
+    document.getElementById('receiptFileInput').value = '';
+    document.getElementById('selectedReceiptPreview').style.display = 'none';
+    document.getElementById('selectedReceiptName').textContent = '';
+    document.getElementById('selectedReceiptImagePreview').innerHTML = '';
+  }
+
+  // Handle expense form submission to include receipt
+  document.addEventListener('DOMContentLoaded', function() {
+    const expenseForm = document.getElementById('expenseForm');
+    if (expenseForm) {
+      expenseForm.addEventListener('submit', function(e) {
+        // Form will submit normally with receipt file included if selected
+        // The receipt will be saved along with the expense in the store/update method
+      });
+    }
+  });
+
+  // Update table row click to open edit modal
+  function openExpenseDetails(id) {
+    openExpenseModal('edit', id);
   }
 
   let draggedElement = null;
@@ -741,4 +1065,5 @@
 
 @endsection
 
+</html>
 </html>

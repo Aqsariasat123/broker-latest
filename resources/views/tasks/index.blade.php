@@ -128,15 +128,21 @@
                 </td>
                   <td class="action-cell">
                     <svg class="action-expand" onclick="openEditTask({{ $task->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                      <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                      <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                      <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <!-- Maximize icon: four arrows pointing outward from center -->
+                      <!-- Top arrow -->
+                      <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <!-- Right arrow -->
+                      <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <!-- Bottom arrow -->
+                      <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <!-- Left arrow -->
+                      <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </td>
                       @foreach($selectedColumns as $col)
                       @if($col == 'task_id')
                         <td data-column="task_id">
-                          <a href="javascript:void(0)" onclick="openEditTask({{ $task->id }})" style="color:#007bff; text-decoration:underline;">{{ $task->task_id }}</a>
+                            {{ $task->task_id }}
                         </td>
                       @elseif($col == 'category')
                         <td data-column="category">{{ $task->category }}</td>
@@ -188,8 +194,8 @@
             </table>
           </div>
 
-          <div class="footer">
-            <div class="footer-left">
+          <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+             <div class="footer-left">
               <a class="btn btn-export" href="{{ route('tasks.export', array_merge(request()->query(), ['page' => $tasks->currentPage()])) }}">Export</a>
               <button class="btn btn-column" id="columnBtn" type="button">Column</button>
                <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
@@ -227,7 +233,7 @@
         <h4 id="modalTitle" style="margin: 0; font-size: 18px; font-weight: bold;">Add Task</h4>
         <div style="display: flex; gap: 10px;">
           <button type="submit" form="taskForm" class="btn-save" style="background: #f3742a; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Save</button>
-          <button type="button" class="btn-cancel" onclick="closeModal()" style="background: #000; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()" style="background: #000; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Close</button>
         </div>
       </div>
       <form id="taskForm" method="POST">
@@ -368,7 +374,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4>Column Select & Sort</h4>
-        <button type="button" class="modal-close" onclick="closeColumnModal()">×</button>
+        <button type="button" class="btn-cancel" onclick="closeColumnModal()" style="background: #000; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Close</button>
+
       </div>
       <div class="modal-body">
         <div class="column-actions">
@@ -429,72 +436,7 @@
             @endforeach
           </div>
         </form>
-        <!-- <form id="columnForm" action="{{ route('tasks.save-column-settings') }}" method="POST">
-          @csrf
-          <div class="column-selection">
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="task_id" id="col_task_id">
-              <label for="col_task_id">Task ID</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="category" id="col_category">
-              <label for="col_category">Category</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="description" id="col_description">
-              <label for="col_description">Description</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="name" id="col_name">
-              <label for="col_name">Name</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="contact_no" id="col_contact_no">
-              <label for="col_contact_no">Contact No</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="due_date" id="col_due_date">
-              <label for="col_due_date">Due Date</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="due_time" id="col_due_time">
-              <label for="col_due_time">Due Time</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="date_in" id="col_date_in">
-              <label for="col_date_in">Date In</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="assignee" id="col_assignee">
-              <label for="col_assignee">Assignee</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="task_status" id="col_task_status">
-              <label for="col_task_status">Task Status</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="date_done" id="col_date_done">
-              <label for="col_date_done">Date Done</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="repeat" id="col_repeat">
-              <label for="col_repeat">Repeat</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="frequency" id="col_frequency">
-              <label for="col_frequency">Frequency</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="rpt_date" id="col_rpt_date">
-              <label for="col_rpt_date">Rpt Date</label>
-            </div>
-            <div class="column-item">
-              <input type="checkbox" class="column-checkbox" value="rpt_stop_date" id="col_rpt_stop_date">
-              <label for="col_rpt_stop_date">Rpt Stop Date</label>
-            </div>
-          </div>
-        </form> -->
-      </div>
+     
       <div class="modal-footer">
         <button type="button" class="btn-cancel" onclick="closeColumnModal()">Cancel</button>
         <button type="button" class="btn-save" onclick="saveColumnSettings()">Save Settings</button>

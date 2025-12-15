@@ -53,7 +53,15 @@ class DocumentController extends Controller
             $validated['format'] = null;
         }
 
-        Document::create($validated);
+        $document = Document::create($validated);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Document created successfully.',
+                'document' => $document
+            ]);
+        }
 
         return redirect()->route('documents.index')->with('success', 'Document created successfully.');
     }
@@ -99,6 +107,14 @@ class DocumentController extends Controller
         }
 
         $document->update($validated);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Document updated successfully.',
+                'document' => $document
+            ]);
+        }
 
         return redirect()->route('documents.index')->with('success', 'Document updated successfully.');
     }

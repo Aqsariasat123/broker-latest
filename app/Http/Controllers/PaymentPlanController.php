@@ -42,14 +42,19 @@ class PaymentPlanController extends Controller
 
         $paymentPlans = $query->orderBy('due_date', 'asc')->paginate(15);
 
-        // Get schedules for filter
-        $schedules = Schedule::with('policy')->orderBy('created_at', 'desc')->get();
+        // Get schedules for filter and dropdown
+        $schedules = Schedule::with('policy.client')->orderBy('created_at', 'desc')->get();
+        
+        // Get frequencies from lookup
+        $frequencies = LookupValue::whereHas('lookupCategory', function($q) {
+            $q->where('name', 'Frequency');
+        })->where('active', 1)->orderBy('seq')->get();
 
         // Use TableConfigHelper for selected columns
         $config = \App\Helpers\TableConfigHelper::getConfig('payment-plans');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('payment-plans');
 
-        return view('payment-plans.index', compact('paymentPlans', 'schedules', 'selectedColumns'));
+        return view('payment-plans.index', compact('paymentPlans', 'schedules', 'frequencies', 'selectedColumns'));
     }
 
     public function create(Request $request)
@@ -90,6 +95,14 @@ class PaymentPlanController extends Controller
         // Log activity
         \App\Models\AuditLog::log('create', $paymentPlan, null, $paymentPlan->getAttributes(), 'Payment plan created: ' . ($paymentPlan->installment_label ?? 'Instalment #' . $paymentPlan->id));
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment plan created successfully.',
+                'paymentPlan' => $paymentPlan->load(['schedule.policy.client'])
+            ]);
+        }
+
         return redirect()->route('payment-plans.index')
             ->with('success', 'Payment plan created successfully.');
     }
@@ -108,8 +121,16 @@ class PaymentPlanController extends Controller
     {
         $paymentPlan->load(['schedule.policy.client']);
         
-        if (request()->expectsJson()) {
-            return response()->json($paymentPlan);
+        if (request()->expectsJson() || request()->ajax()) {
+            $schedules = Schedule::with(['policy.client'])->orderBy('created_at', 'desc')->get();
+            $frequencies = LookupValue::whereHas('lookupCategory', function($q) {
+                $q->where('name', 'Frequency');
+            })->where('active', 1)->orderBy('seq')->get();
+            return response()->json([
+                'paymentPlan' => $paymentPlan,
+                'schedules' => $schedules,
+                'frequencies' => $frequencies
+            ]);
         }
         
         $schedules = Schedule::with(['policy.client'])->orderBy('created_at', 'desc')->get();
@@ -138,6 +159,14 @@ class PaymentPlanController extends Controller
 
         // Log activity
         \App\Models\AuditLog::log('update', $paymentPlan, $oldValues, $paymentPlan->getChanges(), 'Payment plan updated: ' . ($paymentPlan->installment_label ?? 'Instalment #' . $paymentPlan->id));
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment plan updated successfully.',
+                'paymentPlan' => $paymentPlan->load(['schedule.policy.client'])
+            ]);
+        }
 
         return redirect()->route('payment-plans.index')
             ->with('success', 'Payment plan updated successfully.');

@@ -58,9 +58,15 @@
             <tr>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openStatementDetails({{ $st->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
@@ -92,7 +98,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('statements.export', array_merge(request()->query(), ['page' => $statements->currentPage()])) }}">Export</a>
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
@@ -436,7 +442,7 @@
   }
 
   // Add Statement Button
-  document.getElementById('addStatementBtn').addEventListener('click', () => openStatementPage('add'));
+  document.getElementById('addStatementBtn').addEventListener('click', () => openStatementModal('add'));
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditStatement(id) {
@@ -637,18 +643,114 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openStatementModal(mode, statement = null) {
+  function openStatementModal(mode, statementId = null) {
+    const modal = document.getElementById('statementModal');
+    const form = document.getElementById('statementForm');
+    const formMethod = document.getElementById('statementFormMethod');
+    const modalTitle = document.getElementById('statementModalTitle');
+    const deleteBtn = document.getElementById('statementDeleteBtn');
+    
     if (mode === 'add') {
-      openStatementPage('add');
-    } else if (statement && currentStatementId) {
-      openEditStatement(currentStatementId);
+      modalTitle.textContent = 'Add Statement';
+      form.reset();
+      form.action = '{{ route("statements.store") }}';
+      formMethod.innerHTML = '';
+      deleteBtn.style.display = 'none';
+      currentStatementId = null;
+    } else if (mode === 'edit' && statementId) {
+      modalTitle.textContent = 'Edit Statement';
+      form.action = '{{ route("statements.update", ":id") }}'.replace(':id', statementId);
+      formMethod.innerHTML = '@method("PUT")';
+      deleteBtn.style.display = 'inline-block';
+      currentStatementId = statementId;
+      
+      // Fetch statement data
+      fetch(`/statements/${statementId}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.statement) {
+            const s = data.statement;
+            document.getElementById('year').value = s.year || '';
+            document.getElementById('insurer_id').value = s.insurer_id || '';
+            document.getElementById('business_category').value = s.business_category || '';
+            document.getElementById('date_received').value = s.date_received ? s.date_received.split('T')[0] : '';
+            document.getElementById('amount_received').value = s.amount_received || '';
+            document.getElementById('mode_of_payment_id').value = s.mode_of_payment_id || '';
+            document.getElementById('remarks').value = s.remarks || '';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching statement data:', error);
+          alert('Error loading statement data');
+        });
     }
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeStatementModal() {
-    closeStatementPageView();
+    const modal = document.getElementById('statementModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    const form = document.getElementById('statementForm');
+    form.reset();
+    currentStatementId = null;
   }
+
+  // Close modal on outside click
+  document.getElementById('statementModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeStatementModal();
+    }
+  });
+
+  // Handle form submission
+  document.getElementById('statementForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const url = form.action;
+    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
+    
+    if (method !== 'POST') {
+      formData.append('_method', method);
+    }
+    
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        closeStatementModal();
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error saving statement');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving statement');
+    });
+  });
+
+  // Update openStatementDetails to open modal in edit mode
+  const originalOpenStatementDetails = window.openStatementDetails;
+  window.openStatementDetails = function(id) {
+    openStatementModal('edit', id);
+  };
 
   let draggedElement = null;
   let dragOverElement = null;

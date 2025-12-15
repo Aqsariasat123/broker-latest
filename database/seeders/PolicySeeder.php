@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Policy;
+use App\Models\Client;
 use Carbon\Carbon;
 
 class PolicySeeder extends Seeder
@@ -377,8 +378,83 @@ class PolicySeeder extends Seeder
             ]
         ];
 
-        foreach ($policies as $policy) {
-            Policy::create($policy);
+        foreach ($policies as $policyData) {
+            // Extract client_name and find or create client
+            $clientName = $policyData['client_name'] ?? null;
+            
+            // Remove old string fields that no longer exist
+            $fieldsToRemove = [
+                'client_name', 'insurer', 'policy_class', 'policy_plan', 
+                'policy_status', 'biz_type', 'frequency', 'pay_plan', 
+                'agency', 'policy_id'
+            ];
+            foreach ($fieldsToRemove as $field) {
+                unset($policyData[$field]);
+            }
+            
+            $clientId = null;
+            if ($clientName) {
+                // Try to find existing client by name
+                $client = Client::where('client_name', $clientName)->first();
+                
+                if (!$client) {
+                    // Create a new client if not found
+                    $nameParts = explode(' ', $clientName, 2);
+                    $firstName = $nameParts[0] ?? $clientName;
+                    $surname = $nameParts[1] ?? $clientName;
+                    
+                    $client = Client::create([
+                        'client_name' => $clientName,
+                        'first_name' => $firstName,
+                        'surname' => $surname,
+                        'client_type' => 'Individual',
+                        'clid' => 'CLI' . str_pad(Client::count() + 1, 6, '0', STR_PAD_LEFT),
+                        'email_address' => strtolower(str_replace([' ', "'"], ['.', ''], $clientName)) . '@example.com',
+                        'mobile_no' => '00000000',
+                        'source' => 'Direct',
+                        'status' => 'Active',
+                        'signed_up' => now(),
+                    ]);
+                }
+                
+                $clientId = $client->id;
+            }
+            
+            // Add client_id to policy data
+            $policyData['client_id'] = $clientId;
+            
+            // Set lookup IDs to null (they would need to be mapped from lookup values)
+            $policyData['insurer_id'] = null;
+            $policyData['policy_class_id'] = null;
+            $policyData['policy_plan_id'] = null;
+            $policyData['policy_status_id'] = null;
+            $policyData['business_type_id'] = null;
+            $policyData['frequency_id'] = null;
+            $policyData['pay_plan_lookup_id'] = null;
+            $policyData['agency_id'] = null;
+            
+            // Convert renewable from string to boolean
+            if (isset($policyData['renewable'])) {
+                $policyData['renewable'] = strtolower($policyData['renewable']) === 'yes';
+            }
+            
+            // Generate policy_code if not set (use policy_no as fallback)
+            // Make it unique by appending a counter if needed
+            if (!isset($policyData['policy_code'])) {
+                $baseCode = $policyData['policy_no'] ?? 'POL-' . uniqid();
+                $policyCode = $baseCode;
+                $counter = 1;
+                
+                // Check if policy_code already exists and make it unique
+                while (Policy::where('policy_code', $policyCode)->exists()) {
+                    $policyCode = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                
+                $policyData['policy_code'] = $policyCode;
+            }
+            
+            Policy::create($policyData);
         }
 
         $this->command->info('Successfully seeded ' . count($policies) . ' policies.');

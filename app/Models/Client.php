@@ -76,4 +76,28 @@ class Client extends Model
     {
         return $this->hasMany(Document::class, 'tied_to', 'clid');
     }
+
+    /**
+     * Get the followups for the client.
+     */
+    public function followups(): HasMany
+    {
+        return $this->hasMany(Followup::class);
+    }
+
+    /**
+     * Get the claims for the client.
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class);
+    }
+
+    /**
+     * Get the nominees for the client.
+     */
+    public function nominees(): HasMany
+    {
+        return $this->hasMany(Nominee::class);
+    }
 }

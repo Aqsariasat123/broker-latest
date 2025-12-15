@@ -132,6 +132,14 @@ class PaymentController extends Controller
             // Log activity
             \App\Models\AuditLog::log('create', $payment, null, $payment->getAttributes(), 'Payment recorded: ' . $payment->payment_reference);
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment recorded successfully.',
+                    'payment' => $payment->load(['debitNote.paymentPlan.schedule.policy.client', 'modeOfPayment'])
+                ]);
+            }
+
             return redirect()->route('payments.index')
                 ->with('success', 'Payment recorded successfully.');
         } catch (\Exception $e) {
@@ -156,8 +164,16 @@ class PaymentController extends Controller
     {
         $payment->load(['debitNote.paymentPlan.schedule.policy.client', 'modeOfPayment']);
         
-        if (request()->expectsJson()) {
-            return response()->json($payment);
+        if (request()->expectsJson() || request()->ajax()) {
+            $debitNotes = DebitNote::with(['paymentPlan.schedule.policy.client'])->orderBy('created_at', 'desc')->get();
+            $modesOfPayment = LookupValue::whereHas('lookupCategory', function($q) {
+                $q->where('name', 'Mode Of Payment (Life)');
+            })->where('active', 1)->orderBy('seq')->get();
+            return response()->json([
+                'payment' => $payment,
+                'debitNotes' => $debitNotes,
+                'modesOfPayment' => $modesOfPayment
+            ]);
         }
         
         $debitNotes = DebitNote::with(['paymentPlan.schedule.policy.client'])->orderBy('created_at', 'desc')->get();
@@ -241,6 +257,14 @@ class PaymentController extends Controller
 
         // Log activity
         \App\Models\AuditLog::log('update', $payment, $oldValues, $payment->getChanges(), 'Payment updated: ' . $payment->payment_reference);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment updated successfully.',
+                'payment' => $payment->load(['debitNote.paymentPlan.schedule.policy.client', 'modeOfPayment'])
+            ]);
+        }
 
         return redirect()->route('payments.index')
             ->with('success', 'Payment updated successfully.');

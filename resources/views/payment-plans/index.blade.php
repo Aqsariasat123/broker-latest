@@ -70,9 +70,15 @@
             <tr>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openPaymentPlanDetails({{ $plan->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
@@ -106,7 +112,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
       </div>
@@ -224,17 +230,11 @@
               <label for="frequency">Frequency</label>
               <select class="form-control" name="frequency" id="frequency">
                 <option value="">Select Frequency</option>
-                @php
-                  $frequencies = \App\Models\LookupValue::whereHas('lookupCategory', function($q) {
-                    $q->where('name', 'Frequency');
-                  })->where('active', 1)->orderBy('seq')->get();
-                @endphp
-                @foreach($frequencies as $freq)
-                  <option value="{{ $freq->name }}">{{ $freq->name }}</option>
-                @endforeach
-                <option value="Monthly">Monthly</option>
-                <option value="Quarterly">Quarterly</option>
-                <option value="Annually">Annually</option>
+                @if(isset($frequencies))
+                  @foreach($frequencies as $freq)
+                    <option value="{{ $freq->name }}">{{ $freq->name }}</option>
+                  @endforeach
+                @endif
               </select>
             </div>
             <div class="form-group">
@@ -454,9 +454,8 @@
   }
 
   // Add Payment Plan Button
-  document.getElementById('addPaymentPlanBtn').addEventListener('click', () => {
-    window.location.href = '{{ route("payment-plans.create") }}';
-  });
+  document.getElementById('addPaymentPlanBtn').addEventListener('click', () => openPaymentPlanModal('add'));
+
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditPaymentPlan(id) {
@@ -651,18 +650,113 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openPaymentPlanModal(mode, plan = null) {
+  function openPaymentPlanModal(mode, planId = null) {
+    const modal = document.getElementById('paymentPlanModal');
+    const form = document.getElementById('paymentPlanForm');
+    const formMethod = document.getElementById('paymentPlanFormMethod');
+    const modalTitle = document.getElementById('paymentPlanModalTitle');
+    const deleteBtn = document.getElementById('paymentPlanDeleteBtn');
+    
     if (mode === 'add') {
-      openPaymentPlanPage('add');
-    } else if (plan && currentPaymentPlanId) {
-      openEditPaymentPlan(currentPaymentPlanId);
+      modalTitle.textContent = 'Add Payment Plan';
+      form.reset();
+      form.action = '{{ route("payment-plans.store") }}';
+      formMethod.innerHTML = '';
+      deleteBtn.style.display = 'none';
+      currentPaymentPlanId = null;
+    } else if (mode === 'edit' && planId) {
+      modalTitle.textContent = 'Edit Payment Plan';
+      form.action = '{{ route("payment-plans.update", ":id") }}'.replace(':id', planId);
+      formMethod.innerHTML = '@method("PUT")';
+      deleteBtn.style.display = 'inline-block';
+      currentPaymentPlanId = planId;
+      
+      // Fetch payment plan data
+      fetch(`/payment-plans/${planId}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.paymentPlan) {
+            const p = data.paymentPlan;
+            document.getElementById('schedule_id').value = p.schedule_id || '';
+            document.getElementById('installment_label').value = p.installment_label || '';
+            document.getElementById('due_date').value = p.due_date ? p.due_date.split('T')[0] : '';
+            document.getElementById('amount').value = p.amount || '';
+            document.getElementById('frequency').value = p.frequency || '';
+            document.getElementById('status').value = p.status || 'pending';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching payment plan data:', error);
+          alert('Error loading payment plan data');
+        });
     }
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closePaymentPlanModal() {
-    closePaymentPlanPageView();
+    const modal = document.getElementById('paymentPlanModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    const form = document.getElementById('paymentPlanForm');
+    form.reset();
+    currentPaymentPlanId = null;
   }
+
+  // Close modal on outside click
+  document.getElementById('paymentPlanModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closePaymentPlanModal();
+    }
+  });
+
+  // Handle form submission
+  document.getElementById('paymentPlanForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const url = form.action;
+    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
+    
+    if (method !== 'POST') {
+      formData.append('_method', method);
+    }
+    
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        closePaymentPlanModal();
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error saving payment plan');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving payment plan');
+    });
+  });
+
+  // Update openPaymentPlanDetails to open modal in edit mode
+  const originalOpenPaymentPlanDetails = window.openPaymentPlanDetails;
+  window.openPaymentPlanDetails = function(id) {
+    openPaymentPlanModal('edit', id);
+  };
 
   let draggedElement = null;
   let dragOverElement = null;

@@ -69,6 +69,14 @@ class ScheduleController extends Controller
         // Log activity
         \App\Models\AuditLog::log('create', $schedule, null, $schedule->getAttributes(), 'Schedule created: ' . $schedule->schedule_no);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Schedule created successfully.',
+                'schedule' => $schedule
+            ]);
+        }
+
         return redirect()->route('schedules.index')
             ->with('success', 'Schedule created successfully.');
     }
@@ -82,6 +90,14 @@ class ScheduleController extends Controller
     public function edit(Schedule $schedule)
     {
         $policies = Policy::with('client')->orderBy('policy_no')->get();
+        
+        if (request()->ajax()) {
+            return response()->json([
+                'schedule' => $schedule,
+                'policies' => $policies
+            ]);
+        }
+        
         return view('schedules.edit', compact('schedule', 'policies'));
     }
 
@@ -107,6 +123,14 @@ class ScheduleController extends Controller
 
         // Log activity
         \App\Models\AuditLog::log('update', $schedule, $oldValues, $schedule->getChanges(), 'Schedule updated: ' . $schedule->schedule_no);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Schedule updated successfully.',
+                'schedule' => $schedule
+            ]);
+        }
 
         return redirect()->route('schedules.index')
             ->with('success', 'Schedule updated successfully.');

@@ -171,6 +171,7 @@ Route::middleware('auth')->group(function () {
     // Expenses Routes
     Route::get('/expenses/export', [ExpenseController::class, 'export'])->name('expenses.export');
     Route::post('/expenses/save-column-settings', [ExpenseController::class, 'saveColumnSettings'])->name('expenses.save-column-settings');
+    Route::post('/expenses/upload-receipt', [ExpenseController::class, 'uploadReceipt'])->name('expenses.upload-receipt');
     Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
     Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
@@ -212,6 +213,7 @@ Route::middleware('auth')->group(function () {
     // Claims Routes
     Route::get('/claims/export', [ClaimController::class, 'export'])->name('claims.export');
     Route::post('/claims/save-column-settings', [ClaimController::class, 'saveColumnSettings'])->name('claims.save-column-settings');
+    Route::post('/claims/upload-document', [ClaimController::class, 'uploadDocument'])->name('claims.upload-document');
     Route::get('/claims/{claim}/edit', [ClaimController::class, 'edit'])->name('claims.edit');
     Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
     Route::get('/claims', [ClaimController::class, 'index'])->name('claims.index');

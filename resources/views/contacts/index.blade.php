@@ -151,6 +151,39 @@
       left: 28px;
     }
     @media (max-width: 768px) { .form-row .form-group { flex: 0 0 calc((100% - 20px) / 2); } }
+    /* Checkbox styling to match clients page */
+    .checkbox-cell { text-align:center; }
+    .checkbox-cell input[type="checkbox"],
+    input[type="checkbox"].checkbox-style { 
+      width:18px; 
+      height:18px; 
+      cursor:pointer; 
+      accent-color:#f3742a; 
+      border-radius:3px;
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      border:2px solid #ccc;
+      background-color:#fff;
+      position:relative;
+    }
+    .checkbox-cell input[type="checkbox"]:checked,
+    input[type="checkbox"].checkbox-style:checked {
+      background-color:#f3742a;
+      border-color:#f3742a;
+    }
+    .checkbox-cell input[type="checkbox"]:checked::after,
+    input[type="checkbox"].checkbox-style:checked::after {
+      content:'✓';
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      color:#fff;
+      font-size:12px;
+      font-weight:bold;
+      line-height:1;
+    }
   </style>
 
 @php
@@ -262,19 +295,25 @@
               </td>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openEditContact({{ $contact->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'contact_name')
                   <td data-column="contact_name">
-                    <a href="javascript:void(0)" onclick="openEditContact({{ $contact->id }})" style="color:#007bff; text-decoration:underline;">{{ $contact->contact_name }}</a>
+                  {{ $contact->contact_name }}
                   </td>
                 @elseif($col == 'contact_id')
                   <td data-column="contact_id">
-                    <a href="javascript:void(0)" onclick="openEditContact({{ $contact->id }})" style="color:#007bff; text-decoration:underline;">{{ $contact->contact_id }}</a>
+                    {{ $contact->contact_id }}
                   </td>
                 @elseif($col == 'contact_no')
                   <td data-column="contact_no">{{ $contact->contact_no ?? '##########' }}</td>
@@ -338,7 +377,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('contacts.export', array_merge(request()->query(), ['page' => $contacts->currentPage()])) }}">Export</a>
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
@@ -411,7 +450,9 @@
               <div style="display: flex; gap: 6px;">
                 <input id="contact_no" name="contact_no" class="form-control" style="flex: 1; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
                 <input id="wa" name="wa" placeholder="WA" class="form-control" style="width: 70px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
-                <input type="checkbox" id="wa_checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #f3742a; margin-top: 2px;">
+                <div class="checkbox-cell" style="display: flex; align-items: center; margin-top: 2px;">
+                  <input type="checkbox" id="wa_checkbox" class="checkbox-style">
+                </div>
               </div>
             </div>
             <div>

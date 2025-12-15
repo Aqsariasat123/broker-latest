@@ -37,6 +37,12 @@
       <table id="documentsTable">
         <thead>
           <tr>
+            <th style="text-align:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
+                <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff"/>
+              </svg>
+            </th>
             <th>Action</th>
             @foreach($selectedColumns as $col)
               @if(isset($columnDefinitions[$col]))
@@ -48,17 +54,35 @@
         <tbody>
           @foreach($documents as $doc)
             <tr>
+              <td class="bell-cell">
+                <div style="display:flex; align-items:center; justify-content:center;">
+                  <div class="status-indicator normal" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:transparent;"></div>
+                </div>
+              </td>
               <td class="action-cell">
-                <svg class="action-expand" onclick="openDocumentDetails({{ $doc->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg class="action-expand" onclick="openDocumentDetails({{ $doc->id }})" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="action-delete" onclick="if(confirm('Delete this document?')) { deleteDocumentFromTable({{ $doc->id }}); }" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <!-- Trash icon -->
+                  <path d="M3 6H5H21" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 11V17" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 11V17" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'doc_id')
                   <td data-column="doc_id">
-                    <a href="javascript:void(0)" onclick="openDocumentDetails({{ $doc->id }})" style="color:#007bff; text-decoration:underline;">{{ $doc->doc_id }}</a>
+                  {{ $doc->doc_id }}
                   </td>
                 @elseif($col == 'tied_to')
                   <td data-column="tied_to">{{ $doc->tied_to ?? '-' }}</td>
@@ -94,7 +118,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('documents.export') }}">Export</a>
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
@@ -168,9 +192,28 @@
     </div>
   </div>
 
-  <!-- Add/Edit Document Modal (hidden, used for form structure) -->
+  <!-- Document Details Modal -->
+  <div class="modal" id="documentDetailsModal">
+    <div class="modal-content" style="max-width:800px;">
+      <div class="modal-header">
+        <h4 id="documentDetailsModalTitle">Document Details</h4>
+        <button type="button" class="modal-close" onclick="closeDocumentDetailsModal()">×</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div id="documentDetailsContent" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:15px;">
+          <!-- Content will be loaded via JavaScript -->
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:15px 20px; border-top:1px solid #ddd; background:#fff; display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn-edit" id="editDocumentFromDetailsBtn" onclick="openDocumentModal('edit', currentDocumentId)" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px; display:none;">Edit</button>
+        <button type="button" class="btn-cancel" onclick="closeDocumentDetailsModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Document Modal -->
   <div class="modal" id="documentModal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width:800px;">
       <div class="modal-header">
         <h4 id="documentModalTitle">Add Document</h4>
         <button type="button" class="modal-close" onclick="closeDocumentModal()">×</button>
@@ -178,52 +221,52 @@
       <form id="documentForm" method="POST" action="{{ route('documents.store') }}" enctype="multipart/form-data">
         @csrf
         <div id="documentFormMethod" style="display:none;"></div>
-        <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tied_to">Tied To</label>
-              <input type="text" class="form-control" name="tied_to" id="tied_to">
+        <div class="modal-body" style="padding:20px;">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="tied_to" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Tied To</label>
+              <input type="text" class="form-control" name="tied_to" id="tied_to" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
-            <div class="form-group">
-              <label for="name">Name *</label>
-              <input type="text" class="form-control" name="name" id="name" required>
+            <div class="form-group" style="flex:1;">
+              <label for="name" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Name *</label>
+              <input type="text" class="form-control" name="name" id="name" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
-            <div class="form-group">
-              <label for="group">Group</label>
-              <input type="text" class="form-control" name="group" id="group">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="type">Type</label>
-              <input type="text" class="form-control" name="type" id="type">
-            </div>
-            <div class="form-group">
-              <label for="date_added">Date Added</label>
-              <input type="date" class="form-control" name="date_added" id="date_added">
-            </div>
-            <div class="form-group">
-              <label for="year">Year</label>
-              <input type="text" class="form-control" name="year" id="year">
+            <div class="form-group" style="flex:1;">
+              <label for="group" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Group</label>
+              <input type="text" class="form-control" name="group" id="group" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
           </div>
-          <div class="form-row">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="type" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Type</label>
+              <input type="text" class="form-control" name="type" id="type" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="date_added" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Date Added</label>
+              <input type="date" class="form-control" name="date_added" id="date_added" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="year" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Year</label>
+              <input type="text" class="form-control" name="year" id="year" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+          </div>
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
-              <label for="file">File</label>
-              <input type="file" class="form-control" name="file" id="file" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+              <label for="file" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">File</label>
+              <input type="file" class="form-control" name="file" id="file" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
             </div>
           </div>
-          <div class="form-row">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
-              <label for="notes">Notes</label>
-              <textarea class="form-control" name="notes" id="notes" rows="2"></textarea>
+              <label for="notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Notes</label>
+              <textarea class="form-control" name="notes" id="notes" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeDocumentModal()">Cancel</button>
-          <button type="button" class="btn-delete" id="documentDeleteBtnModal" style="display: none;" onclick="deleteDocument()">Delete</button>
-          <button type="submit" class="btn-save">Save</button>
+        <div class="modal-footer" style="padding:15px 20px; border-top:1px solid #ddd; background:#fff; display:flex; justify-content:center; gap:10px;">
+          <button type="button" class="btn-cancel" onclick="closeDocumentModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
+          <button type="button" class="btn-delete" id="documentDeleteBtnModal" style="display: none; background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;" onclick="deleteDocument()">Delete</button>
+          <button type="submit" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
         </div>
       </form>
     </div>
@@ -294,7 +337,7 @@
     return `${date.getDate()}-${months[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`;
   }
 
-  // Open document details (full page view) - MUST be defined before HTML onclick handlers
+  // Open document details modal
   async function openDocumentDetails(id) {
     try {
       const res = await fetch(`/documents/${id}`, {
@@ -307,157 +350,168 @@
       const doc = await res.json();
       currentDocumentId = id;
       
-      // Get all required elements
-      const documentPageName = document.getElementById('documentPageName');
-      const documentPageTitle = document.getElementById('documentPageTitle');
-      const clientsTableView = document.getElementById('clientsTableView');
-      const documentPageView = document.getElementById('documentPageView');
-      const documentDetailsPageContent = document.getElementById('documentDetailsPageContent');
-      const documentFormPageContent = document.getElementById('documentFormPageContent');
-      const editDocumentFromPageBtn = document.getElementById('editDocumentFromPageBtn');
-      const closeDocumentPageBtn = document.getElementById('closeDocumentPageBtn');
-      
-      if (!documentPageName || !documentPageTitle || !clientsTableView || !documentPageView || 
-          !documentDetailsPageContent || !documentFormPageContent) {
-        console.error('Required elements not found');
-        alert('Error: Page elements not found');
-        return;
-      }
-      
       // Set document name in header
       const documentName = doc.name || doc.doc_id || 'Unknown';
-      documentPageName.textContent = documentName;
-      documentPageTitle.textContent = 'Document';
+      document.getElementById('documentDetailsModalTitle').textContent = 'Document Details - ' + documentName;
       
-      populateDocumentDetails(doc);
+      populateDocumentDetailsModal(doc);
       
-      // Hide table view, show page view
-      clientsTableView.classList.add('hidden');
-      documentPageView.style.display = 'block';
-      documentPageView.classList.add('show');
-      documentDetailsPageContent.style.display = 'block';
-      documentFormPageContent.style.display = 'none';
-      if (editDocumentFromPageBtn) editDocumentFromPageBtn.style.display = 'inline-block';
-      if (closeDocumentPageBtn) closeDocumentPageBtn.style.display = 'inline-block';
+      // Show edit button
+      const editBtn = document.getElementById('editDocumentFromDetailsBtn');
+      if (editBtn) editBtn.style.display = 'inline-block';
+      
+      // Show modal
+      const modal = document.getElementById('documentDetailsModal');
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
     } catch (e) {
       console.error(e);
       alert('Error loading document details: ' + e.message);
     }
   }
 
-  // Populate document details view
-  function populateDocumentDetails(doc) {
+  function closeDocumentDetailsModal() {
+    const modal = document.getElementById('documentDetailsModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    currentDocumentId = null;
+  }
+
+  // Populate document details modal
+  function populateDocumentDetailsModal(doc) {
     const content = document.getElementById('documentDetailsContent');
     if (!content) return;
 
     const fileLink = doc.file_path ? `<a href="{{ asset('storage') }}/${doc.file_path}" target="_blank" style="color:#007bff; text-decoration:underline;">View File</a>` : '-';
 
-    const col1 = `
-      <div class="detail-section">
-        <div class="detail-section-header">DOCUMENT BASIC INFO</div>
-        <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Document ID</span>
-            <div class="detail-value">${doc.doc_id || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Name</span>
-            <div class="detail-value">${doc.name || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Tied To</span>
-            <div class="detail-value">${doc.tied_to || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Group</span>
-            <div class="detail-value">${doc.group || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Type</span>
-            <div class="detail-value">${doc.type || '-'}</div>
-          </div>
+    content.innerHTML = `
+      <div style="background:#f5f5f5; padding:12px; border-radius:4px;">
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Document ID:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.doc_id || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Name:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.name || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Tied To:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.tied_to || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Group:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.group || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Type:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.type || '-'}</div>
+        </div>
+      </div>
+      <div style="background:#f5f5f5; padding:12px; border-radius:4px;">
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Format:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.format || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Date Added:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${formatDate(doc.date_added)}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Year:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${doc.year || '-'}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">File:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px;">${fileLink}</div>
+        </div>
+        <div style="margin-top:15px;">
+          <span style="font-size:12px; color:#666; font-weight:500;">Notes:</span>
+          <div style="font-size:13px; color:#000; margin-top:4px; white-space:pre-wrap;">${doc.notes || '-'}</div>
         </div>
       </div>
     `;
-
-    const col2 = `
-      <div class="detail-section">
-        <div class="detail-section-header">DOCUMENT DETAILS</div>
-        <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Format</span>
-            <div class="detail-value">${doc.format || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date Added</span>
-            <div class="detail-value">${formatDate(doc.date_added)}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Year</span>
-            <div class="detail-value">${doc.year || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">File</span>
-            <div class="detail-value">${fileLink}</div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const col3 = `
-      <div class="detail-section">
-        <div class="detail-section-header">NOTES</div>
-        <div class="detail-section-body">
-          <div class="detail-row" style="align-items:flex-start;">
-            <span class="detail-label">Notes</span>
-            <textarea class="detail-value" style="min-height:200px; resize:vertical; flex:1; font-size:11px; padding:4px 6px;" readonly>${doc.notes || ''}</textarea>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const col4 = `
-      <div class="detail-section">
-        <div class="detail-section-header"></div>
-        <div class="detail-section-body">
-        </div>
-      </div>
-    `;
-
-    content.innerHTML = col1 + col2 + col3 + col4;
   }
 
-  // Open document page (Add or Edit)
-  async function openDocumentPage(mode) {
+  // Open document modal (Add or Edit)
+  function openDocumentModal(mode, id = null) {
+    const modal = document.getElementById('documentModal');
+    const form = document.getElementById('documentForm');
+    const formMethod = document.getElementById('documentFormMethod');
+    const deleteBtn = document.getElementById('documentDeleteBtnModal');
+    const title = document.getElementById('documentModalTitle');
+    
     if (mode === 'add') {
-      openDocumentForm('add');
-    } else {
-      if (currentDocumentId) {
-        openEditDocument(currentDocumentId);
-      }
-    }
-  }
-
-  // Add Document Button
-  document.getElementById('addDocumentBtn').addEventListener('click', () => openDocumentPage('add'));
-  document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
-
-  async function openEditDocument(id) {
-    try {
-      const res = await fetch(`/documents/${id}/edit`, {
+      currentDocumentId = null;
+      title.textContent = 'Add Document';
+      form.action = '{{ route("documents.store") }}';
+      formMethod.innerHTML = '';
+      if (deleteBtn) deleteBtn.style.display = 'none';
+      form.reset();
+    } else if (id) {
+      // Load document data for edit
+      fetch(`/documents/${id}/edit`, {
         headers: {
           'Accept': 'application/json',
           'X-Requested-With': 'XMLHttpRequest'
         }
+      })
+      .then(res => res.json())
+      .then(doc => {
+        currentDocumentId = id;
+        title.textContent = 'Edit Document';
+        form.action = `/documents/${id}`;
+        formMethod.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+        if (deleteBtn) deleteBtn.style.display = 'inline-block';
+        
+        // Populate form fields
+        document.getElementById('tied_to').value = doc.tied_to || '';
+        document.getElementById('name').value = doc.name || '';
+        document.getElementById('group').value = doc.group || '';
+        document.getElementById('type').value = doc.type || '';
+        document.getElementById('date_added').value = doc.date_added ? doc.date_added.substring(0, 10) : '';
+        document.getElementById('year').value = doc.year || '';
+        document.getElementById('notes').value = doc.notes || '';
+        
+        // Show modal
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      })
+      .catch(e => {
+        console.error(e);
+        alert('Error loading document data');
       });
-      if (!res.ok) throw new Error('Network error');
-      const doc = await res.json();
-      currentDocumentId = id;
-      openDocumentForm('edit', doc);
-    } catch (e) {
-      console.error(e);
-      alert('Error loading document data');
+      return;
     }
+    
+    // Show modal for add mode
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDocumentModal() {
+    const modal = document.getElementById('documentModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    currentDocumentId = null;
+  }
+
+  // Add Document Button
+  document.getElementById('addDocumentBtn').addEventListener('click', () => openDocumentModal('add'));
+  document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
+
+  // Legacy functions for backward compatibility
+  async function openDocumentPage(mode) {
+    if (mode === 'add') {
+      openDocumentModal('add');
+    } else {
+      if (currentDocumentId) {
+        openDocumentModal('edit', currentDocumentId);
+      }
+    }
+  }
+
+  async function openEditDocument(id) {
+    openDocumentModal('edit', id);
   }
 
   function openDocumentForm(mode, doc = null) {
@@ -636,18 +690,93 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openDocumentModal(mode, doc = null) {
-    if (mode === 'add') {
-      openDocumentPage('add');
-    } else if (doc && currentDocumentId) {
-      openEditDocument(currentDocumentId);
-    }
+  function deleteDocumentFromTable(id) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/documents/${id}`;
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = '{{ csrf_token() }}';
+    form.appendChild(csrf);
+    const method = document.createElement('input');
+    method.type = 'hidden';
+    method.name = '_method';
+    method.value = 'DELETE';
+    form.appendChild(method);
+    document.body.appendChild(form);
+    form.submit();
   }
 
-  function closeDocumentModal() {
-    closeDocumentPageView();
-  }
+  // Handle form submission
+  document.getElementById('documentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const isEdit = form.action.includes('/documents/') && form.action !== '{{ route("documents.store") }}';
+    
+    if (isEdit) {
+      formData.append('_method', 'PUT');
+    }
+    
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success || response.status === 200) {
+          alert(isEdit ? 'Document updated successfully!' : 'Document created successfully!');
+          closeDocumentModal();
+          location.reload();
+        } else {
+          alert('Error: ' + (result.message || 'Unknown error'));
+        }
+      } else {
+        const errorData = await response.json();
+        if (errorData.errors) {
+          let errorMsg = 'Validation errors:\n';
+          Object.keys(errorData.errors).forEach(key => {
+            errorMsg += errorData.errors[key][0] + '\n';
+          });
+          alert(errorMsg);
+        } else {
+          alert('Error saving document: ' + (errorData.message || 'Unknown error'));
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error saving document: ' + error.message);
+    }
+  });
+
+  // Close modals on ESC key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeDocumentModal();
+      closeDocumentDetailsModal();
+    }
+  });
+
+  // Close modals when clicking outside
+  document.getElementById('documentModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDocumentModal();
+    }
+  });
+
+  document.getElementById('documentDetailsModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDocumentDetailsModal();
+    }
+  });
 
   let draggedElement = null;
   let dragOverElement = null;

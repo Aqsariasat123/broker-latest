@@ -93,4 +93,28 @@ class LifeProposal extends Model
         $daysUntilOffer = $today->diffInDays($offerDate, false);
         return $daysUntilOffer >= 0 && $daysUntilOffer <= 7;
     }
+
+    /**
+     * Get the contact that owns the life proposal.
+     */
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+    /**
+     * Get the medical record for the life proposal.
+     */
+    public function medical()
+    {
+        return $this->hasOne(Medical::class);
+    }
+
+    /**
+     * Get the followups for the life proposal.
+     */
+    public function followups()
+    {
+        return $this->hasMany(Followup::class);
+    }
 }

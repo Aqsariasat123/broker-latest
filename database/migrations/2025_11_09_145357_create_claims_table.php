@@ -10,20 +10,19 @@ class CreateClaimsTable extends Migration
     {
         Schema::create('claims', function (Blueprint $table) {
             $table->id();
-            $table->string('claim_code')->unique();
-            $table->foreignId('policy_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('vehicle_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('claim_id')->unique();
+            $table->foreignId('policy_id')->nullable()->after('id')->constrained('policies')->nullOnDelete();
+            $table->foreignId('client_id')->nullable()->after('policy_id')->constrained('clients')->nullOnDelete();
+            $table->foreignId('vehicle_id')->nullable()->after('client_id')->constrained('vehicles')->nullOnDelete();
             $table->date('loss_date')->nullable();
             $table->date('claim_date')->nullable();
             $table->decimal('claim_amount', 15, 2)->nullable();
-            $table->string('claim_summary')->nullable();
-            $table->foreignId('claim_status_id')->nullable()->constrained('lookup_values')->nullOnDelete();
+            $table->text('claim_summary')->nullable();
+            $table->string('claim_stage')->nullable();
+            $table->string('status')->nullable();
             $table->date('close_date')->nullable();
             $table->decimal('paid_amount', 15, 2)->nullable();
-            $table->string('claim_form_path')->nullable();
-            $table->string('other_documents_path')->nullable();
-            $table->text('settlement_notes')->nullable();
+            $table->text('settlment_notes')->nullable();
             $table->timestamps();
         });
     }

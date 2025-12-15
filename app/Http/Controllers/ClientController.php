@@ -184,6 +184,16 @@ class ClientController extends Controller
             ]);
         }
 
+        // If this is an AJAX request, return JSON
+        if ($request->expectsJson() || $request->ajax()) {
+            $client->load('documents');
+            return response()->json([
+                'success' => true,
+                'message' => 'Client created successfully.',
+                'client' => $client
+            ]);
+        }
+
         return redirect()->route('clients.index')->with('success', 'Client created successfully.');
     }
 
@@ -348,6 +358,16 @@ class ClientController extends Controller
         $validated['client_name'] = trim($validated['first_name'] . ' ' . ($validated['other_names'] ?? '') . ' ' . $validated['surname']);
 
         $client->update($validated);
+
+        // If this is an AJAX request, return JSON
+        if ($request->expectsJson() || $request->ajax()) {
+            $client->load('documents');
+            return response()->json([
+                'success' => true,
+                'message' => 'Client updated successfully.',
+                'client' => $client
+            ]);
+        }
 
         return redirect()->route('clients.index')->with('success', 'Client updated successfully.');
     }
@@ -567,15 +587,15 @@ class ClientController extends Controller
     private function getLookupData()
     {
         return [
-            'client_types' => ['Individual', 'Business', 'Company', 'Organization'],
-            'sources' => LookupCategory::where('name', 'Source')->first()->values()->where('active', true)->pluck('name')->toArray(),
-            'client_statuses' => ['Active', 'Inactive', 'Suspended', 'Pending'],
-            'districts' => ['Victoria', 'Beau Vallon', 'Mont Fleuri', 'Cascade', 'Providence', 'Grand Anse', 'Anse Aux Pins'],
-            'islands' => LookupCategory::where('name', 'Island')->first()->values()->where('active', true)->pluck('name')->toArray(),
-            'countries' => LookupCategory::where('name', 'Issuing Country')->first()->values()->where('active', true)->pluck('name')->toArray(),
-            'income_sources' => LookupCategory::where('name', 'Income Source')->first()->values()->where('active', true)->pluck('name')->toArray(),
-            'salutations' => LookupCategory::where('name', 'Salutation')->first()->values()->where('active', true)->pluck('name')->toArray(),
-            'occupations' => ['Accountant', 'Driver', 'Customer Service Officer', 'Real Estate Agent', 'Rock Breaker', 'Payroll Officer', 'Boat Charter', 'Contractor', 'Technician', 'Paymaster', 'Human Resources Manager']
+            'client_types' => LookupCategory::where('name', 'Client Type')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? ['Individual', 'Business', 'Company', 'Organization'],
+            'sources' => LookupCategory::where('name', 'Source')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? [],
+            'client_statuses' => LookupCategory::where('name', 'Client Status')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? ['Active', 'Inactive', 'Suspended', 'Pending'],
+            'districts' => LookupCategory::where('name', 'District')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? ['Victoria', 'Beau Vallon', 'Mont Fleuri', 'Cascade', 'Providence', 'Grand Anse', 'Anse Aux Pins'],
+            'islands' => LookupCategory::where('name', 'Island')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? [],
+            'countries' => LookupCategory::where('name', 'Issuing Country')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? [],
+            'income_sources' => LookupCategory::where('name', 'Income Source')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? [],
+            'salutations' => LookupCategory::where('name', 'Salutation')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? [],
+            'occupations' => LookupCategory::where('name', 'Occupation')->first()?->values()->where('active', true)->orderBy('seq')->pluck('name')->toArray() ?? ['Accountant', 'Driver', 'Customer Service Officer', 'Real Estate Agent', 'Rock Breaker', 'Payroll Officer', 'Boat Charter', 'Contractor', 'Technician', 'Paymaster', 'Human Resources Manager']
         ];
     }
 }

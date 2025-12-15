@@ -58,9 +58,15 @@
             <tr>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openCommissionDetails({{ $com->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
@@ -110,7 +116,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('commissions.export', array_merge(request()->query(), ['page' => $commissions->currentPage()])) }}">Export</a>
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
@@ -533,7 +539,7 @@
   }
 
   // Add Commission Button
-  document.getElementById('addCommissionBtn').addEventListener('click', () => openCommissionPage('add'));
+  document.getElementById('addCommissionBtn').addEventListener('click', () => openCommissionModal('add'));
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditCommission(id) {
@@ -732,18 +738,122 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openCommissionModal(mode, commission = null) {
+  function openCommissionModal(mode, commissionId = null) {
+    const modal = document.getElementById('commissionModal');
+    const form = document.getElementById('commissionForm');
+    const formMethod = document.getElementById('commissionFormMethod');
+    const modalTitle = document.getElementById('commissionModalTitle');
+    const deleteBtn = document.getElementById('commissionDeleteBtn');
+    
     if (mode === 'add') {
-      openCommissionPage('add');
-    } else if (commission && currentCommissionId) {
-      openEditCommission(currentCommissionId);
+      modalTitle.textContent = 'Add Commission';
+      form.reset();
+      form.action = '{{ route("commissions.store") }}';
+      formMethod.innerHTML = '';
+      deleteBtn.style.display = 'none';
+      currentCommissionId = null;
+    } else if (mode === 'edit' && commissionId) {
+      modalTitle.textContent = 'Edit Commission';
+      form.action = '{{ route("commissions.update", ":id") }}'.replace(':id', commissionId);
+      formMethod.innerHTML = '@method("PUT")';
+      deleteBtn.style.display = 'inline-block';
+      currentCommissionId = commissionId;
+      
+      // Fetch commission data
+      fetch(`/commissions/${commissionId}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.commission) {
+            const c = data.commission;
+            document.getElementById('policy_number').value = c.policy_number || '';
+            document.getElementById('client_name').value = c.client_name || '';
+            document.getElementById('insurer_id').value = c.insurer_id || '';
+            document.getElementById('grouping').value = c.grouping || '';
+            document.getElementById('basic_premium').value = c.basic_premium || '';
+            document.getElementById('rate').value = c.rate || '';
+            document.getElementById('amount_due').value = c.amount_due || '';
+            document.getElementById('payment_status_id').value = c.payment_status_id || '';
+            document.getElementById('amount_rcvd').value = c.amount_rcvd || '';
+            document.getElementById('date_rcvd').value = c.date_rcvd ? c.date_rcvd.split('T')[0] : '';
+            document.getElementById('state_no').value = c.state_no || '';
+            document.getElementById('mode_of_payment_id').value = c.mode_of_payment_id || '';
+            document.getElementById('variance').value = c.variance || '';
+            document.getElementById('reason').value = c.reason || '';
+            document.getElementById('date_due').value = c.date_due ? c.date_due.split('T')[0] : '';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching commission data:', error);
+          alert('Error loading commission data');
+        });
     }
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeCommissionModal() {
-    closeCommissionPageView();
+    const modal = document.getElementById('commissionModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    const form = document.getElementById('commissionForm');
+    form.reset();
+    currentCommissionId = null;
   }
+
+  // Close modal on outside click
+  document.getElementById('commissionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCommissionModal();
+    }
+  });
+
+  // Handle form submission
+  document.getElementById('commissionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const url = form.action;
+    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
+    
+    if (method !== 'POST') {
+      formData.append('_method', method);
+    }
+    
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        closeCommissionModal();
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error saving commission');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving commission');
+    });
+  });
+
+  // Update openCommissionDetails to open modal in edit mode
+  const originalOpenCommissionDetails = window.openCommissionDetails;
+  window.openCommissionDetails = function(id) {
+    openCommissionModal('edit', id);
+  };
 
   let draggedElement = null;
   let dragOverElement = null;

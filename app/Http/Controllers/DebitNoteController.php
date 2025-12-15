@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DebitNote;
 use App\Models\PaymentPlan;
 use App\Models\LookupValue;
-use App\Services\EncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -47,8 +46,8 @@ class DebitNoteController extends Controller
 
         $debitNotes = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        // Get payment plans for filter
-        $paymentPlans = PaymentPlan::with('schedule.policy')->orderBy('created_at', 'desc')->get();
+        // Get payment plans for filter and dropdown
+        $paymentPlans = PaymentPlan::with('schedule.policy.client')->orderBy('created_at', 'desc')->get();
 
         // Use TableConfigHelper for selected columns
         $config = \App\Helpers\TableConfigHelper::getConfig('debit-notes');
@@ -84,19 +83,43 @@ class DebitNoteController extends Controller
             'document' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx',
         ]);
 
-        // Handle file upload with encryption
+        $debitNote = DebitNote::create($validated);
+
+        // Handle file upload - store in documents table
         if ($request->hasFile('document')) {
             $file = $request->file('document');
-            // Store encrypted file in secure location
-            $path = EncryptionService::storeEncryptedFile($file, 'encrypted', 'debit-notes');
-            $validated['document_path'] = $path;
-            $validated['is_encrypted'] = true; // Flag to indicate encrypted storage
-        }
+            $filename = 'debit_note_' . $debitNote->id . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('documents', $filename, 'public');
+            
+            // Generate unique DOC ID
+            $latest = \App\Models\Document::orderBy('id', 'desc')->first();
+            $nextId = $latest && $latest->doc_id ? (int)str_replace('DOC', '', $latest->doc_id) + 1 : 1001;
+            $docId = 'DOC' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-        $debitNote = DebitNote::create($validated);
+            // Store in documents table - tie to debit note using debit_note_no
+            \App\Models\Document::create([
+                'doc_id' => $docId,
+                'tied_to' => $debitNote->debit_note_no,
+                'name' => 'Debit Note Document',
+                'group' => 'Debit Note Document',
+                'type' => 'debit_note',
+                'format' => $file->getClientOriginalExtension(),
+                'date_added' => now(),
+                'year' => now()->format('Y'),
+                'file_path' => $path,
+            ]);
+        }
 
         // Log activity
         \App\Models\AuditLog::log('create', $debitNote, null, $debitNote->getAttributes(), 'Debit note created: ' . $debitNote->debit_note_no);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Debit note created successfully.',
+                'debitNote' => $debitNote->load(['paymentPlan.schedule.policy.client'])
+            ]);
+        }
 
         return redirect()->route('debit-notes.index')
             ->with('success', 'Debit note created successfully.');
@@ -105,6 +128,12 @@ class DebitNoteController extends Controller
     public function show(Request $request, DebitNote $debitNote)
     {
         $debitNote->load(['paymentPlan.schedule.policy.client', 'payments']);
+        
+        // Load documents for this debit note
+        $documents = \App\Models\Document::where('tied_to', $debitNote->debit_note_no)
+            ->where('group', 'Debit Note Document')
+            ->get();
+        $debitNote->documents = $documents;
         
         if ($request->expectsJson()) {
             return response()->json($debitNote);
@@ -116,8 +145,18 @@ class DebitNoteController extends Controller
     {
         $debitNote->load(['paymentPlan.schedule.policy.client']);
         
-        if (request()->expectsJson()) {
-            return response()->json($debitNote);
+        if (request()->expectsJson() || request()->ajax()) {
+            // Load documents for this debit note
+            $documents = \App\Models\Document::where('tied_to', $debitNote->debit_note_no)
+                ->where('group', 'Debit Note Document')
+                ->get();
+            $debitNote->documents = $documents;
+            
+            $paymentPlans = PaymentPlan::with(['schedule.policy.client'])->orderBy('created_at', 'desc')->get();
+            return response()->json([
+                'debitNote' => $debitNote,
+                'paymentPlans' => $paymentPlans
+            ]);
         }
         
         $paymentPlans = PaymentPlan::with(['schedule.policy.client'])->orderBy('created_at', 'desc')->get();
@@ -135,25 +174,42 @@ class DebitNoteController extends Controller
             'document' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx',
         ]);
 
-        // Handle file upload with encryption
+        // Handle file upload - store in documents table
         if ($request->hasFile('document')) {
-            // Delete old encrypted file if exists
-            if ($debitNote->document_path) {
-                if ($debitNote->is_encrypted ?? false) {
-                    EncryptionService::deleteEncryptedFile($debitNote->document_path, 'encrypted');
-                } else {
-                    // Legacy unencrypted file
-                    if (Storage::disk('public')->exists($debitNote->document_path)) {
-                        Storage::disk('public')->delete($debitNote->document_path);
-                    }
+            // Delete old documents if exists
+            $oldDocuments = \App\Models\Document::where('tied_to', $debitNote->debit_note_no)
+                ->where('group', 'Debit Note Document')
+                ->where('type', 'debit_note')
+                ->get();
+            
+            foreach ($oldDocuments as $oldDoc) {
+                if ($oldDoc->file_path && Storage::disk('public')->exists($oldDoc->file_path)) {
+                    Storage::disk('public')->delete($oldDoc->file_path);
                 }
+                $oldDoc->delete();
             }
             
             $file = $request->file('document');
-            // Store encrypted file in secure location
-            $path = EncryptionService::storeEncryptedFile($file, 'encrypted', 'debit-notes');
-            $validated['document_path'] = $path;
-            $validated['is_encrypted'] = true;
+            $filename = 'debit_note_' . $debitNote->id . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('documents', $filename, 'public');
+            
+            // Generate unique DOC ID
+            $latest = \App\Models\Document::orderBy('id', 'desc')->first();
+            $nextId = $latest && $latest->doc_id ? (int)str_replace('DOC', '', $latest->doc_id) + 1 : 1001;
+            $docId = 'DOC' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+
+            // Store in documents table - tie to debit note using debit_note_no
+            \App\Models\Document::create([
+                'doc_id' => $docId,
+                'tied_to' => $debitNote->debit_note_no,
+                'name' => 'Debit Note Document',
+                'group' => 'Debit Note Document',
+                'type' => 'debit_note',
+                'format' => $file->getClientOriginalExtension(),
+                'date_added' => now(),
+                'year' => now()->format('Y'),
+                'file_path' => $path,
+            ]);
         }
 
         $oldValues = $debitNote->getAttributes();
@@ -161,6 +217,14 @@ class DebitNoteController extends Controller
 
         // Log activity
         \App\Models\AuditLog::log('update', $debitNote, $oldValues, $debitNote->getChanges(), 'Debit note updated: ' . $debitNote->debit_note_no);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Debit note updated successfully.',
+                'debitNote' => $debitNote->load(['paymentPlan.schedule.policy.client'])
+            ]);
+        }
 
         return redirect()->route('debit-notes.index')
             ->with('success', 'Debit note updated successfully.');

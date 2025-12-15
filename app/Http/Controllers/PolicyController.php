@@ -1277,7 +1277,7 @@ class PolicyController extends Controller
                 ['id' => null, 'name' => 'Direct'],
                 ['id' => null, 'name' => 'Transfer']
             ],
-            'term_units' => [
+            'term_units' => $getLookupValues('Term Units') ?: [
                 ['id' => null, 'name' => 'Year'],
                 ['id' => null, 'name' => 'Month'],
                 ['id' => null, 'name' => 'Days']
@@ -1293,6 +1293,12 @@ class PolicyController extends Controller
                 ['id' => null, 'name' => 'Full'],
                 ['id' => null, 'name' => 'Instalments'],
                 ['id' => null, 'name' => 'Regular']
+            ],
+            'document_types' => $getLookupValues('Document Type') ?: [
+                ['id' => null, 'name' => 'Policy Document'],
+                ['id' => null, 'name' => 'Certificate'],
+                ['id' => null, 'name' => 'Claim Document'],
+                ['id' => null, 'name' => 'Other Document']
             ],
             'agencies' => $getLookupValues('APL Agency'),
             'channels' => $getLookupValues('Channel')

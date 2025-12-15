@@ -138,9 +138,19 @@ class LookupTableSeeder extends Seeder
                 ['seq' => 3, 'name' => 'Medium', 'active' => true],
                 ['seq' => 4, 'name' => 'Low', 'active' => true],
             ],
+            'Rank' => [
+                ['seq' => 1, 'name' => 'VIP', 'active' => true],
+                ['seq' => 2, 'name' => 'High', 'active' => true],
+                ['seq' => 3, 'name' => 'Medium', 'active' => true],
+                ['seq' => 4, 'name' => 'Low', 'active' => true],
+                ['seq' => 5, 'name' => 'Warm', 'active' => true],
+            ],
             'Client Status' => [
                 ['seq' => 1, 'name' => 'Active', 'active' => true],
-                ['seq' => 2, 'name' => 'Dormant', 'active' => true],
+                ['seq' => 2, 'name' => 'Inactive', 'active' => true],
+                ['seq' => 3, 'name' => 'Suspended', 'active' => true],
+                ['seq' => 4, 'name' => 'Pending', 'active' => true],
+                ['seq' => 5, 'name' => 'Dormant', 'active' => true],
             ],
             'Issuing Country' => [
                 ['seq' => 1, 'name' => 'Seychelles', 'code' => 'SEY', 'active' => true],
@@ -246,12 +256,13 @@ class LookupTableSeeder extends Seeder
                 ['seq' => 9, 'name' => 'Van', 'active' => true],
             ],
             'Income Category' => [
-                ['seq' => 1, 'name' => 'Less than 10,000', 'active' => true],
-                ['seq' => 2, 'name' => '10,001 to 20,000', 'active' => true],
-                ['seq' => 3, 'name' => '20,001 to 30,000', 'active' => true],
-                ['seq' => 4, 'name' => '30,001 to 40,000', 'active' => true],
-                ['seq' => 5, 'name' => '40,001 to 50,000', 'active' => true],
-                ['seq' => 6, 'name' => '50,001 and above', 'active' => true],
+                ['seq' => 1, 'name' => 'General', 'active' => true],
+                ['seq' => 2, 'name' => 'Commission', 'active' => true],
+                ['seq' => 3, 'name' => 'Bonus', 'active' => true],
+                ['seq' => 4, 'name' => 'Salary', 'active' => true],
+                ['seq' => 5, 'name' => 'Investment', 'active' => true],
+                ['seq' => 6, 'name' => 'Rentals', 'active' => true],
+                ['seq' => 7, 'name' => 'Other', 'active' => true],
             ],
             'Business Type' => [
                 ['seq' => 1, 'name' => 'Direct', 'active' => true],
@@ -310,6 +321,39 @@ class LookupTableSeeder extends Seeder
                 ['seq' => 7, 'name' => 'Amendment', 'description' => 'Pay Plan Changed', 'active' => true],
                 ['seq' => 8, 'name' => 'Amendment', 'description' => 'Vehicle changed', 'active' => true],
             ],
+            'District' => [
+                ['seq' => 1, 'name' => 'Victoria', 'active' => true],
+                ['seq' => 2, 'name' => 'Beau Vallon', 'active' => true],
+                ['seq' => 3, 'name' => 'Mont Fleuri', 'active' => true],
+                ['seq' => 4, 'name' => 'Cascade', 'active' => true],
+                ['seq' => 5, 'name' => 'Providence', 'active' => true],
+                ['seq' => 6, 'name' => 'Grand Anse', 'active' => true],
+                ['seq' => 7, 'name' => 'Anse Aux Pins', 'active' => true],
+            ],
+            'Occupation' => [
+                ['seq' => 1, 'name' => 'Accountant', 'active' => true],
+                ['seq' => 2, 'name' => 'Driver', 'active' => true],
+                ['seq' => 3, 'name' => 'Customer Service Officer', 'active' => true],
+                ['seq' => 4, 'name' => 'Real Estate Agent', 'active' => true],
+                ['seq' => 5, 'name' => 'Rock Breaker', 'active' => true],
+                ['seq' => 6, 'name' => 'Payroll Officer', 'active' => true],
+                ['seq' => 7, 'name' => 'Boat Charter', 'active' => true],
+                ['seq' => 8, 'name' => 'Contractor', 'active' => true],
+                ['seq' => 9, 'name' => 'Technician', 'active' => true],
+                ['seq' => 10, 'name' => 'Paymaster', 'active' => true],
+                ['seq' => 11, 'name' => 'Human Resources Manager', 'active' => true],
+            ],
+            'Term Units' => [
+                ['seq' => 1, 'name' => 'Year', 'active' => true],
+                ['seq' => 2, 'name' => 'Month', 'active' => true],
+                ['seq' => 3, 'name' => 'Days', 'active' => true],
+            ],
+            'Document Type' => [
+                ['seq' => 1, 'name' => 'Policy Document', 'active' => true],
+                ['seq' => 2, 'name' => 'Certificate', 'active' => true],
+                ['seq' => 3, 'name' => 'Claim Document', 'active' => true],
+                ['seq' => 4, 'name' => 'Other Document', 'active' => true],
+            ],
         ];
 
         foreach ($lookupData as $categoryName => $values) {
@@ -319,15 +363,31 @@ class LookupTableSeeder extends Seeder
             );
 
             foreach ($values as $value) {
-                // Check if value already exists to avoid duplicates
+                // Check if value already exists to avoid duplicates (by name and seq)
                 $existingValue = $category->values()
                     ->where('name', $value['name'])
+                    ->where('seq', $value['seq'])
                     ->first();
                 
                 if (!$existingValue) {
-                $category->values()->create($value);
+                    // Also check if seq already exists for this category with different name
+                    $seqExists = $category->values()
+                        ->where('seq', $value['seq'])
+                        ->where('name', '!=', $value['name'])
+                        ->exists();
+                    
+                    if (!$seqExists) {
+                        $category->values()->create($value);
+                    } else {
+                        // If seq exists but name is different, create with next available seq
+                        $maxSeq = $category->values()->max('seq') ?? 0;
+                        $value['seq'] = $maxSeq + 1;
+                        $category->values()->create($value);
+                    }
                 }
             }
         }
+        
+        $this->command->info('Lookup categories and values seeded successfully.');
     }
 }

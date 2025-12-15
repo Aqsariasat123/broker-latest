@@ -522,9 +522,15 @@
               </td>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openPolicyDetails({{ $policy->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <svg class="action-clock" onclick="window.location.href='{{ route('policies.index') }}?dfr=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
@@ -534,7 +540,7 @@
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'policy_no')
-                  <td data-column="policy_no"><a href="javascript:void(0)" onclick="openPolicyDetails({{ $policy->id }})" style="color:#007bff; text-decoration:underline;">{{ $policy->policy_no }}</a></td>
+                  <td data-column="policy_no">{{ $policy->policy_no }}</td>
                 @elseif($col == 'client_name')
                   <td data-column="client_name">
                     @php $clientName = $policy->client_name; @endphp
@@ -878,7 +884,12 @@
           <div class="form-row">
             <div class="form-group">
               <label for="term_unit">Term Unit</label>
-              <input id="term_unit" name="term_unit" class="form-control">
+              <select id="term_unit" name="term_unit" class="form-control">
+                <option value="">Select</option>
+                @foreach($lookupData['term_units'] ?? [] as $termUnit)
+                  <option value="{{ $termUnit['name'] }}">{{ $termUnit['name'] }}</option>
+                @endforeach
+              </select>
             </div>
             <div class="form-group">
               <label for="base_premium">Base Premium</label>
@@ -960,10 +971,9 @@
             <label for="policyDocumentType" style="display:block; margin-bottom:5px; font-weight:600;">Document Type</label>
             <select id="policyDocumentType" name="document_type" class="form-control" required>
               <option value="">Select Document Type</option>
-              <option value="policy_document">Policy Document</option>
-              <option value="certificate">Certificate</option>
-              <option value="claim_document">Claim Document</option>
-              <option value="other">Other Document</option>
+              @foreach($lookupData['document_types'] ?? [] as $docType)
+                <option value="{{ strtolower(str_replace(' ', '_', $docType['name'])) }}">{{ $docType['name'] }}</option>
+              @endforeach
             </select>
           </div>
           <div class="form-group" style="margin-bottom:15px;">
@@ -2284,9 +2294,7 @@
                 <div style="display:flex; gap:4px;">
                   <input type="number" name="term" id="term" value="${lp.term || ''}" class="form-control" style="flex:1; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
                   <select name="term_unit" id="term_unit" class="form-control" style="width:80px; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:3px;">
-                    <option value="Years">Years</option>
-                    <option value="Months">Months</option>
-                    <option value="Days">Days</option>
+                    ${createSelectOptions(lookupData.term_units || [], '', false)}
                   </select>
                 </div>
               </div>

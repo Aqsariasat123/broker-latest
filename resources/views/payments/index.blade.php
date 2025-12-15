@@ -64,9 +64,15 @@
             <tr>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openPaymentDetails({{ $payment->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
@@ -96,7 +102,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
       </div>
@@ -316,7 +322,7 @@
   }
 
   // Open payment details (full page view) - MUST be defined before HTML onclick handlers
-  async function openPaymentDetails(id) {
+  window.openPaymentDetails = async function(id) {
     try {
       const res = await fetch(`/payments/${id}`, {
         headers: {
@@ -364,7 +370,7 @@
       console.error(e);
       alert('Error loading payment details: ' + e.message);
     }
-  }
+  };
 
   // Populate payment details view
   function populatePaymentDetails(payment) {
@@ -456,9 +462,7 @@
   }
 
   // Add Payment Button
-  document.getElementById('addPaymentBtn').addEventListener('click', () => {
-    window.location.href = '{{ route("payments.create") }}';
-  });
+  document.getElementById('addPaymentBtn').addEventListener('click', () => openPaymentModal('add'));
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditPayment(id) {
@@ -656,126 +660,113 @@
   }
 
   // Legacy function for backward compatibility
-  function openPaymentModal(mode, payment = null) {
+  function openPaymentModal(mode, paymentId = null) {
+    const modal = document.getElementById('paymentModal');
+    const form = document.getElementById('paymentForm');
+    const formMethod = document.getElementById('paymentFormMethod');
+    const modalTitle = document.getElementById('paymentModalTitle');
+    const deleteBtn = document.getElementById('paymentDeleteBtn');
+    
     if (mode === 'add') {
-      openPaymentPage('add');
-    } else if (payment && currentPaymentId) {
-      openEditPayment(currentPaymentId);
+      modalTitle.textContent = 'Add Payment';
+      form.reset();
+      form.action = '{{ route("payments.store") }}';
+      formMethod.innerHTML = '';
+      deleteBtn.style.display = 'none';
+      currentPaymentId = null;
+    } else if (mode === 'edit' && paymentId) {
+      modalTitle.textContent = 'Edit Payment';
+      form.action = '{{ route("payments.update", ":id") }}'.replace(':id', paymentId);
+      formMethod.innerHTML = '@method("PUT")';
+      deleteBtn.style.display = 'inline-block';
+      currentPaymentId = paymentId;
+      
+      // Fetch payment data
+      fetch(`/payments/${paymentId}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.payment) {
+            const p = data.payment;
+            document.getElementById('debit_note_id').value = p.debit_note_id || '';
+            document.getElementById('payment_reference').value = p.payment_reference || '';
+            document.getElementById('paid_on').value = p.paid_on ? p.paid_on.split('T')[0] : '';
+            document.getElementById('amount').value = p.amount || '';
+            document.getElementById('mode_of_payment_id').value = p.mode_of_payment_id || '';
+            document.getElementById('notes').value = p.notes || '';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching payment data:', error);
+          alert('Error loading payment data');
+        });
     }
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closePaymentModal() {
-    closePaymentPageView();
+    const modal = document.getElementById('paymentModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    const form = document.getElementById('paymentForm');
+    form.reset();
+    currentPaymentId = null;
   }
 
-  let draggedElement = null;
-  let dragOverElement = null;
-
-  // Initialize drag and drop when column modal opens
-  let dragInitialized = false;
-
-  function initDragAndDrop() {
-    const columnSelection = document.getElementById('columnSelection');
-    if (!columnSelection) return;
-
-    // Only initialize once to avoid duplicate event listeners
-    if (dragInitialized) {
-      // Re-enable draggable on all items
-      const columnItems = columnSelection.querySelectorAll('.column-item');
-      columnItems.forEach(item => {
-        item.setAttribute('draggable', 'true');
-      });
-      return;
+  // Close modal on outside click
+  document.getElementById('paymentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closePaymentModal();
     }
+  });
 
-    // Make all column items draggable
-    const columnItems = columnSelection.querySelectorAll('.column-item');
-
-    columnItems.forEach(item => {
-      // Ensure draggable attribute is set
-      item.setAttribute('draggable', 'true');
-      item.style.cursor = 'move';
-
-      // Drag start
-      item.addEventListener('dragstart', function(e) {
-        draggedElement = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', ''); // Required for Firefox
-        // Create a ghost image
-        const dragImage = this.cloneNode(true);
-        dragImage.style.opacity = '0.5';
-        document.body.appendChild(dragImage);
-        e.dataTransfer.setDragImage(dragImage, 0, 0);
-        setTimeout(() => {
-          if (document.body.contains(dragImage)) {
-            document.body.removeChild(dragImage);
-          }
-        }, 0);
-      });
-
-      // Drag end
-      item.addEventListener('dragend', function(e) {
-        this.classList.remove('dragging');
-        if (dragOverElement) {
-          dragOverElement.classList.remove('drag-over');
-          dragOverElement = null;
-        }
-        draggedElement = null;
-      });
-
-      // Drag over
-      item.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-
-        if (draggedElement && this !== draggedElement) {
-          if (dragOverElement && dragOverElement !== this) {
-            dragOverElement.classList.remove('drag-over');
-          }
-
-          this.classList.add('drag-over');
-          dragOverElement = this;
-
-          const rect = this.getBoundingClientRect();
-          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-
-          if (next) {
-            if (this.nextSibling && this.nextSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this.nextSibling);
-            } else if (!this.nextSibling) {
-              this.parentNode.appendChild(draggedElement);
-            }
-          } else {
-            if (this.previousSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this);
-            }
-          }
-        }
-      });
-
-      // Drag leave
-      item.addEventListener('dragleave', function(e) {
-        if (!this.contains(e.relatedTarget)) {
-          this.classList.remove('drag-over');
-          if (dragOverElement === this) {
-            dragOverElement = null;
-          }
-        }
-      });
-
-      // Drop
-      item.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('drag-over');
-        dragOverElement = null;
-        return false;
-      });
+  // Handle form submission
+  document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const url = form.action;
+    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
+    
+    if (method !== 'POST') {
+      formData.append('_method', method);
+    }
+    
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        closePaymentModal();
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error saving payment');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving payment');
     });
+  });
 
-    dragInitialized = true;
-  }
+  // Update openPaymentDetails to open modal in edit mode instead of full page view
+  const originalOpenPaymentDetails = window.openPaymentDetails;
+  window.openPaymentDetails = function(id) {
+    openPaymentModal('edit', id);
+  };
 </script>
 
 @include('partials.table-scripts', [

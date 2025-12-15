@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Income extends Model
 {
@@ -11,7 +12,7 @@ class Income extends Model
 
     protected $fillable = [
         'income_id', 'income_code', 'commission_statement_id', 'income_source_id', 'date_rcvd', 'date_received', 'amount_received', 'description',
-        'category', 'mode_of_payment_id', 'statement_no', 'bank_statement_path', 'income_notes', 'notes'
+        'category_id', 'mode_of_payment_id', 'statement_no', 'income_notes', 'notes'
     ];
 
     protected $casts = [
@@ -34,5 +35,18 @@ class Income extends Model
     public function modeOfPayment()
     {
         return $this->belongsTo(\App\Models\LookupValue::class, 'mode_of_payment_id');
+    }
+
+    public function incomeCategory()
+    {
+        return $this->belongsTo(\App\Models\LookupValue::class, 'category_id');
+    }
+
+    /**
+     * Get the commission statement that owns the income.
+     */
+    public function commissionStatement(): BelongsTo
+    {
+        return $this->belongsTo(CommissionStatement::class, 'commission_statement_id');
     }
 }

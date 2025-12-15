@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Commission extends Model
 {
@@ -28,5 +29,21 @@ class Commission extends Model
     public function modeOfPayment()
     {
         return $this->belongsTo(\App\Models\LookupValue::class, 'mode_of_payment_id');
+    }
+
+    /**
+     * Get the commission note that owns the commission.
+     */
+    public function commissionNote(): BelongsTo
+    {
+        return $this->belongsTo(CommissionNote::class);
+    }
+
+    /**
+     * Get the commission statement that owns the commission.
+     */
+    public function commissionStatement(): BelongsTo
+    {
+        return $this->belongsTo(CommissionStatement::class);
     }
 }

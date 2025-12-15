@@ -55,7 +55,15 @@ class StatementController extends Controller
         $nextId = $latest ? (int)str_replace('ST', '', $latest->statement_no) + 1 : 1001;
         $validated['statement_no'] = 'ST' . $nextId;
 
-        Statement::create($validated);
+        $statement = Statement::create($validated);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Statement created successfully.',
+                'statement' => $statement->load(['insurer', 'modeOfPayment'])
+            ]);
+        }
 
         return redirect()->route('statements.index')->with('success', 'Statement created successfully.');
     }
@@ -89,6 +97,14 @@ class StatementController extends Controller
         ]);
 
         $statement->update($validated);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Statement updated successfully.',
+                'statement' => $statement->load(['insurer', 'modeOfPayment'])
+            ]);
+        }
 
         return redirect()->route('statements.index')->with('success', 'Statement updated successfully.');
     }

@@ -78,4 +78,20 @@ class Contact extends Model
         }
         return \Carbon\Carbon::parse($this->dob)->age;
     }
+
+    /**
+     * Get the life proposals for the contact.
+     */
+    public function lifeProposals()
+    {
+        return $this->hasMany(LifeProposal::class);
+    }
+
+    /**
+     * Get the followups for the contact.
+     */
+    public function followups()
+    {
+        return $this->hasMany(Followup::class);
+    }
 }

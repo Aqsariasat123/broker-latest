@@ -67,7 +67,15 @@ class CommissionController extends Controller
         $nextId = $latest ? (int)str_replace('CN', '', $latest->cnid) + 1 : 1001;
         $validated['cnid'] = 'CN' . $nextId;
 
-        Commission::create($validated);
+        $commission = Commission::create($validated);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Commission created successfully.',
+                'commission' => $commission->load(['insurer', 'paymentStatus', 'modeOfPayment'])
+            ]);
+        }
 
         return redirect()->route('commissions.index')->with('success', 'Commission created successfully.');
     }
@@ -109,6 +117,14 @@ class CommissionController extends Controller
         ]);
 
         $commission->update($validated);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Commission updated successfully.',
+                'commission' => $commission->load(['insurer', 'paymentStatus', 'modeOfPayment'])
+            ]);
+        }
 
         return redirect()->route('commissions.index')->with('success', 'Commission updated successfully.');
     }

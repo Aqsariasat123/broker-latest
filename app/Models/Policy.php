@@ -138,6 +138,46 @@ class Policy extends Model
         return $this->belongsTo(LookupValue::class, 'channel_id');
     }
 
+    /**
+     * Get the vehicles for the policy.
+     */
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
+     * Get the claims for the policy.
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class);
+    }
+
+    /**
+     * Get the nominees for the policy.
+     */
+    public function nominees(): HasMany
+    {
+        return $this->hasMany(Nominee::class);
+    }
+
+    /**
+     * Get the endorsements for the policy.
+     */
+    public function endorsements(): HasMany
+    {
+        return $this->hasMany(Endorsement::class);
+    }
+
+    /**
+     * Get the renewal notices for the policy.
+     */
+    public function renewalNotices(): HasMany
+    {
+        return $this->hasMany(RenewalNotice::class);
+    }
+
     // Note: Documents are tied using 'tied_to' field which can be policy_code or policy_no
     // We can't use a standard relationship here, so we'll load documents manually in controllers
 

@@ -18,9 +18,11 @@
     .btn-export, .btn-column { background:#fff; color:#000; border:1px solid #ccc; }
     .btn-close { background:#e0e0e0; color:#000; border-color:#ccc; }
     .btn-follow-up { background:#000; color:#fff; border-color:#000; }
-    .btn-follow-up.inactive { background:#e0e0e0; color:#000; border-color:#ccc; }
-    .btn-submitted { background:#e0e0e0; color:#000; border-color:#ccc; }
+    .btn-follow-up.inactive { background:#000; color:#fff; border-color:#000; }
+    .btn-follow-up.filter-active { background:#28a745; color:#fff; border-color:#28a745; }
+    .btn-submitted { background:#000; color:#fff; border-color:#000; }
     .btn-submitted.active { background:#000; color:#fff; border-color:#000; }
+    .btn-submitted.filter-active { background:#28a745; color:#fff; border-color:#28a745; }
     .filter-group { display:flex; align-items:center; gap:8px; }
     .table-responsive { width: 100%; border: none; background: #fff; margin-bottom:0; overflow-x: auto; padding: 0 20px; }
     .footer { display:flex; justify-content:space-between; align-items:center; padding:15px 20px; gap:10px; border-top:1px solid #ddd; flex-wrap:wrap; margin-top:0; background:#f5f5f5; }
@@ -120,8 +122,39 @@
     .rider-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 4px; }
     .rider-item { display: flex; align-items: center; gap: 4px; }
     .rider-item label { margin: 0; font-weight: normal; font-size: 11px; }
-    .rider-checkbox { width: 14px; height: 14px; cursor: pointer; margin: 0; }
-    .rider-checkbox:checked { accent-color: #f3742a; }
+    .rider-checkbox { 
+      width: 18px; 
+      height: 18px; 
+      cursor: pointer; 
+      margin: 0; 
+      accent-color: #f3742a; 
+      border-radius: 3px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      position: relative;
+    }
+    .rider-checkbox:checked {
+      background-color: #f3742a;
+      border-color: #f3742a;
+    }
+    .rider-checkbox:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .rider-checkbox:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .rider-premium { width: 65px !important; padding: 2px 3px !important; font-size: 10px !important; height: 22px !important; }
     .btn-save { background: #f3742a; color: white; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
     .btn-cancel { background: #e0e0e0; color: #000; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer; font-size: 13px; }
@@ -145,7 +178,39 @@
     .detail-row:last-child { margin-bottom: 0; }
     .detail-label { font-size: 11px; color: #555; font-weight: 600; min-width: 110px; flex-shrink: 0; }
     .detail-value { font-size: 11px; color: #000; padding: 4px 8px; border: 1px solid #ddd; background: #fff; border-radius: 2px; min-height: 24px; display: flex; align-items: center; flex: 1; }
-    .detail-value input[type="checkbox"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+    .detail-value input[type="checkbox"] { 
+      width: 18px; 
+      height: 18px; 
+      margin: 0; 
+      cursor: pointer; 
+      accent-color: #f3742a; 
+      border-radius: 3px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      position: relative;
+    }
+    .detail-value input[type="checkbox"]:checked {
+      background-color: #f3742a;
+      border-color: #f3742a;
+    }
+    .detail-value input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .detail-value input[type="checkbox"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .detail-value textarea { width: 100%; min-height: 50px; padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 2px; resize: vertical; }
     
     /* Navigation Tabs */
@@ -198,8 +263,8 @@
               @endphp
               <input type="checkbox" id="filterToggle" {{ $hasFollowUp || $hasSubmitted ? 'checked' : '' }}>
             </label>
-            <button class="btn btn-follow-up {{ $hasFollowUp ? '' : 'inactive' }}" id="followUpBtn" type="button" style="background:{{ $hasFollowUp ? '#000' : '#e0e0e0' }}; color:{{ $hasFollowUp ? '#fff' : '#000' }}; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">To Follow Up</button>
-            <button class="btn btn-submitted {{ $hasSubmitted ? 'active' : '' }}" id="submittedBtn" type="button" style="background:{{ $hasSubmitted ? '#000' : '#e0e0e0' }}; color:{{ $hasSubmitted ? '#fff' : '#000' }}; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Submitted</button>
+            <button class="btn btn-follow-up" id="followUpBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">To Follow Up</button>
+            <button class="btn btn-submitted" id="submittedBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Submitted</button>
           </div>
         </div>
       </div>
@@ -265,28 +330,30 @@
        
                
                 <svg class="action-expand" onclick="openProposalDetails({{ $proposal->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <circle cx="12" cy="12" r="10" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
                   <path d="M12 6V12L16 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <circle cx="12" cy="5" r="1.5" fill="#2d2d2d"/>
-                  <circle cx="12" cy="12" r="1.5" fill="#2d2d2d"/>
-                  <circle cx="12" cy="19" r="1.5" fill="#2d2d2d"/>
-                </svg>
+          
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'proposers_name')
                   <td data-column="proposers_name">
-                    <a href="javascript:void(0)" onclick="openProposalDetails({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->proposers_name }}</a>
+                  {{ $proposal->proposers_name }}
                   </td>
                 @elseif($col == 'prid')
                   <td data-column="prid">
-                    <a href="javascript:void(0)" onclick="openProposalDetails({{ $proposal->id }})" style="color:#007bff; text-decoration:underline;">{{ $proposal->prid }}</a>
+                  {{ $proposal->prid }}
                   </td>
                 @elseif($col == 'insurer')
                   <td data-column="insurer">{{ $proposal->insurer }}</td>
@@ -340,7 +407,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <a class="btn btn-export" href="{{ route('life-proposals.export') }}">Export</a>
         <button class="btn btn-column" id="columnBtn" type="button">Column</button>
@@ -1077,17 +1144,43 @@
       columnBtn.addEventListener('click', () => openColumnModal());
     }
 
-    // Filter toggle handler - just visual indicator, clears filters when unchecked
+    // Filter toggle handler - updates button colors and clears filters when unchecked
     const filterToggle = document.getElementById('filterToggle');
+    const followUpBtn = document.getElementById('followUpBtn');
+    const submittedBtn = document.getElementById('submittedBtn');
+    
+    function updateButtonColors() {
+      const isFilterActive = filterToggle && filterToggle.checked;
+      if (followUpBtn) {
+        if (isFilterActive) {
+          followUpBtn.classList.add('filter-active');
+          followUpBtn.classList.remove('inactive');
+        } else {
+          followUpBtn.classList.remove('filter-active');
+        }
+      }
+      if (submittedBtn) {
+        if (isFilterActive) {
+          submittedBtn.classList.add('filter-active');
+        } else {
+          submittedBtn.classList.remove('filter-active');
+        }
+      }
+    }
+    
     if (filterToggle) {
       const urlParams = new URLSearchParams(window.location.search);
       const hasFollowUp = urlParams.get('follow_up') === 'true' || urlParams.get('follow_up') === '1';
       const hasSubmitted = urlParams.get('submitted') === 'true' || urlParams.get('submitted') === '1';
       filterToggle.checked = hasFollowUp || hasSubmitted;
       
+      // Update button colors on page load
+      updateButtonColors();
+      
       filterToggle.addEventListener('change', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        updateButtonColors();
         if (!this.checked) {
           // Clear all filters when toggle is unchecked
           const u = new URL(window.location.href);
@@ -1106,7 +1199,6 @@
     }
 
     // To Follow Up button handler
-    const followUpBtn = document.getElementById('followUpBtn');
     if (followUpBtn) {
       followUpBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -1121,12 +1213,16 @@
           u.searchParams.set('follow_up', '1');
           u.searchParams.delete('submitted');
         }
+        // Ensure filter toggle is checked when activating filter
+        if (filterToggle) {
+          filterToggle.checked = true;
+          updateButtonColors();
+        }
         window.location.href = u.toString();
       });
     }
 
     // Submitted button handler
-    const submittedBtn = document.getElementById('submittedBtn');
     if (submittedBtn) {
       submittedBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -1140,6 +1236,11 @@
           // Activate filter
           u.searchParams.set('submitted', '1');
           u.searchParams.delete('follow_up');
+        }
+        // Ensure filter toggle is checked when activating filter
+        if (filterToggle) {
+          filterToggle.checked = true;
+          updateButtonColors();
         }
         window.location.href = u.toString();
       });

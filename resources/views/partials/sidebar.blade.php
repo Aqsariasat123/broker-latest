@@ -4,7 +4,8 @@
 </div>
         
         <ul class="ks-sidebar-menu">
-            <li class="active" data-tooltip="Dashboard">
+            @if(auth()->check() && (auth()->user()->hasPermission('dashboard.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('dashboard') || request()->is('/') ? 'active' : '' }}" data-tooltip="Dashboard">
                 <a href="/dashboard">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -14,8 +15,10 @@
                     <span class="ks-sidebar-label">Dashboard</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Calendar">
+            @if(auth()->check() && (auth()->user()->hasPermission('calendar.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('calendar*') ? 'active' : '' }}" data-tooltip="Calendar">
                 <a href="/calendar">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,8 +30,10 @@
                     <span class="ks-sidebar-label">Calendar</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Tasks">
+            @if(auth()->check() && (auth()->user()->hasPermission('tasks.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('tasks*') ? 'active' : '' }}" data-tooltip="Tasks">
                 <a href="/tasks">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,8 +44,10 @@
                     <span class="ks-sidebar-label">Tasks</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Contacts">
+            @if(auth()->check() && (auth()->user()->hasPermission('contacts.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('contacts*') ? 'active' : '' }}" data-tooltip="Contacts">
                 <a href="/contacts">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,8 +60,10 @@
                     <span class="ks-sidebar-label">Contacts</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Clients">
+            @if(auth()->check() && (auth()->user()->hasPermission('clients.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('clients*') ? 'active' : '' }}" data-tooltip="Clients">
                 <a href="/clients">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -66,8 +75,10 @@
                     <span class="ks-sidebar-label">Clients</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Proposals">
+            @if(auth()->check() && (auth()->user()->hasPermission('life-proposals.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('life-proposals*') ? 'active' : '' }}" data-tooltip="Proposals">
                 <a href="/life-proposals">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,8 +90,10 @@
                     <span class="ks-sidebar-label">Proposals</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Policies">
+            @if(auth()->check() && (auth()->user()->hasPermission('policies.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('policies*') ? 'active' : '' }}" data-tooltip="Policies">
                 <a href="/policies">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -92,8 +105,10 @@
                     <span class="ks-sidebar-label">Policies</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Schedules">
+            @if(auth()->check() && (auth()->user()->hasPermission('schedules.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('schedules.*') ? 'active' : '' }}" data-tooltip="Schedules">
                 <a href="{{ route('schedules.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,8 +119,10 @@
                     <span class="ks-sidebar-label">Schedules</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Commission">
+            @if(auth()->check() && (auth()->user()->hasPermission('commissions.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('commissions*') ? 'active' : '' }}" data-tooltip="Commission">
                 <a href="/commissions">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,8 +134,10 @@
                     <span class="ks-sidebar-label">Commission</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Statements">
+            @if(auth()->check() && (auth()->user()->hasPermission('statements.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('statements*') ? 'active' : '' }}" data-tooltip="Statements">
                 <a href="/statements">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -130,8 +149,10 @@
                     <span class="ks-sidebar-label">Statements</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Income">
+            @if(auth()->check() && (auth()->user()->hasPermission('incomes.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('incomes*') ? 'active' : '' }}" data-tooltip="Income">
                 <a href="/incomes">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,8 +165,10 @@
                     <span class="ks-sidebar-label">Income</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Expenses">
+            @if(auth()->check() && (auth()->user()->hasPermission('expenses.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('expenses*') ? 'active' : '' }}" data-tooltip="Expenses">
                 <a href="/expenses">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -157,8 +180,10 @@
                     <span class="ks-sidebar-label">Expenses</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Payment Plans">
+            @if(auth()->check() && (auth()->user()->hasPermission('payment-plans.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('payment-plans.*') ? 'active' : '' }}" data-tooltip="Payment Plans">
                 <a href="{{ route('payment-plans.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -173,8 +198,10 @@
                     <span class="ks-sidebar-label">Payment Plans</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Debit Notes">
+            @if(auth()->check() && (auth()->user()->hasPermission('debit-notes.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('debit-notes.*') ? 'active' : '' }}" data-tooltip="Debit Notes">
                 <a href="{{ route('debit-notes.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -188,8 +215,10 @@
                     <span class="ks-sidebar-label">Debit Notes</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Payments">
+            @if(auth()->check() && (auth()->user()->hasPermission('payments.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('payments.*') ? 'active' : '' }}" data-tooltip="Payments">
                 <a href="{{ route('payments.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -203,8 +232,10 @@
                     <span class="ks-sidebar-label">Payments</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Claims">
+            @if(auth()->check() && (auth()->user()->hasPermission('claims.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('claims*') ? 'active' : '' }}" data-tooltip="Claims">
                 <a href="/claims">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -216,8 +247,10 @@
                     <span class="ks-sidebar-label">Claims</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Vehicles">
+            @if(auth()->check() && (auth()->user()->hasPermission('vehicles.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('vehicles*') ? 'active' : '' }}" data-tooltip="Vehicles">
                 <a href="/vehicles">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -229,8 +262,10 @@
                     <span class="ks-sidebar-label">Vehicles</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Documents">
+            @if(auth()->check() && (auth()->user()->hasPermission('documents.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('documents*') ? 'active' : '' }}" data-tooltip="Documents">
                 <a href="/documents">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -241,8 +276,10 @@
                     <span class="ks-sidebar-label">Documents</span>
                 </a>
             </li>
+            @endif
             
-            <li data-tooltip="Settings">
+            @if(auth()->check() && (auth()->user()->hasPermission('lookups.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->is('lookups*') ? 'active' : '' }}" data-tooltip="Settings">
                 <a href="/lookups">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -253,15 +290,16 @@
                     <span class="ks-sidebar-label">Settings</span>
                 </a>
             </li>
+            @endif
             
            
-            
+            @if(auth()->check() && (auth()->user()->hasPermission('lookups.manage') || auth()->user()->isAdmin()))
             <!-- Web Settings Nested Menu -->
             <li class="ks-sidebar-section-header" style="padding: 10px 15px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6); font-weight: 600;">Web Settings</span>
             </li>
             
-            <li data-tooltip="Lookup Categories">
+            <li class="{{ request()->routeIs('lookup-categories.*') ? 'active' : '' }}" data-tooltip="Lookup Categories">
                 <a href="{{ route('lookup-categories.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -276,7 +314,7 @@
                 </a>
             </li>
             
-            <li data-tooltip="Lookup Values">
+            <li class="{{ request()->routeIs('lookup-values.*') ? 'active' : '' }}" data-tooltip="Lookup Values">
                 <a href="{{ route('lookup-values.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -289,10 +327,11 @@
                     <span class="ks-sidebar-label">Lookup Values</span>
                 </a>
             </li>
+            @endif
             
             @auth
-            @if(auth()->user()->isAdmin())
-            <li data-tooltip="Users">
+            @if(auth()->check() && (auth()->user()->hasPermission('users.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('users.*') ? 'active' : '' }}" data-tooltip="Users">
                 <a href="{{ route('users.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -305,7 +344,9 @@
                     <span class="ks-sidebar-label">Users</span>
                 </a>
             </li>
-            <li data-tooltip="Permissions">
+            @endif
+            @if(auth()->check() && (auth()->user()->hasPermission('permissions.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('permissions.*') ? 'active' : '' }}" data-tooltip="Permissions">
                 <a href="{{ route('permissions.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -315,7 +356,9 @@
                     <span class="ks-sidebar-label">Permissions</span>
                 </a>
             </li>
-            <li data-tooltip="Roles">
+            @endif
+            @if(auth()->check() && (auth()->user()->hasPermission('roles.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('roles.*') ? 'active' : '' }}" data-tooltip="Roles">
                 <a href="{{ route('roles.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -327,7 +370,9 @@
                     <span class="ks-sidebar-label">Roles</span>
                 </a>
             </li>
-            <li data-tooltip="Audit Logs">
+            @endif
+            @if(auth()->check() && (auth()->user()->hasPermission('audit-logs.view') || auth()->user()->isAdmin()))
+            <li class="{{ request()->routeIs('audit-logs.*') ? 'active' : '' }}" data-tooltip="Audit Logs">
                 <a href="{{ route('audit-logs.index') }}">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

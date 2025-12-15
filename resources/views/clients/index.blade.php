@@ -1048,9 +1048,15 @@
               </td>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openClientDetailsModal({{ $client->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <svg class="action-clock" onclick="window.location.href='{{ route('clients.index') }}?follow_up=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
@@ -1201,7 +1207,7 @@
             <div style="display:flex; gap:10px; justify-content:flex-end;">
               <input type="file" id="photoUploadInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
               <button class="btn" onclick="document.getElementById('photoUploadInput').click()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Upload Photo</button>
-              <button class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Add Document</button>
+              <button id="addDocumentBtn1" class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px; display:none;">Add Document</button>
             </div>
           </div>
         </div>
@@ -1263,9 +1269,16 @@
                     <span class="detail-label">Client Type</span>
                     <select id="client_type" name="client_type" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                       <option value="">Select</option>
-                      <option value="Individual">Individual</option>
-                      <option value="Business">Business</option>
-                      <option value="Company">Company</option>
+                      @if(isset($lookupData['client_types']))
+                        @foreach($lookupData['client_types'] as $clientType)
+                          <option value="{{ $clientType }}">{{ $clientType }}</option>
+                        @endforeach
+                      @else
+                        <option value="Individual">Individual</option>
+                        <option value="Business">Business</option>
+                        <option value="Company">Company</option>
+                        <option value="Organization">Organization</option>
+                      @endif
                     </select>
                   </div>
                   <div class="detail-row">
@@ -1544,7 +1557,7 @@
             </div>
             <div style="display:flex; gap:10px; justify-content:flex-end;">
               <button type="button" class="btn" onclick="document.getElementById('image').click()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Upload Photo</button>
-              <button type="button" class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Add Document</button>
+              <button id="addDocumentBtn2" type="button" class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px; display:none;">Add Document</button>
             </div>
           </div>
         </div>
@@ -1581,7 +1594,7 @@
           <div style="display:flex; gap:10px; justify-content:flex-end; padding:0 12px 12px;">
             <input type="file" id="photoUploadInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
             <button class="btn" onclick="document.getElementById('photoUploadInput').click()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Upload Photo</button>
-            <button class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Add Document</button>
+            <button id="addDocumentBtn3" class="btn" onclick="openDocumentUploadModal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px; display:none;">Add Document</button>
           </div>
         </div>
       </div>
@@ -1721,6 +1734,31 @@
   let currentClientId = null;
   const lookupData = @json($lookupData);
   const selectedColumns = @json($selectedColumns);
+
+  // Toggle Alternate No field visibility based on "On Wattsapp" checkbox
+  function setupWaToggle() {
+    const waCheckbox = document.getElementById('wa');
+    const alternateNoRow = document.getElementById('alternate_no_row');
+    if (waCheckbox && alternateNoRow) {
+      // Function to toggle visibility
+      const toggleAlternateNo = function() {
+        if (this.checked) {
+          // Hide Alternate No if On Wattsapp is checked
+          alternateNoRow.style.display = 'none';
+        } else {
+          // Show Alternate No if On Wattsapp is unchecked
+          alternateNoRow.style.display = '';
+        }
+      };
+      
+      // Remove existing listener and add new one
+      waCheckbox.removeEventListener('change', toggleAlternateNo);
+      waCheckbox.addEventListener('change', toggleAlternateNo);
+      
+      // Set initial state based on checkbox
+      toggleAlternateNo.call(waCheckbox);
+    }
+  }
 
   document.getElementById('addClientBtn').addEventListener('click', () => openClientModal('add'));
   document.getElementById('columnBtn').addEventListener('click', () => openColumnModal());
@@ -2641,16 +2679,19 @@
       // Clear checkboxes
       document.getElementById('married').checked = false;
       document.getElementById('pep').checked = false;
-      document.getElementById('wa').checked = false;
+      const waCheckbox = document.getElementById('wa');
+      if (waCheckbox) {
+        waCheckbox.checked = false;
+        // Show Alternate No field by default (since wa is unchecked)
+        const alternateNoRow = document.getElementById('alternate_no_row');
+        if (alternateNoRow) {
+          alternateNoRow.style.display = '';
+        }
+      }
       document.getElementById('has_vehicle').checked = false;
       document.getElementById('has_house').checked = false;
       document.getElementById('has_business').checked = false;
       document.getElementById('has_boat').checked = false;
-      // Show Alternate No field by default (since wa is unchecked)
-      const alternateNoRow = document.getElementById('alternate_no_row');
-      if (alternateNoRow) {
-        alternateNoRow.style.display = '';
-      }
       // Clear photo preview
       const photoImg = document.getElementById('clientPhotoImg');
       const photoSpan = document.getElementById('clientPhotoPreview').querySelector('span');
@@ -2662,6 +2703,16 @@
       // Clear documents list
       const editDocumentsList = document.getElementById('editClientDocumentsList');
       if (editDocumentsList) editDocumentsList.innerHTML = '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
+      
+      // Hide "Add Document" buttons in add mode (no client ID yet)
+      const addDocumentBtns = ['addDocumentBtn1', 'addDocumentBtn2', 'addDocumentBtn3'];
+      addDocumentBtns.forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.style.display = 'none';
+      });
+      
+      // Re-setup WA toggle after form reset
+      setupWaToggle();
     } else {
       modalForm.action = `/clients/${currentClientId}`;
       formMethod.innerHTML = `@method('PUT')`;
@@ -2673,6 +2724,13 @@
         if (!el) return;
         if (el.type === 'checkbox') {
           el.checked = !!client[k];
+          // If this is the wa checkbox, update alternate_no_row visibility
+          if (k === 'wa' && el.id === 'wa') {
+            const alternateNoRow = document.getElementById('alternate_no_row');
+            if (alternateNoRow) {
+              alternateNoRow.style.display = el.checked ? 'none' : '';
+            }
+          }
         } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
           if (el.type === 'date' && client[k]) {
             // Format date for date inputs (YYYY-MM-DD)
@@ -2685,11 +2743,22 @@
       });
       document.getElementById('married').checked = !!client.married;
       document.getElementById('pep').checked = !!client.pep;
-      document.getElementById('wa').checked = !!client.wa;
+      const waCheckboxEdit = document.getElementById('wa');
+      if (waCheckboxEdit) {
+        waCheckboxEdit.checked = !!client.wa;
+        // Update alternate_no_row visibility based on wa checkbox state
+        const alternateNoRow = document.getElementById('alternate_no_row');
+        if (alternateNoRow) {
+          alternateNoRow.style.display = waCheckboxEdit.checked ? 'none' : '';
+        }
+      }
       document.getElementById('has_vehicle').checked = !!client.has_vehicle;
       document.getElementById('has_house').checked = !!client.has_house;
       document.getElementById('has_business').checked = !!client.has_business;
       document.getElementById('has_boat').checked = !!client.has_boat;
+      
+      // Re-setup WA toggle after populating form data
+      setupWaToggle();
       
       // Set existing image if present
       const imageInput = document.getElementById('image');
@@ -2729,28 +2798,8 @@
       expiryInput.addEventListener('change', calculateIDExpiryDays);
     }
 
-    // Toggle Alternate No field visibility based on "On Wattsapp" checkbox
-    const waCheckbox = document.getElementById('wa');
-    const alternateNoRow = document.getElementById('alternate_no_row');
-    if (waCheckbox && alternateNoRow) {
-      // Function to toggle visibility
-      const toggleAlternateNo = function() {
-        if (this.checked) {
-          // Hide Alternate No if On Wattsapp is checked
-          alternateNoRow.style.display = 'none';
-        } else {
-          // Show Alternate No if On Wattsapp is unchecked
-          alternateNoRow.style.display = '';
-        }
-      };
-      
-      // Remove existing listener and add new one
-      waCheckbox.removeEventListener('change', toggleAlternateNo);
-      waCheckbox.addEventListener('change', toggleAlternateNo);
-      
-      // Set initial state based on checkbox
-      toggleAlternateNo.call(waCheckbox);
-    }
+    // Setup toggle on page load
+    setupWaToggle();
 
     // Attach client type change listener to ensure all fields remain visible for Individual and Entity types
     const clientTypeSelect = document.getElementById('client_type');
@@ -3080,6 +3129,24 @@
     clientPageView.style.display = 'block';
     document.getElementById('clientDetailsPageContent').style.display = 'none';
     document.getElementById('clientFormPageContent').style.display = 'block';
+    
+    // Ensure "Add Document" buttons are shown/hidden correctly based on mode
+    // Use setTimeout to ensure DOM is ready after page content is displayed
+    setTimeout(() => {
+      if (mode === 'edit') {
+        // Show "Add Document" button in edit mode (addDocumentBtn2 is in clientFormPageContent)
+        const addDocumentBtn2 = document.getElementById('addDocumentBtn2');
+        if (addDocumentBtn2) {
+          addDocumentBtn2.style.display = 'inline-block';
+        }
+      } else {
+        // Hide "Add Document" buttons in add mode
+        const addDocumentBtn2 = document.getElementById('addDocumentBtn2');
+        if (addDocumentBtn2) {
+          addDocumentBtn2.style.display = 'none';
+        }
+      }
+    }, 100);
   }
 
   function closeClientModal(){
@@ -3414,11 +3481,91 @@
   });
 
   // Simple validation
-  document.getElementById('clientForm').addEventListener('submit', function(e){
-    const req = this.querySelectorAll('[required]');
+  document.getElementById('clientForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    
+    const form = this;
+    const req = form.querySelectorAll('[required]');
     let ok = true;
     req.forEach(f => { if (!String(f.value||'').trim()) { ok = false; f.style.borderColor='red'; } else { f.style.borderColor=''; } });
-    if (!ok) { e.preventDefault(); alert('Please fill required fields'); }
+    if (!ok) { alert('Please fill required fields'); return; }
+    
+    const formData = new FormData(form);
+    const isEdit = form.action.includes('/clients/') && form.action !== '{{ route("clients.store") }}';
+    const url = isEdit ? form.action : form.action;
+    const method = isEdit ? 'PUT' : 'POST';
+    
+    // Add method override for PUT
+    if (isEdit) {
+      formData.append('_method', 'PUT');
+    }
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success) {
+          // If this was a create operation, set currentClientId and switch to edit mode
+          if (!isEdit && result.client && result.client.id) {
+            currentClientId = result.client.id;
+            // Fetch full client data and switch to edit mode to allow document upload
+            try {
+              const clientRes = await fetch(`/clients/${result.client.id}`, {
+                headers: {
+                  'Accept': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
+                }
+              });
+              if (clientRes.ok) {
+                const clientData = await clientRes.json();
+                await openClientModal('edit', clientData);
+                alert('Client created successfully! You can now upload documents.');
+              } else {
+                alert('Client created successfully!');
+                closeClientModal();
+                location.reload();
+              }
+            } catch (error) {
+              console.error('Error fetching client:', error);
+              alert('Client created successfully!');
+              closeClientModal();
+              location.reload();
+            }
+          } else {
+            // For edit, just show success and close modal
+            alert('Client updated successfully!');
+            closeClientModal();
+            location.reload(); // Reload to show updated data
+          }
+        } else {
+          alert('Error: ' + (result.message || 'Unknown error'));
+        }
+      } else {
+        // Handle validation errors
+        const errorData = await response.json();
+        if (errorData.errors) {
+          let errorMsg = 'Validation errors:\n';
+          Object.keys(errorData.errors).forEach(key => {
+            errorMsg += errorData.errors[key][0] + '\n';
+          });
+          alert(errorMsg);
+        } else {
+          alert('Error saving client: ' + (errorData.message || 'Unknown error'));
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error saving client: ' + error.message);
+    }
   });
 
   // Toggle scrollbar helper for responsive table

@@ -6,19 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Vehicle extends Model
+class Endorsement extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'vehicle_id', 'regn_no', 'make', 'model', 'type', 'useage', 'year', 'value', 'policy_id',
-        'engine', 'engine_type', 'cc', 'engine_no', 'chassis_no', 'from', 'to', 'notes'
+        'policy_id',
+        'endorsement_no',
+        'type',
+        'effective_date',
+        'status',
+        'description',
+        'document_path',
     ];
 
-    protected $dates = ['from', 'to'];
+    protected $casts = [
+        'effective_date' => 'date',
+    ];
 
     /**
-     * Get the policy that owns the vehicle.
+     * Get the policy that owns the endorsement.
      */
     public function policy(): BelongsTo
     {

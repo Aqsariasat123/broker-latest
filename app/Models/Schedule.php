@@ -41,5 +41,13 @@ class Schedule extends Model
     {
         return $this->hasMany(PaymentPlan::class);
     }
+
+    /**
+     * Get the commission notes for the schedule.
+     */
+    public function commissionNotes(): HasMany
+    {
+        return $this->hasMany(CommissionNote::class);
+    }
 }
 

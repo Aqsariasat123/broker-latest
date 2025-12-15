@@ -229,7 +229,7 @@ class TableConfigHelper
                 'route_prefix' => 'expenses',
                 'session_key' => 'expense_columns',
                 'default_columns' => [
-                    'expense_id','payee','date_paid','amount_paid','description','category','mode_of_payment','expense_notes'
+                    'expense_id','payee','date_paid','amount_paid','description','category_id','mode_of_payment','expense_notes'
                 ],
                 'mandatory_columns' => ['expense_id', 'payee', 'amount_paid'],
                 'column_definitions' => [
@@ -238,7 +238,7 @@ class TableConfigHelper
                     'date_paid' => 'Date Paid',
                     'amount_paid' => 'Amount Paid',
                     'description' => 'Description',
-                    'category' => 'Category',
+                    'category_id' => 'Category',
                     'mode_of_payment' => 'Mode Of Payment',
                     'expense_notes' => 'Expense Notes',
                 ],
@@ -270,7 +270,7 @@ class TableConfigHelper
                 'route_prefix' => 'incomes',
                 'session_key' => 'income_columns',
                 'default_columns' => [
-                    'income_id','income_source','date_rcvd','amount_received','description','category','mode_of_payment','statement_no','income_notes'
+                    'income_id','income_source','date_rcvd','amount_received','description','category_id','mode_of_payment','statement_no','income_notes'
                 ],
                 'mandatory_columns' => ['income_id', 'income_source', 'amount_received'],
                 'column_definitions' => [
@@ -279,7 +279,7 @@ class TableConfigHelper
                     'date_rcvd' => 'Date Rcvd',
                     'amount_received' => 'Amount Received',
                     'description' => 'Description',
-                    'category' => 'Category',
+                    'category_id' => 'Category',
                     'mode_of_payment' => 'Mode Of Payment (Life)',
                     'statement_no' => 'Statement No',
                     'income_notes' => 'Income Notes',

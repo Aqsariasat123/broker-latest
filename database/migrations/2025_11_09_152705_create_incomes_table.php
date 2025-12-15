@@ -16,7 +16,7 @@ class CreateIncomesTable extends Migration
             $table->date('date_received')->nullable();
             $table->decimal('amount_received', 15, 2)->nullable();
             $table->string('description')->nullable();
-            $table->string('category')->nullable();
+            $table->foreignId('category_id')->nullable()->constrained('lookup_values')->nullOnDelete();
             $table->foreignId('mode_of_payment_id')->nullable()->constrained('lookup_values')->nullOnDelete();
             $table->string('bank_statement_path')->nullable();
             $table->text('notes')->nullable();

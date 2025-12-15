@@ -69,15 +69,21 @@
             <tr>
               <td class="action-cell">
                 <svg class="action-expand" onclick="openDebitNoteDetails({{ $note->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <rect x="9" y="9" width="6" height="6" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 9L12 5M12 15L12 19M9 12L5 12M15 12L19 12" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M12 5L10 7M12 5L14 7M12 19L10 17M12 19L14 17M5 12L7 10M5 12L7 14M19 12L17 10M19 12L17 14" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Maximize icon: four arrows pointing outward from center -->
+                  <!-- Top arrow -->
+                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Right arrow -->
+                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Bottom arrow -->
+                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Left arrow -->
+                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'debit_note_no')
                   <td data-column="debit_note_no">
-                    <a href="javascript:void(0)" onclick="openDebitNoteDetails({{ $note->id }})" style="color:#007bff; text-decoration:underline;">{{ $note->debit_note_no }}</a>
+                  {{ $note->debit_note_no }}
                   </td>
                 @elseif($col == 'policy_no')
                   <td data-column="policy_no">{{ $note->paymentPlan->schedule->policy->policy_no ?? '-' }}</td>
@@ -103,7 +109,7 @@
 
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
       <div class="footer-left">
         <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
       </div>
@@ -232,6 +238,14 @@
               <input type="file" class="form-control" name="document" id="document" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
             </div>
           </div>
+          <div id="existingDocumentPreview" style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:4px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <p style="margin:0; font-size:12px; color:#666; font-weight:500;">Current Document:</p>
+                <div id="existingDocumentPreviewContent" style="margin-top:5px;"></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closeDebitNoteModal()">Cancel</button>
@@ -314,7 +328,7 @@
   }
 
   // Open debit note details (full page view) - MUST be defined before HTML onclick handlers
-  async function openDebitNoteDetails(id) {
+  window.openDebitNoteDetails = async function(id) {
     try {
       const res = await fetch(`/debit-notes/${id}`, {
         headers: {
@@ -362,7 +376,7 @@
       console.error(e);
       alert('Error loading debit note details: ' + e.message);
     }
-  }
+  };
 
   // Populate debit note details view
   function populateDebitNoteDetails(note) {
@@ -412,7 +426,14 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Document</span>
-            <div class="detail-value">${note.document_path ? '<a href="#" target="_blank" style="color:#007bff;">View Document</a>' : '-'}</div>
+            <div class="detail-value">
+              ${note.documents && note.documents.length > 0 
+                ? note.documents.map(doc => 
+                    `<a href="/storage/${doc.file_path}" target="_blank" style="color:#007bff; text-decoration:underline; display:block; margin-bottom:4px;">${doc.name || 'View Document'}</a>`
+                  ).join('')
+                : '-'
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -439,9 +460,8 @@
   }
 
   // Add Debit Note Button
-  document.getElementById('addDebitNoteBtn').addEventListener('click', () => {
-    window.location.href = '{{ route("debit-notes.create") }}';
-  });
+  document.getElementById('addDebitNoteBtn').addEventListener('click', () => openDebitNoteModal('add'));
+ 
   document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
 
   async function openEditDebitNote(id) {
@@ -636,127 +656,134 @@
     form.submit();
   }
 
-  // Legacy function for backward compatibility
-  function openDebitNoteModal(mode, note = null) {
+  function openDebitNoteModal(mode, noteId = null) {
+    const modal = document.getElementById('debitNoteModal');
+    const form = document.getElementById('debitNoteForm');
+    const formMethod = document.getElementById('debitNoteFormMethod');
+    const modalTitle = document.getElementById('debitNoteModalTitle');
+    const deleteBtn = document.getElementById('debitNoteDeleteBtn');
+    
     if (mode === 'add') {
-      openDebitNotePage('add');
-    } else if (note && currentDebitNoteId) {
-      openEditDebitNote(currentDebitNoteId);
+      modalTitle.textContent = 'Add Debit Note';
+      form.reset();
+      form.action = '{{ route("debit-notes.store") }}';
+      formMethod.innerHTML = '';
+      deleteBtn.style.display = 'none';
+      currentDebitNoteId = null;
+    } else if (mode === 'edit' && noteId) {
+      modalTitle.textContent = 'Edit Debit Note';
+      form.action = '{{ route("debit-notes.update", ":id") }}'.replace(':id', noteId);
+      formMethod.innerHTML = '@method("PUT")';
+      deleteBtn.style.display = 'inline-block';
+      currentDebitNoteId = noteId;
+      
+      // Fetch debit note data
+      fetch(`/debit-notes/${noteId}/edit`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.debitNote) {
+            const d = data.debitNote;
+            document.getElementById('payment_plan_id').value = d.payment_plan_id || '';
+            document.getElementById('debit_note_no').value = d.debit_note_no || '';
+            document.getElementById('issued_on').value = d.issued_on ? d.issued_on.split('T')[0] : '';
+            document.getElementById('amount').value = d.amount || '';
+            document.getElementById('status').value = d.status || 'pending';
+            
+            // Show existing document preview if available (from documents table)
+            const existingPreview = document.getElementById('existingDocumentPreview');
+            const existingPreviewContent = document.getElementById('existingDocumentPreviewContent');
+            
+            if (d.documents && d.documents.length > 0) {
+              existingPreview.style.display = 'block';
+              existingPreviewContent.innerHTML = d.documents.map(doc => 
+                `<a href="/storage/${doc.file_path}" target="_blank" style="color:#007bff; text-decoration:underline; display:block; margin-bottom:4px; font-size:13px;">${doc.name || 'View Document'}</a>`
+              ).join('');
+            } else {
+              existingPreview.style.display = 'none';
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching debit note data:', error);
+          alert('Error loading debit note data');
+        });
     }
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeDebitNoteModal() {
-    closeDebitNotePageView();
-  }
-
-  let draggedElement = null;
-  let dragOverElement = null;
-
-  // Initialize drag and drop when column modal opens
-  let dragInitialized = false;
-
-  function initDragAndDrop() {
-    const columnSelection = document.getElementById('columnSelection');
-    if (!columnSelection) return;
-
-    // Only initialize once to avoid duplicate event listeners
-    if (dragInitialized) {
-      // Re-enable draggable on all items
-      const columnItems = columnSelection.querySelectorAll('.column-item');
-      columnItems.forEach(item => {
-        item.setAttribute('draggable', 'true');
-      });
-      return;
+    const modal = document.getElementById('debitNoteModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    const form = document.getElementById('debitNoteForm');
+    form.reset();
+    currentDebitNoteId = null;
+    // Reset document preview
+    const existingPreview = document.getElementById('existingDocumentPreview');
+    if (existingPreview) {
+      existingPreview.style.display = 'none';
+      const existingPreviewContent = document.getElementById('existingDocumentPreviewContent');
+      if (existingPreviewContent) {
+        existingPreviewContent.innerHTML = '';
+      }
     }
-
-    // Make all column items draggable
-    const columnItems = columnSelection.querySelectorAll('.column-item');
-
-    columnItems.forEach(item => {
-      // Ensure draggable attribute is set
-      item.setAttribute('draggable', 'true');
-      item.style.cursor = 'move';
-
-      // Drag start
-      item.addEventListener('dragstart', function(e) {
-        draggedElement = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', ''); // Required for Firefox
-        // Create a ghost image
-        const dragImage = this.cloneNode(true);
-        dragImage.style.opacity = '0.5';
-        document.body.appendChild(dragImage);
-        e.dataTransfer.setDragImage(dragImage, 0, 0);
-        setTimeout(() => {
-          if (document.body.contains(dragImage)) {
-            document.body.removeChild(dragImage);
-          }
-        }, 0);
-      });
-
-      // Drag end
-      item.addEventListener('dragend', function(e) {
-        this.classList.remove('dragging');
-        if (dragOverElement) {
-          dragOverElement.classList.remove('drag-over');
-          dragOverElement = null;
-        }
-        draggedElement = null;
-      });
-
-      // Drag over
-      item.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-
-        if (draggedElement && this !== draggedElement) {
-          if (dragOverElement && dragOverElement !== this) {
-            dragOverElement.classList.remove('drag-over');
-          }
-
-          this.classList.add('drag-over');
-          dragOverElement = this;
-
-          const rect = this.getBoundingClientRect();
-          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-
-          if (next) {
-            if (this.nextSibling && this.nextSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this.nextSibling);
-            } else if (!this.nextSibling) {
-              this.parentNode.appendChild(draggedElement);
-            }
-          } else {
-            if (this.previousSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this);
-            }
-          }
-        }
-      });
-
-      // Drag leave
-      item.addEventListener('dragleave', function(e) {
-        if (!this.contains(e.relatedTarget)) {
-          this.classList.remove('drag-over');
-          if (dragOverElement === this) {
-            dragOverElement = null;
-          }
-        }
-      });
-
-      // Drop
-      item.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('drag-over');
-        dragOverElement = null;
-        return false;
-      });
-    });
-
-    dragInitialized = true;
   }
+
+  // Close modal on outside click
+  document.getElementById('debitNoteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDebitNoteModal();
+    }
+  });
+
+  // Handle form submission
+  document.getElementById('debitNoteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const url = form.action;
+    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
+    
+    if (method !== 'POST') {
+      formData.append('_method', method);
+    }
+    
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        closeDebitNoteModal();
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error saving debit note');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving debit note');
+    });
+  });
+
+  // Update openDebitNoteDetails to open modal in edit mode instead of full page view
+  const originalOpenDebitNoteDetails = window.openDebitNoteDetails;
+  window.openDebitNoteDetails = function(id) {
+    openDebitNoteModal('edit', id);
+  };
 </script>
 
 @include('partials.table-scripts', [

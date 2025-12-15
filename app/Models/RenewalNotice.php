@@ -6,19 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Vehicle extends Model
+class RenewalNotice extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'vehicle_id', 'regn_no', 'make', 'model', 'type', 'useage', 'year', 'value', 'policy_id',
-        'engine', 'engine_type', 'cc', 'engine_no', 'chassis_no', 'from', 'to', 'notes'
+        'policy_id',
+        'rnid',
+        'notice_date',
+        'status',
+        'delivery_method',
+        'document_path',
+        'remarks',
     ];
 
-    protected $dates = ['from', 'to'];
+    protected $casts = [
+        'notice_date' => 'date',
+    ];
 
     /**
-     * Get the policy that owns the vehicle.
+     * Get the policy that owns the renewal notice.
      */
     public function policy(): BelongsTo
     {
