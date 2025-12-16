@@ -1,55 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-  .container-table { max-width: 100%; margin: 0 auto; }
-  h3 { background: #f1f1f1; padding: 8px; margin-bottom: 10px; font-weight: bold; border: 1px solid #ddd; }
-  .top-bar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
-  .left-group { display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:220px; }
-  .records-found { font-size:14px; color:#555; min-width:150px; }
-  .action-buttons { margin-left:auto; display:flex; gap:10px; align-items:center; }
-  .btn { border:none; cursor:pointer; padding:6px 12px; font-size:13px; border-radius:2px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; }
-  .btn-add { background:#df7900; color:#fff; border-color:#df7900; }
-  .btn-back { background:#ccc; color:#333; border-color:#ccc; }
-  .table-responsive { width: 100%; overflow-x: auto; border: 1px solid #ddd; max-height: 520px; overflow-y: auto; background: #fff; }
-  .footer { display:flex; justify-content:center; align-items:center; padding:5px 0; gap:10px; border-top:1px solid #ccc; flex-wrap:wrap; margin-top:15px; }
-  table { width:100%; border-collapse:collapse; font-size:13px; min-width:1000px; }
-  thead tr { background-color: black; color: white; height:35px; font-weight: normal; }
-  thead th { padding:6px 5px; text-align:left; border-right:1px solid #444; white-space:nowrap; font-weight: normal; }
-  tbody tr { background-color:#fefefe; border-bottom:1px solid #ddd; }
-  tbody tr:nth-child(even) { background-color:#f8f8f8; }
-  tbody td { padding:5px 5px; border-right:1px solid #ddd; white-space:nowrap; vertical-align:middle; font-size:12px; }
-  .btn-action { padding:2px 6px; font-size:11px; margin:1px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:2px; display:inline-block; }
-  .badge-status { font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; }
-  .badge-draft { background:#6c757d; }
-  .badge-active { background:#28a745; }
-  .badge-expired { background:#dc3545; }
-  .badge-cancelled { background:#ffc107; color:#000; }
-  input[type="text"], select { padding:6px 8px; border:1px solid #ccc; border-radius:2px; font-size:13px; }
-  
-  /* Modal Styles */
-  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
-  .modal.show { display:flex; }
-  .modal-content { background:#fff; border-radius:6px; width:90%; max-width:800px; max-height:calc(100vh - 40px); overflow:auto; box-shadow:0 4px 6px rgba(0,0,0,.1); padding:0; }
-  .modal-header { padding:15px 20px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; background:white; }
-  .modal-header h4 { margin:0; font-size:18px; font-weight:bold; color:#2d2d2d; }
-  .modal-body { padding:20px; }
-  .modal-footer { padding:15px 20px; border-top:1px solid #ddd; display:flex; justify-content:center; gap:10px; background:#f9f9f9; }
-  .modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:#666; line-height:1; padding:0; width:24px; height:24px; }
-  
-  /* Form Styles */
-  .form-group { margin-bottom:15px; }
-  .form-group label { display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#2d2d2d; }
-  .form-control { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:2px; font-size:13px; background:#f8f8f8; }
-  .form-control:focus { outline:none; border-color:#007bff; background:#fff; }
-  textarea.form-control { min-height:100px; resize:vertical; }
-  .form-row { display:grid; grid-template-columns:repeat(2, 1fr); gap:15px; margin-bottom:15px; }
-  .form-row.full-width { grid-template-columns:1fr; }
-  
-  /* Button Styles */
-  .btn-save { background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px; }
-  .btn-cancel { background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/schedules-index.css') }}">
+
+
 
 @if(session('success'))
   <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin-bottom:12px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
@@ -208,112 +162,12 @@
   </div>
 </div>
 
+
 <script>
-  let currentScheduleId = null;
-
-  function openScheduleModal(mode, scheduleId = null) {
-    const modal = document.getElementById('scheduleModal');
-    const form = document.getElementById('scheduleForm');
-    const formMethod = document.getElementById('scheduleFormMethod');
-    const modalTitle = document.getElementById('scheduleModalTitle');
-    
-    currentScheduleId = scheduleId;
-    
-    if (mode === 'add') {
-      modalTitle.textContent = 'Add Schedule';
-      form.reset();
-      form.action = '{{ route("schedules.store") }}';
-      formMethod.innerHTML = '';
-      currentScheduleId = null;
-    } else if (mode === 'edit' && scheduleId) {
-      modalTitle.textContent = 'Edit Schedule';
-      form.action = '{{ route("schedules.update", ":id") }}'.replace(':id', scheduleId);
-      formMethod.innerHTML = '@method("PUT")';
-      
-      // Fetch schedule data
-      fetch(`/schedules/${scheduleId}/edit`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.schedule) {
-            const s = data.schedule;
-            document.getElementById('policy_id').value = s.policy_id || '';
-            document.getElementById('schedule_no').value = s.schedule_no || '';
-            document.getElementById('status').value = s.status || 'draft';
-            document.getElementById('issued_on').value = s.issued_on ? s.issued_on.split('T')[0] : '';
-            document.getElementById('effective_from').value = s.effective_from ? s.effective_from.split('T')[0] : '';
-            document.getElementById('effective_to').value = s.effective_to ? s.effective_to.split('T')[0] : '';
-            document.getElementById('notes').value = s.notes || '';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching schedule data:', error);
-          alert('Error loading schedule data');
-        });
-    }
-    
-    modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeScheduleModal() {
-    const modal = document.getElementById('scheduleModal');
-    modal.classList.remove('show');
-    document.body.style.overflow = '';
-    const form = document.getElementById('scheduleForm');
-    form.reset();
-    currentScheduleId = null;
-  }
-
-  // Close modal on outside click
-  document.getElementById('scheduleModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeScheduleModal();
-    }
-  });
-
-  // Close modal on ESC key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeScheduleModal();
-    }
-  });
-
-  // Handle form submission
-  document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const form = this;
-    const formData = new FormData(form);
-    const url = form.action;
-    const method = form.querySelector('[name="_method"]') ? form.querySelector('[name="_method"]').value : 'POST';
-    
-    // Add method override if needed
-    if (method !== 'POST') {
-      formData.append('_method', method);
-    }
-    
-    fetch(url, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        closeScheduleModal();
-        window.location.reload();
-      } else {
-        alert(data.message || 'Error saving schedule');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error saving schedule');
-    });
-  });
+  // Initialize data from Blade
+  const schedulesStoreRoute = '{{ route("schedules.store") }}';
+  const schedulesUpdateRouteTemplate = '{{ route("schedules.update", ":id") }}';
 </script>
+<script src="{{ asset('js/schedules-index.js') }}"></script>
 @endsection
 

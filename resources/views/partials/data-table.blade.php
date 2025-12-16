@@ -130,9 +130,12 @@
   'columnSettingsRoute' => $columnSettingsRoute,
 ])
 
+
 <script>
-  const selectedColumns = @json($selectedColumns);
+  // Initialize data from Blade
+  const selectedColumns = @json($selectedColumns ?? []);
 </script>
+<script src="{{ asset('js/partials-data-table.js') }}"></script>
 @include('partials.table-scripts', [
   'mandatoryColumns' => $mandatoryColumns,
 ])

@@ -1,6 +1,6 @@
 
 <div class="ks-sidebar-logo">
-  <label class="ks-sidebar-logo-text custom-logo" id="login-title"><span class="ks-sidebar-orange">Key</span>stone</h3>
+  <label class="ks-sidebar-logo-text custom-logo" id="login-title"><span class="ks-sidebar-orange">Key</span>stone</label>
 </div>
         
         <ul class="ks-sidebar-menu">

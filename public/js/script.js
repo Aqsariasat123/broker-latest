@@ -3,10 +3,10 @@ function updateToggleButtonIcon() {
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = document.getElementById("toggleBtn");
   if (!toggleBtn) return;
-  
+
   const openIcon = toggleBtn.querySelector(".toggle-icon-open");
   const closeIcon = toggleBtn.querySelector(".toggle-icon-close");
-  
+
   if (window.innerWidth > 768) {
     // Desktop: collapsed = closed, not collapsed = open
     if (sidebar.classList.contains("collapsed")) {
@@ -36,7 +36,7 @@ function updateToggleButtonIcon() {
 function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   const body = document.body;
-  
+
   // On desktop: toggle collapsed state (icons only)
   if (window.innerWidth > 768) {
     sidebar.classList.toggle("collapsed");
@@ -64,7 +64,7 @@ function toggleSidebar() {
       body.classList.remove("sidebar-open");
     }
   }
-  
+
   // Update toggle button icon
   updateToggleButtonIcon();
 }
@@ -73,57 +73,57 @@ function toggleSidebar() {
 function initTooltips() {
   const sidebar = document.querySelector(".sidebar");
   if (!sidebar) return;
-  
-  const menuItems = sidebar.querySelectorAll(".ks-sidebar-menu li[data-tooltip]");
-  
+
+  const menuItems = sidebar.querySelectorAll(".ks-sidebar-menu li[data-tooltip]");                                                                              
+
   menuItems.forEach((item) => {
     // Skip if already initialized
     if (item.hasAttribute('data-tooltip-initialized')) {
       return;
     }
     item.setAttribute('data-tooltip-initialized', 'true');
-    
+
     item.addEventListener("mouseenter", function(e) {
       if (!sidebar.classList.contains("collapsed")) return;
-      
+
       const tooltip = this.getAttribute("data-tooltip");
       if (!tooltip) return;
-      
+
       // Remove any existing tooltip
-      const existingTooltip = document.querySelector(".sidebar-tooltip-chip");
+      const existingTooltip = document.querySelector(".sidebar-tooltip-chip");  
       if (existingTooltip) {
         existingTooltip.remove();
       }
-      
+
       const rect = this.getBoundingClientRect();
-      
+
       // Create tooltip element
       const tooltipEl = document.createElement("div");
       tooltipEl.className = "sidebar-tooltip-chip";
       tooltipEl.textContent = tooltip;
       document.body.appendChild(tooltipEl);
-      
+
       // Position tooltip to the right of the icon
       const left = rect.right + 8;
       const top = rect.top + (rect.height / 2);
-      
+
       tooltipEl.style.left = left + "px";
       tooltipEl.style.top = top + "px";
       tooltipEl.style.transform = "translateY(-50%)";
       tooltipEl.style.opacity = "0";
-      
+
       // Trigger animation
       requestAnimationFrame(() => {
         tooltipEl.style.opacity = "1";
         tooltipEl.style.transform = "translateY(-50%) translateX(0)";
       });
     });
-    
+
     item.addEventListener("mouseleave", function() {
-      const tooltipEl = document.querySelector(".sidebar-tooltip-chip");
+      const tooltipEl = document.querySelector(".sidebar-tooltip-chip");        
       if (tooltipEl) {
         tooltipEl.style.opacity = "0";
-        tooltipEl.style.transform = "translateY(-50%) translateX(-5px)";
+        tooltipEl.style.transform = "translateY(-50%) translateX(-5px)";        
         setTimeout(() => {
           if (tooltipEl.parentNode) {
             tooltipEl.remove();
@@ -137,14 +137,14 @@ function initTooltips() {
 // Initialize sidebar state on page load
 document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.querySelector(".sidebar");
-  
+
   // Set initial state based on screen size
   if (window.innerWidth <= 768) {
     sidebar.classList.remove("active");
   } else {
     sidebar.classList.remove("active");
   }
-  
+
   // Setup toggle button
   const toggleBtn = document.getElementById("toggleBtn");
   if (toggleBtn) {
@@ -153,14 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleSidebar();
     });
   }
-  
+
   // Initialize tooltips if sidebar is collapsed
   if (sidebar && sidebar.classList.contains("collapsed")) {
     setTimeout(() => {
       initTooltips();
     }, 100);
   }
-  
+
   // Initialize toggle button icon
   updateToggleButtonIcon();
 });
@@ -169,11 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("click", (e) => {
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = document.getElementById("toggleBtn");
-  
+
   if (window.innerWidth <= 768) {
     if (
       sidebar.classList.contains("active") &&
-      !sidebar.contains(e.target) && 
+      !sidebar.contains(e.target) &&
       !toggleBtn.contains(e.target)
     ) {
       sidebar.classList.remove("active");
@@ -185,7 +185,7 @@ document.addEventListener("click", (e) => {
 // Handle window resize
 window.addEventListener("resize", () => {
   const sidebar = document.querySelector(".sidebar");
-  
+
   if (window.innerWidth > 768) {
     sidebar.classList.remove("active");
     document.body.classList.remove("sidebar-open");
@@ -198,7 +198,7 @@ window.addEventListener("resize", () => {
       tooltip.remove();
     }
   }
-  
+
   // Update toggle button icon after resize
   updateToggleButtonIcon();
 });
@@ -207,23 +207,23 @@ window.addEventListener("resize", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const profileBtn = document.getElementById("profileBtn");
   const profileDropdown = document.querySelector(".profile-dropdown");
-  
+
   if (profileBtn && profileDropdown) {
     profileBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       profileDropdown.classList.toggle("active");
     });
-    
+
     // Close dropdown when clicking outside
     document.addEventListener("click", function(e) {
       if (!profileDropdown.contains(e.target)) {
         profileDropdown.classList.remove("active");
       }
     });
-    
+
     // Close dropdown on escape key
     document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && profileDropdown.classList.contains("active")) {
+      if (e.key === "Escape" && profileDropdown.classList.contains("active")) { 
         profileDropdown.classList.remove("active");
       }
     });
