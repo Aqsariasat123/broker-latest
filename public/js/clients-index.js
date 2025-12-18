@@ -47,6 +47,144 @@
     });
   });
   
+  // Handle client type change to show/hide fields - defined globally
+  function handleClientTypeChange() {
+      const clientTypeSelect = document.getElementById('client_type');
+      if (!clientTypeSelect) return;
+      
+      const selectedType = clientTypeSelect.value;
+      const isIndividual = selectedType === 'Individual';
+      const isBusiness = ['Business', 'Company', 'Organization'].includes(selectedType);
+      
+      // Find the form container (could be modal or page view)
+      const formContainer = clientTypeSelect.closest('form') || clientTypeSelect.closest('.modal-body') || document;
+      
+      if (!selectedType) {
+        // Hide all conditional fields if no type selected
+        formContainer.querySelectorAll('[data-field-type="Individual"]').forEach(field => {
+          field.style.display = 'none';
+        });
+        formContainer.querySelectorAll('[data-field-type="Business"]').forEach(field => {
+          field.style.display = 'none';
+        });
+        // Update labels to default
+        const dobDorLabel = document.getElementById('dob_dor_label');
+        if (dobDorLabel) {
+          dobDorLabel.textContent = 'DOB/DOR';
+        }
+        const ninBcrnLabel = document.getElementById('nin_bcrn_label');
+        if (ninBcrnLabel) {
+          ninBcrnLabel.textContent = 'NIN/BCRN';
+        }
+        return;
+      }
+      
+      // Show/hide fields based on client type
+      // Hide all conditional fields first
+      formContainer.querySelectorAll('[data-field-type="Individual"], [data-field-type="business"]').forEach(field => {
+        field.style.display = 'none';
+      });
+      
+      // Then show only the fields for the selected type
+      // Both Individual and Business show the same fields (Individual fields)
+      if (isIndividual || isBusiness) {
+        formContainer.querySelectorAll('[data-field-type="Individual"]').forEach(field => {
+          field.style.display = '';
+        });
+        // Hide all business-specific fields
+        formContainer.querySelectorAll('[data-field-type="business"]').forEach(field => {
+          field.style.display = 'none';
+        });
+      }
+      
+      // Show/hide DOB/DOR field (always shown when type is selected)
+      const dobDorRow = formContainer.querySelector('#dob_dor_row') || document.getElementById('dob_dor_row');
+      if (dobDorRow) {
+        dobDorRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
+        // Age field only for Individual, not Business
+        const ageField = dobDorRow.querySelector('.dob_age_field');
+        if (ageField) {
+          ageField.style.display = isIndividual ? '' : 'none';
+        }
+      }
+      
+      // Update labels dynamically
+      const dobDorLabel = formContainer.querySelector('#dob_dor_label') || document.getElementById('dob_dor_label');
+      if (dobDorLabel) {
+        if (isIndividual) {
+          dobDorLabel.textContent = 'DOB';
+        } else if (isBusiness) {
+          dobDorLabel.textContent = 'DOB'; // Business also shows DOB
+        } else {
+          dobDorLabel.textContent = 'DOB/DOR';
+        }
+      }
+      
+      // Show/hide NIN/BCRN field
+      const ninBcrnRow = formContainer.querySelector('[data-field-type="Individual"] #nin_bcrn')?.closest('.detail-row');
+      const bcrnBusinessRow = formContainer.querySelector('[data-field-type="business"] #bcrn_business_main')?.closest('.detail-row');
+      
+      if (ninBcrnRow) {
+        ninBcrnRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
+      }
+      if (bcrnBusinessRow) {
+        bcrnBusinessRow.style.display = 'none'; // Always hide business BCRN field
+      }
+      
+      const ninBcrnLabel = formContainer.querySelector('#nin_bcrn_label') || document.getElementById('nin_bcrn_label');
+      if (ninBcrnLabel) {
+        ninBcrnLabel.textContent = 'NIN';
+      }
+      
+      // Sync values between duplicate fields when type changes
+      if (isBusiness) {
+        // Sync BCRN fields
+        const ninBcrn = document.getElementById('nin_bcrn');
+        const bcrnBusiness = document.getElementById('bcrn_business_main');
+        if (ninBcrn && bcrnBusiness) {
+          if (bcrnBusiness.value && !ninBcrn.value) {
+            ninBcrn.value = bcrnBusiness.value;
+          } else if (ninBcrn.value && !bcrnBusiness.value) {
+            bcrnBusiness.value = ninBcrn.value;
+          }
+        }
+        
+        // Sync mobile no
+        const mobileNoIndividual = document.getElementById('mobile_no_individual');
+        const mobileNoBusiness = document.getElementById('mobile_no_business');
+        if (mobileNoIndividual && mobileNoBusiness) {
+          if (mobileNoBusiness.value && !mobileNoIndividual.value) {
+            mobileNoIndividual.value = mobileNoBusiness.value;
+          } else if (mobileNoIndividual.value && !mobileNoBusiness.value) {
+            mobileNoBusiness.value = mobileNoIndividual.value;
+          }
+        }
+      }
+      
+      // Update required fields
+      const firstNameInput = formContainer.querySelector('#first_name') || document.getElementById('first_name');
+      const surnameInput = formContainer.querySelector('#surname') || document.getElementById('surname');
+      const businessNameInput = formContainer.querySelector('#business_name') || document.getElementById('business_name');
+      
+      if (isIndividual || isBusiness) {
+        // Both Individual and Business use the same fields, so same validation
+        if (firstNameInput) {
+          firstNameInput.required = true;
+        }
+        if (surnameInput) {
+          surnameInput.required = true;
+        }
+        if (businessNameInput) {
+          businessNameInput.required = false;
+        }
+      } else {
+        // Reset required states if no type selected
+        if (firstNameInput) firstNameInput.required = false;
+        if (surnameInput) surnameInput.required = false;
+        if (businessNameInput) businessNameInput.required = false;
+      }
+    }
+  
   // Initialize filter visibility based on toggle state
   document.addEventListener('DOMContentLoaded', function() {
     const filterToggle = document.getElementById('filterToggle');
@@ -57,34 +195,41 @@
       });
     }
     
-    // Ensure all fields are visible when Individual or Entity (Business/Company) is selected
+    // Helper function to sync duplicate fields
+    function syncDuplicateFields(primaryId, duplicateIds) {
+      const primary = document.getElementById(primaryId);
+      if (!primary) return;
+      
+      duplicateIds.forEach(dupId => {
+        const duplicate = document.getElementById(dupId);
+        if (duplicate) {
+          if (duplicate.value && !primary.value) {
+            primary.value = duplicate.value;
+          } else if (primary.value && !duplicate.value) {
+            duplicate.value = primary.value;
+          }
+        }
+      });
+    }
+    
+    // Initialize on page load - show fields based on selected type
+    // Since Individual is selected by default, show Individual fields immediately
+    handleClientTypeChange();
+    
+    // Also check fields on any form that might be created dynamically
+    setTimeout(() => {
+      handleClientTypeChange();
+    }, 100);
+    
+    // Listen for client type changes
     const clientTypeSelect = document.getElementById('client_type');
     if (clientTypeSelect) {
-      clientTypeSelect.addEventListener('change', function() {
-        const selectedType = this.value;
-        // Entity types: Business and Company are considered entities
-        const entityTypes = ['Business', 'Company'];
-        const shouldShowAllFields = selectedType === 'Individual' || entityTypes.includes(selectedType);
-        
-        if (shouldShowAllFields) {
-          // Ensure all form fields are visible
-          const allFields = document.querySelectorAll('.detail-row, .detail-section, .detail-section-body');
-          allFields.forEach(field => {
-            field.style.display = '';
-            field.style.visibility = '';
-            field.style.opacity = '';
-          });
-          
-          // Also ensure all inputs, selects, and textareas are visible
-          const allInputs = document.querySelectorAll('#clientForm input, #clientForm select, #clientForm textarea, #clientForm .detail-section');
-          allInputs.forEach(input => {
-            if (input.closest('.detail-section')) {
-              input.closest('.detail-section').style.display = '';
-            }
-            input.style.display = '';
-            input.style.visibility = '';
-            input.disabled = false;
-          });
+      clientTypeSelect.addEventListener('change', handleClientTypeChange);
+      
+      // Also handle changes in modal and page view forms (delegated event)
+      document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'client_type') {
+          handleClientTypeChange();
         }
       });
     }
@@ -222,7 +367,7 @@
     const idExpiryDays = client.id_expiry_date ? daysUntilExpiry(client.id_expiry_date) : '';
     const photoUrl = client.image ? (client.image.startsWith('http') ? client.image : `/storage/${client.image}`) : '';
 
-    // Column 1 (Leftmost): CUSTOMER DETAILS, then CONTACT DETAILS
+    // Column 1 (Leftmost): CUSTOMER DETAILS only
     const col1 = `
       <div class="detail-section">
         <div class="detail-section-header">CUSTOMER DETAILS</div>
@@ -255,18 +400,16 @@
           </div>
         </div>
       </div>
+    `;
+
+    // Column 2 (Second from Left): CONTACT DETAILS only
+    const col2 = `
       <div class="detail-section">
         <div class="detail-section-header">CONTACT DETAILS</div>
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Mobile No</span>
             <div class="detail-value">${client.mobile_no || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">On Whatsapp</span>
-            <div class="detail-value checkbox">
-              <input type="checkbox" ${client.wa ? 'checked' : ''} disabled>
-            </div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Alternate No</span>
@@ -278,15 +421,18 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Contact Person</span>
-            <div class="detail-value">${client.contact_person || ''}</div>
-            </div>
+            <div class="detail-value">${client.contact_person || '-'}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Designation</span>
+            <div class="detail-value">${client.designation || '-'}</div>
           </div>
         </div>
-   
+      </div>
     `;
 
-    // Column 2 (Second from Left): ADDRESS DETAILS , then REGISTRATION DETAILS
-    const col2 = `
+    // Column 3 (Second from Right): ADDRESS DETAILS only
+    const col3 = `
       <div class="detail-section">
         <div class="detail-section-header">ADDRESS DETAILS</div>
         <div class="detail-section-body">
@@ -295,11 +441,11 @@
             <div class="detail-value">${client.district || '-'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Address</span>
+            <span class="detail-label">Address Location</span>
             <div class="detail-value">${client.location || '-'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Island</span>
+            <span class="detail-label">Location</span>
             <div class="detail-value">${client.island || '-'}</div>
           </div>
           <div class="detail-row">
@@ -312,20 +458,16 @@
           </div>
         </div>
       </div>
+    `;
+
+    // Column 4 (Rightmost): OTHER DETAILS (Registration info)
+    const col4 = `
       <div class="detail-section">
-        <div class="detail-section-header">REGISTRATION DETAILS</div>
+        <div class="detail-section-header">OTHER DETAILS</div>
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Sign Up Date</span>
             <div class="detail-value">${client.signed_up ? formatDate(client.signed_up) : '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Agency</span>
-            <div class="detail-value">Keystone</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Agent</span>
-            <div class="detail-value">${client.agent || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Source</span>
@@ -335,143 +477,19 @@
             <span class="detail-label">Source Name</span>
             <div class="detail-value">${client.source_name || '-'}</div>
           </div>
-        </div>
-      </div>
-      
-    `;
-
-    // Column 3 (Second from Right): ADDRESS DETAILS, then OTHER DETAILS
-    const col3 = `
-      <div class="detail-section">
-        <div class="detail-section-header">INDIVIDUAL DETAILS</div>
-        <div class="detail-section-body">
-          <div style="display:flex; gap:10px; align-items:flex-start;">
-            <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-              <div class="detail-row" style="margin-bottom:0;">
-                <span class="detail-label">Salutation</span>
-                <div class="detail-value" style="flex:1;">${client.salutation || '-'}</div>
-          </div>
-              <div class="detail-row" style="margin-bottom:0;">
-                <span class="detail-label">First Name</span>
-                <div class="detail-value" style="flex:1;">${client.first_name || '-'}</div>
-              </div>
-            </div>
-            ${photoUrl ? `<div style="flex-shrink:0; margin-top:13px;"><img src="${photoUrl}" alt="Photo" class="detail-photo" style="cursor:pointer; width:80px; height:100px; border:1px solid #ddd; border-radius:2px;" onclick="previewClientPhotoModal('${photoUrl}')"></div>` : '<div style="flex-shrink:0; margin-top:13px; width:80px; height:100px; border:1px solid #ddd; border-radius:2px; background:#f5f5f5;"></div>'}
+          <div class="detail-row">
+            <span class="detail-label">Agency</span>
+            <div class="detail-value">${client.agency || 'Keystone'}</div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Other Names</span>
-            <div class="detail-value">${client.other_names || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Surname</span>
-            <div class="detail-value">${client.surname || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Passport No</span>
-            <div style="display:flex; gap:5px; align-items:center; flex:1;">
-              <div class="detail-value" style="flex:1;">${client.passport_no || '-'}</div>
-              <input type="text" value="SEY" readonly style="width:60px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; text-align:center; font-size:11px; font-family:inherit; box-sizing:border-box; min-height:22px; flex-shrink:0;">
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header">INCOME DETAILS</div>
-        <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Occupation</span>
-            <div class="detail-value">${client.occupation || '-'}</div>
-            </div>
-          <div class="detail-row">
-            <span class="detail-label">Income Source</span>
-            <div class="detail-value">${client.income_source || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Employer</span>
-            <div class="detail-value">${client.employer || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Monthly Income</span>
-            <div class="detail-value">${client.monthly_income || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label"></span>
-            <div class="detail-value"></div>
-          </div>
-        </div>
-      </div>
-      
-
-    `;
-
-    // Column 4 (Rightmost): REGISTRATION DETAILS, then INSURABLES
-    const col4 = `
-      <div class="detail-section">
-        <div class="detail-section-header">OTHER DETAILS</div>
-        <div class="detail-section-body">
-          <div class="detail-row">
-            <span class="detail-label">Married</span>
-            <div class="detail-value checkbox">
-              <input type="checkbox" ${client.married ? 'checked' : ''} disabled>
-          </div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Spouse's Name</span>
-            <div class="detail-value">${client.spouses_name || '-'}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">PEP</span>
-            <div style="display:flex; gap:5px; align-items:center; flex:1;">
-              <div class="detail-value checkbox" style="flex:0 0 auto; min-width:auto;">
-                <input type="checkbox" ${client.pep ? 'checked' : ''} disabled>
-          </div>
-              <input type="text" value="PEP Details" readonly style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; font-size:11px; font-family:inherit; box-sizing:border-box; min-height:22px;">
-            </div>
-          </div>
-          <div class="detail-row" style="align-items:flex-start;">
-            <span class="detail-label"></span>
-            <div class="detail-value" style="min-height:40px; padding:4px 6px; border:1px solid #ddd; border-radius:2px; background:#fff; white-space:pre-wrap; word-wrap:break-word; flex:1;">${client.pep_comment || ''}</div>
-          </div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header">INSURABLES</div>
-        <div class="detail-section-body">
-          <div style="display:flex; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
-            <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-              <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Vehicle</span>
-              <div class="detail-value checkbox" style="flex:0 0 auto;">
-                <input type="checkbox" ${client.has_vehicle ? 'checked' : ''} disabled>
-              </div>
-            </div>
-            <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-              <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">House</span>
-              <div class="detail-value checkbox" style="flex:0 0 auto;">
-                <input type="checkbox" ${client.has_house ? 'checked' : ''} disabled>
-              </div>
-            </div>
-            <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-              <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Business</span>
-              <div class="detail-value checkbox" style="flex:0 0 auto;">
-                <input type="checkbox" ${client.has_business ? 'checked' : ''} disabled>
-              </div>
-            </div>
-          </div>
-          <div class="detail-row" style="margin-bottom:8px; align-items:center;">
-            <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Boat</span>
-            <div class="detail-value checkbox" style="flex:0 0 auto;">
-                <input type="checkbox" ${client.has_boat ? 'checked' : ''} disabled>
-              </div>
-            </div>
-          <div class="detail-row" style="align-items:flex-start;">
-            <span class="detail-label">Notes</span>
-            <textarea class="detail-value" style="min-height:40px; resize:vertical; flex:1; font-size:11px; padding:4px 6px;" readonly>${client.notes || ''}</textarea>
+            <span class="detail-label">Agent</span>
+            <div class="detail-value">${client.agent || '-'}</div>
           </div>
         </div>
       </div>
     `;
 
-    // Render columns in order: CUSTOMER, CONTACT, ADDRESS, REGISTRATION (left to right)
+    // Render columns in order: CUSTOMER, CONTACT, ADDRESS, OTHER DETAILS (left to right)
     content.innerHTML = col1 + col2 + col3 + col4;
 
     // Load documents from documents table
@@ -849,7 +867,7 @@
     const previewContainer = document.getElementById('clientPhotoPreview');
     const imageInput = event.target;
     
-    if (file && preview) {
+    if (file && preview && previewContainer) {
       // Validate passport photo dimensions
       const img = new Image();
       const reader = new FileReader();
@@ -919,25 +937,21 @@
     const formMethod = document.getElementById('clientFormMethod');
     const deleteBtn = document.getElementById('clientDeleteBtn');
 
-    // Ensure all fields are visible when modal opens - use modal form specifically
-    const modalBody = modalForm ? modalForm.querySelector('.modal-body') : null;
-    const allFields = modalBody ? modalBody.querySelectorAll('.detail-row, .detail-section, .detail-section-body') : [];
-    allFields.forEach(field => {
-      field.style.display = '';
-      field.style.visibility = '';
-      field.style.opacity = '';
-    });
-    const allInputs = modalBody ? modalBody.querySelectorAll('input, select, textarea') : [];
-    allInputs.forEach(input => {
-      input.style.display = '';
-      input.style.visibility = '';
-    });
+    // Don't force all fields visible - let handleClientTypeChange handle it based on client type
+    // This allows conditional fields to be properly hidden/shown
 
     if (mode === 'add') {
       modalForm.action = clientsStoreRoute;
       formMethod.innerHTML = '';
       deleteBtn.style.display = 'none';
       modalForm.reset();
+      
+      // Set Individual as default client type
+      const clientTypeSelect = document.getElementById('client_type');
+      if (clientTypeSelect && !clientTypeSelect.value) {
+        clientTypeSelect.value = 'Individual';
+      }
+      
       // Make photo required for new clients
       const imageInput = document.getElementById('image');
       if (imageInput) imageInput.required = true;
@@ -959,9 +973,12 @@
       document.getElementById('has_boat').checked = false;
       // Clear photo preview
       const photoImg = document.getElementById('clientPhotoImg');
-      const photoSpan = document.getElementById('clientPhotoPreview').querySelector('span');
+      const photoPreview = document.getElementById('clientPhotoPreview');
       if (photoImg) photoImg.style.display = 'none';
-      if (photoSpan) photoSpan.style.display = 'block';
+      if (photoPreview) {
+        const photoSpan = photoPreview.querySelector('span');
+        if (photoSpan) photoSpan.style.display = 'block';
+      }
       // Clear calculated fields
       document.getElementById('dob_age').value = '';
       document.getElementById('id_expiry_days').value = '';
@@ -1030,10 +1047,11 @@
       if (client.image) {
         document.getElementById('existing_image').value = client.image;
         const photoImg = document.getElementById('clientPhotoImg');
-        const photoSpan = document.getElementById('clientPhotoPreview').querySelector('span');
-        if (photoImg) {
+        const photoPreview = document.getElementById('clientPhotoPreview');
+        if (photoImg && photoPreview) {
           photoImg.src = client.image.startsWith('http') ? client.image : `/storage/${client.image}`;
           photoImg.style.display = 'block';
+          const photoSpan = photoPreview.querySelector('span');
           if (photoSpan) photoSpan.style.display = 'none';
         }
         // Photo not required if existing image exists
@@ -1049,6 +1067,11 @@
       // Calculate age and expiry days
       calculateAgeFromDOB();
       calculateIDExpiryDays();
+      
+      // After populating form, update field visibility based on client type
+      setTimeout(() => {
+        handleClientTypeChange();
+      }, 150);
     }
 
     // Add event listeners for calculations
@@ -1066,44 +1089,26 @@
     // Setup toggle on page load
     setupWaToggle();
 
-    // Attach client type change listener to ensure all fields remain visible for Individual and Entity types
+    // Call handleClientTypeChange after modal opens to properly show/hide fields based on selected type
+    // Also ensure the change listener is attached
     const clientTypeSelect = document.getElementById('client_type');
     if (clientTypeSelect) {
-      // Remove existing listeners by cloning
+      // If no value is set (in add mode), default to Individual
+      if (mode === 'add' && !clientTypeSelect.value) {
+        clientTypeSelect.value = 'Individual';
+      }
+      
+      // Remove existing listeners to avoid duplicates
       const newClientTypeSelect = clientTypeSelect.cloneNode(true);
       clientTypeSelect.parentNode.replaceChild(newClientTypeSelect, clientTypeSelect);
       
-      newClientTypeSelect.addEventListener('change', function() {
-        const selectedType = this.value;
-        // Entity types: Business and Company are considered entities
-        const entityTypes = ['Business', 'Company'];
-        const shouldShowAllFields = selectedType === 'Individual' || entityTypes.includes(selectedType);
-        
-        if (shouldShowAllFields) {
-          // Ensure all form fields are visible
-          const allFields = document.querySelectorAll('#clientForm .detail-row, #clientForm .detail-section, #clientForm .detail-section-body');
-          allFields.forEach(field => {
-            field.style.display = '';
-            field.style.visibility = '';
-            field.style.opacity = '';
-          });
-          
-          // Also ensure all inputs, selects, and textareas are visible
-          const allInputs = document.querySelectorAll('#clientForm input, #clientForm select, #clientForm textarea');
-          allInputs.forEach(input => {
-            if (input.closest('.detail-section')) {
-              input.closest('.detail-section').style.display = '';
-            }
-            input.style.display = '';
-            input.style.visibility = '';
-          });
-        }
-      });
+      newClientTypeSelect.addEventListener('change', handleClientTypeChange);
       
-      // Trigger on initial load if a type is already selected
-      if (newClientTypeSelect.value === 'Individual' || ['Business', 'Company'].includes(newClientTypeSelect.value)) {
-        newClientTypeSelect.dispatchEvent(new Event('change'));
-      }
+      // Call immediately and after a delay to ensure fields are shown
+      handleClientTypeChange();
+      setTimeout(() => {
+        handleClientTypeChange();
+      }, 200);
     }
 
     // Clone form content from modal to page view
@@ -1182,25 +1187,9 @@
           pageMethodDiv.innerHTML = formMethod.innerHTML;
         }
         
-        // Ensure all fields in cloned form are visible
-        const clonedFields = formContentDiv.querySelectorAll('.detail-row, .detail-section, .detail-section-body');
-        clonedFields.forEach(field => {
-          field.style.display = '';
-          field.style.visibility = '';
-          field.style.opacity = '';
-        });
-        const clonedInputs = formContentDiv.querySelectorAll('input, select, textarea');
-        clonedInputs.forEach(input => {
-          input.style.display = '';
-          input.style.visibility = '';
-          if (input.closest('.detail-section')) {
-            input.closest('.detail-section').style.display = '';
-          }
-        });
-        
         // If editing, populate the cloned form fields with client data
         if (mode === 'edit' && client) {
-          const fields = ['salutation','first_name','other_names','surname','client_type','nin_bcrn','dob_dor','id_expiry_date','passport_no','mobile_no','alternate_no','email_address','occupation','employer','income_source','monthly_income','source','source_name','agent','agency','status','signed_up','location','district','island','country','po_box_no','spouses_name','contact_person','pep_comment','notes'];
+          const fields = ['salutation','first_name','other_names','surname','client_type','nin_bcrn','dob_dor','id_expiry_date','passport_no','mobile_no','alternate_no','email_address','occupation','employer','income_source','monthly_income','source','source_name','agent','agency','status','signed_up','location','district','island','country','po_box_no','spouses_name','contact_person','pep_comment','notes','designation'];
           fields.forEach(k => {
             const el = formContentDiv.querySelector(`#${k}`);
             if (!el) return;
@@ -1211,11 +1200,17 @@
                 // Format date for date inputs (YYYY-MM-DD)
                 const date = new Date(client[k]);
                 el.value = date.toISOString().split('T')[0];
-              } else {
-                el.value = client[k] ?? '';
-              }
+            } else {
+              el.value = client[k] ?? '';
             }
+          }
           });
+          
+          // Handle business_name for business clients
+          const businessNameInput = formContentDiv.querySelector('#business_name');
+          if (businessNameInput && ['Business', 'Company', 'Organization'].includes(client.client_type)) {
+            businessNameInput.value = client.client_name || '';
+          }
           
           // Set checkboxes in cloned form
           const marriedCheckbox = formContentDiv.querySelector('#married');
@@ -1324,39 +1319,127 @@
             });
           }
           
+          // Handle client type change for cloned form
+          function handleClientTypeChangeInForm(container) {
+            const clientTypeSelect = container.querySelector('#client_type');
+            if (!clientTypeSelect) return;
+            
+            const selectedType = clientTypeSelect.value;
+            const isIndividual = selectedType === 'Individual';
+            const isBusiness = ['Business', 'Company', 'Organization'].includes(selectedType);
+            
+            if (!selectedType) {
+              // Hide all conditional fields if no type selected
+              container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+                field.style.display = 'none';
+              });
+              container.querySelectorAll('[data-field-type="business"]').forEach(field => {
+                field.style.display = 'none';
+              });
+              return;
+            }
+            
+            // Hide all conditional fields first
+            container.querySelectorAll('[data-field-type="individual"], [data-field-type="business"]').forEach(field => {
+              field.style.display = 'none';
+            });
+            
+            // Then show only the fields for the selected type
+            // Both Individual and Business show the same fields (Individual fields)
+            if (isIndividual || isBusiness) {
+              container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+                field.style.display = '';
+              });
+              // Hide all business-specific fields
+              container.querySelectorAll('[data-field-type="business"]').forEach(field => {
+                field.style.display = 'none';
+              });
+            }
+            
+            // Show/hide DOB/DOR field (always shown when type is selected)
+            const dobDorRow = container.querySelector('#dob_dor_row');
+            if (dobDorRow) {
+              dobDorRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
+              // Age field only for Individual, not Business
+              const ageField = dobDorRow.querySelector('.dob_age_field');
+              if (ageField) {
+                ageField.style.display = isIndividual ? '' : 'none';
+              }
+            }
+            
+            // Update labels dynamically
+            const dobDorLabel = container.querySelector('#dob_dor_label');
+            if (dobDorLabel) {
+              if (isIndividual) {
+                dobDorLabel.textContent = 'DOB';
+              } else if (isBusiness) {
+                dobDorLabel.textContent = 'DOB'; // Business also shows DOB
+              } else {
+                dobDorLabel.textContent = 'DOB/DOR';
+              }
+            }
+            
+            const ninBcrnLabel = container.querySelector('#nin_bcrn_label');
+            if (ninBcrnLabel) {
+              ninBcrnLabel.textContent = 'NIN'; // Both use NIN
+            }
+            
+            // Show/hide NIN/BCRN field
+            const ninBcrnRowInContainer = container.querySelector('[data-field-type="individual"] #nin_bcrn')?.closest('.detail-row');
+            if (ninBcrnRowInContainer) {
+              ninBcrnRowInContainer.style.display = (isIndividual || isBusiness) ? '' : 'none';
+            }
+            
+            // Note: No sections to show/hide anymore - all fields are in the grid
+            
+            // Update required fields
+            const firstNameInput = container.querySelector('#first_name');
+            const surnameInput = container.querySelector('#surname');
+            const businessNameInput = container.querySelector('#business_name');
+            
+            if (isIndividual || isBusiness) {
+              // Both Individual and Business use the same fields, so same validation
+              if (firstNameInput) {
+                firstNameInput.required = true;
+              }
+              if (surnameInput) {
+                surnameInput.required = true;
+              }
+              if (businessNameInput) {
+                businessNameInput.required = false;
+              }
+            } else {
+              // Reset required states if no type selected
+              if (firstNameInput) firstNameInput.required = false;
+              if (surnameInput) surnameInput.required = false;
+              if (businessNameInput) businessNameInput.required = false;
+            }
+          }
+          
           // Attach client type change listener to cloned form
           const clonedClientTypeSelect = formContentDiv.querySelector('#client_type');
           if (clonedClientTypeSelect) {
+            // If no value is set (in add mode), default to Individual
+            if (mode === 'add' && !clonedClientTypeSelect.value) {
+              clonedClientTypeSelect.value = 'Individual';
+            }
+            
             clonedClientTypeSelect.addEventListener('change', function() {
-              const selectedType = this.value;
-              const entityTypes = ['Business', 'Company'];
-              const shouldShowAllFields = selectedType === 'Individual' || entityTypes.includes(selectedType);
-              
-              if (shouldShowAllFields) {
-                // Ensure all form fields are visible
-                const allFields = formContentDiv.querySelectorAll('.detail-row, .detail-section, .detail-section-body');
-                allFields.forEach(field => {
-                  field.style.display = '';
-                  field.style.visibility = '';
-                  field.style.opacity = '';
-                });
-                
-                // Also ensure all inputs, selects, and textareas are visible
-                const allInputs = formContentDiv.querySelectorAll('input, select, textarea');
-                allInputs.forEach(input => {
-                  if (input.closest('.detail-section')) {
-                    input.closest('.detail-section').style.display = '';
-                  }
-                  input.style.display = '';
-                  input.style.visibility = '';
-                });
-              }
+              handleClientTypeChangeInForm(formContentDiv);
             });
             
-            // Trigger on initial load if a type is already selected
-            if (clonedClientTypeSelect.value === 'Individual' || ['Business', 'Company'].includes(clonedClientTypeSelect.value)) {
-              clonedClientTypeSelect.dispatchEvent(new Event('change'));
-            }
+            // Trigger on initial load after form is populated to show correct fields
+            setTimeout(() => {
+              handleClientTypeChangeInForm(formContentDiv);
+            }, 100);
+          } else {
+            // Even if no client type select, hide all conditional fields
+            formContentDiv.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+              field.style.display = 'none';
+            });
+            formContentDiv.querySelectorAll('[data-field-type="business"]').forEach(field => {
+              field.style.display = 'none';
+            });
           }
           
           // Attach WA checkbox listener to cloned form
@@ -1750,12 +1833,71 @@
     e.preventDefault();
     
     const form = this;
-    const req = form.querySelectorAll('[required]');
+    
+    // Disable hidden duplicate fields to prevent submission conflicts
+    const clientType = form.querySelector('#client_type')?.value;
+    const isIndividual = clientType === 'Individual';
+    const isBusiness = ['Business', 'Company', 'Organization'].includes(clientType);
+    
+    // Sync values from visible fields to primary fields and disable hidden duplicates
+    if (isBusiness) {
+        // Sync business fields
+        const businessName = form.querySelector('#business_name');
+        const mobileNo = form.querySelector('#mobile_no_business') || form.querySelector('#mobile_no_individual');
+      const district = form.querySelector('#district_business') || form.querySelector('#district_business_col3') || form.querySelector('#district');
+      const signedUp = form.querySelector('#signed_up_business') || form.querySelector('#signed_up_business_col4') || form.querySelector('#signed_up');
+      const agency = form.querySelector('#agency_business') || form.querySelector('#agency');
+      const agent = form.querySelector('#agent_business') || form.querySelector('#agent');
+      const source = form.querySelector('#source_business') || form.querySelector('#source');
+      const sourceName = form.querySelector('#source_name_business') || form.querySelector('#source_name');
+      const location = form.querySelector('#location_business') || form.querySelector('#location');
+      const island = form.querySelector('#island_business') || form.querySelector('#island');
+      const country = form.querySelector('#country_business') || form.querySelector('#country');
+      const notes = form.querySelector('#notes_business') || form.querySelector('#notes');
+      const alternateNo = form.querySelector('#alternate_no_business') || form.querySelector('#alternate_no');
+      const emailAddress = form.querySelector('#email_address_business') || form.querySelector('#email_address');
+      const poBox = form.querySelector('#po_box_location') || form.querySelector('#po_box_no');
+      const bcrn = form.querySelector('#bcrn_business_main') || form.querySelector('#nin_bcrn');
+      const wa = form.querySelector('#wa_business') || form.querySelector('#wa');
+      
+      // Sync values to primary fields (if they exist)
+      if (businessName && form.querySelector('#first_name')) {
+        form.querySelector('#first_name').value = businessName.value;
+      }
+      if (mobileNo && form.querySelector('#mobile_no')) {
+        form.querySelector('#mobile_no').value = mobileNo.value;
+      }
+      
+      // Disable all hidden individual fields
+      form.querySelectorAll('[data-field-type="individual"] input, [data-field-type="individual"] select, [data-field-type="individual"] textarea').forEach(field => {
+        if (field.offsetParent === null) { // Check if hidden
+          field.disabled = true;
+        }
+      });
+    } else if (isIndividual) {
+      // Disable all hidden business fields
+      form.querySelectorAll('[data-field-type="business"] input, [data-field-type="business"] select, [data-field-type="business"] textarea').forEach(field => {
+        if (field.offsetParent === null) { // Check if hidden
+          field.disabled = true;
+        }
+      });
+    }
+    
+    // Check required fields
+    const req = form.querySelectorAll('[required]:not([disabled])');
     let ok = true;
     req.forEach(f => { if (!String(f.value||'').trim()) { ok = false; f.style.borderColor='red'; } else { f.style.borderColor=''; } });
-    if (!ok) { alert('Please fill required fields'); return; }
+    if (!ok) { 
+      // Re-enable disabled fields
+      form.querySelectorAll('input[disabled], select[disabled], textarea[disabled]').forEach(f => f.disabled = false);
+      alert('Please fill required fields'); 
+      return; 
+    }
     
     const formData = new FormData(form);
+    
+    // Re-enable disabled fields after form data is collected
+    form.querySelectorAll('input[disabled], select[disabled], textarea[disabled]').forEach(f => f.disabled = false);
     const isEdit = form.action.includes('/clients/') && form.action !== clientsStoreRoute;
     const url = isEdit ? form.action : form.action;
     const method = isEdit ? 'PUT' : 'POST';

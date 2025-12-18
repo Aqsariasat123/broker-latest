@@ -121,17 +121,7 @@
                 </div>
               </td>
               <td class="action-cell">
-                <svg class="action-expand" onclick="openClientDetailsModal({{ $client->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <!-- Maximize icon: four arrows pointing outward from center -->
-                  <!-- Top arrow -->
-                  <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- Right arrow -->
-                  <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- Bottom arrow -->
-                  <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- Left arrow -->
-                  <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openClientDetailsModal({{ $client->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
                 <svg class="action-clock" onclick="window.location.href='{{ route('clients.index') }}?follow_up=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                   <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
                   <path d="M12 7V12L15 15" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
@@ -254,12 +244,12 @@
           <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
               <div class="client-page-nav">
-                <button class="nav-tab" data-tab="proposals" data-url="{{ route('life-proposals.index') }}">Proposals</button>
-                <button class="nav-tab" data-tab="policies" data-url="{{ route('policies.index') }}">Policies</button>
+                <button class="nav-tab active" data-tab="policies" data-url="{{ route('policies.index') }}">Policies</button>
                 <button class="nav-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
                 <button class="nav-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
                 <button class="nav-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
-                <button class="nav-tab active" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
+                <button class="nav-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
+                <button class="nav-tab" data-tab="bos" data-url="#">BOs</button>
               </div>
               <div class="client-page-actions">
                 <button class="btn btn-edit" id="editClientFromPageBtn" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Edit</button>
@@ -334,290 +324,329 @@
 
         <div class="modal-body" style="background:#f5f5f5; padding:12px;">
           <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
-            <!-- Column 1: Customer Details & Individual Details -->
+            <!-- Column 1 -->
             <div>
-              <div class="detail-section">
-                <div class="detail-section-header">CUSTOMER DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">Client Type</span>
-                    <select id="client_type" name="client_type" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @if(isset($lookupData['client_types']))
-                        @foreach($lookupData['client_types'] as $clientType)
-                          <option value="{{ $clientType }}">{{ $clientType }}</option>
-                        @endforeach
-                      @else
-                        <option value="Individual">Individual</option>
-                        <option value="Business">Business</option>
-                        <option value="Company">Company</option>
-                        <option value="Organization">Organization</option>
-                      @endif
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">DOB/DOR</span>
-                    <div style="display:flex; gap:5px; align-items:center; flex:1;">
-                      <input id="dob_dor" name="dob_dor" type="date" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <input id="dob_age" type="text" readonly class="detail-value" style="width:50px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px; flex-shrink:0;">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">NIN/BCRN</span>
-                    <input id="nin_bcrn" name="nin_bcrn" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">ID Expiry Date</span>
-                    <div style="display:flex; gap:5px; align-items:center; flex:1;">
-                      <input id="id_expiry_date" name="id_expiry_date" type="date" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <input id="id_expiry_days" type="text" readonly class="detail-value" style="width:50px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px; flex-shrink:0;">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Client Status</span>
-                    <select id="status" name="status" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['client_statuses'] as $st) <option value="{{ $st }}">{{ $st }}</option> @endforeach
-                    </select>
-                  </div>
+              <div class="detail-row">
+                <span class="detail-label">Client Type</span>
+                <select id="client_type" name="client_type" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @if(isset($lookupData['client_types']))
+                    @foreach($lookupData['client_types'] as $clientType)
+                      <option value="{{ $clientType }}" {{ $clientType === 'Individual' ? 'selected' : '' }}>{{ $clientType }}</option>
+                    @endforeach
+                  @else
+                    <option value="Individual" selected>Individual</option>
+                    <option value="Business">Business</option>
+                    <option value="Company">Company</option>
+                    <option value="Organization">Organization</option>
+                  @endif
+                </select>
+              </div>
+              <!-- Individual fields -->
+              <div class="detail-row" id="dob_dor_row" data-field-type="individual" style="display:none;">
+                <span class="detail-label" id="dob_dor_label">DOB</span>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                  <input id="dob_dor" name="dob_dor" type="date" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <input id="dob_age" type="text" readonly class="detail-value dob_age_field" style="width:50px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px; flex-shrink:0;">
                 </div>
               </div>
-              <div class="detail-section">
-                <div class="detail-section-header">INDIVIDUAL DETAILS</div>
-                <div class="detail-section-body">
-                  <div style="display:flex; gap:10px; align-items:flex-start;">
-                    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                      <div class="detail-row" style="margin-bottom:0;">
-                    <span class="detail-label">Salutation</span>
-                        <select id="salutation" name="salutation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-                    </select>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Monthly Income</span>
+                <input id="monthly_income" name="monthly_income" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">PEP</span>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                  <div class="detail-value checkbox" style="flex:0 0 auto; min-width:auto;">
+                    <input id="pep" name="pep" type="checkbox" value="1">
                   </div>
-                      <div class="detail-row" style="margin-bottom:0;">
-                      <span class="detail-label">First Name</span>
-                      <input id="first_name" name="first_name" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                    </div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; flex-shrink:0; margin-top:13px;">
-                      <div id="clientPhotoPreview" style="width:80px; height:100px; border:1px solid #ddd; border-radius:2px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                        <img id="clientPhotoImg" src="" alt="Photo" class="detail-photo" style="display:none; width:100%; height:100%; object-fit:cover;">
-                        <span style="font-size:10px; color:#999;">Photo</span>
-                      </div>
-                      <input id="image" name="image" type="file" accept="image/*" style="margin-top:5px; font-size:10px; width:80px;" onchange="previewClientPhoto(event)">
-                      <input type="hidden" id="existing_image" name="existing_image" value="">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Other Names</span>
-                    <input id="other_names" name="other_names" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Surname</span>
-                    <input id="surname" name="surname" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Passport No</span>
-                    <div style="display:flex; gap:5px; align-items:center; flex:1;">
-                      <input id="passport_no" name="passport_no" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <input type="text" value="SEY" readonly style="width:60px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; text-align:center; font-size:11px; flex-shrink:0;">
-                    </div>
-                  </div>
+                  <input type="text" value="PEP Details" readonly style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; font-size:11px; font-family:inherit; box-sizing:border-box; min-height:22px;">
                 </div>
+              </div>
+              <div class="detail-row" id="mobile_no_row_individual" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Mobile No</span>
+                <input id="mobile_no_individual" name="mobile_no" type="text" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" id="mobile_no_row_business" data-field-type="business" style="display:none;">
+                <span class="detail-label">Mobile No</span>
+                <input id="mobile_no_business" name="mobile_no" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <!-- Common fields -->
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">District</span>
+                <select id="district" name="district" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['districts'] as $d) <option value="{{ $d }}">{{ $d }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">District</span>
+                <select id="district_business" name="district" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['districts'] as $d) <option value="{{ $d }}">{{ $d }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Sign Up Date</span>
+                <input id="signed_up" name="signed_up" type="date" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Sign Up Date</span>
+                <input id="signed_up_business" name="signed_up" type="date" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
               </div>
             </div>
 
-            <!-- Column 2: Contact Details & Income Details -->
+            <!-- Column 2 -->
             <div>
-              <div class="detail-section">
-                <div class="detail-section-header">CONTACT DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">Mobile No</span>
-                    <input id="mobile_no" name="mobile_no" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">On Wattsapp</span>
-                    <div class="detail-value checkbox">
-                      <input id="wa" name="wa" type="checkbox" value="1">
-                    </div>
-                  </div>
-                  <div class="detail-row" id="alternate_no_row">
-                    <span class="detail-label">Alternate No</span>
-                    <input id="alternate_no" name="alternate_no" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Email Address</span>
-                    <input id="email_address" name="email_address" type="email" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Contact Person</span>
-                    <input id="contact_person" name="contact_person" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
+              <!-- Individual fields -->
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Name</span>
+                <input id="first_name" name="first_name" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <!-- Business fields -->
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Name</span>
+                <input id="business_name" name="business_name" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label" id="nin_bcrn_label">NIN</span>
+                <input id="nin_bcrn" name="nin_bcrn" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Occupation</span>
+                <select id="occupation" name="occupation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['occupations'] as $o) <option value="{{ $o }}">{{ $o }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">PEP Details</span>
+                <textarea id="pep_comment" name="pep_comment" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">On Whatsapp</span>
+                <div class="detail-value checkbox">
+                  <input id="wa" name="wa" type="checkbox" value="1">
                 </div>
               </div>
-              <div class="detail-section">
-                <div class="detail-section-header">INCOME DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">Occupation</span>
-                    <select id="occupation" name="occupation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['occupations'] as $o) <option value="{{ $o }}">{{ $o }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Income Source</span>
-                    <select id="income_source" name="income_source" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['income_sources'] as $i) <option value="{{ $i }}">{{ $i }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Employer</span>
-                    <input id="employer" name="employer" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Monthly Income</span>
-                    <input id="monthly_income" name="monthly_income" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label"></span>
-                    <input type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Wattsapp</span>
+                <div class="detail-value checkbox">
+                  <input id="wa_business" name="wa" type="checkbox" value="1">
                 </div>
+              </div>
+              <!-- Common fields -->
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Location</span>
+                <input id="location" name="location" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Location</span>
+                <input id="location_business" name="location" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Agency</span>
+                <input id="agency" name="agency" type="text" value="Keystone" readonly class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Agency</span>
+                <input id="agency_business" name="agency" type="text" value="Keystone" readonly class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px;">
               </div>
             </div>
 
-            <!-- Column 3: Address Details & Other Details -->
+            <!-- Column 3 -->
             <div>
-              <div class="detail-section">
-                <div class="detail-section-header">ADDRESS DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">District</span>
-                    <select id="district" name="district" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['districts'] as $d) <option value="{{ $d }}">{{ $d }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Address</span>
-                    <input id="location" name="location" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Island</span>
-                    <select id="island" name="island" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['islands'] as $is) <option value="{{ $is }}">{{ $is }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Country</span>
-                    <select id="country" name="country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['countries'] as $c) <option value="{{ $c }}">{{ $c }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">P.O. Box No</span>
-                    <input id="po_box_no" name="po_box_no" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                </div>
+              <!-- Individual fields -->
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Surname</span>
+                <input id="surname" name="surname" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
               </div>
-              <div class="detail-section">
-                <div class="detail-section-header">OTHER DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">Married</span>
-                    <div class="detail-value checkbox">
-                      <input id="married" name="married" type="checkbox" value="1">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Spouse's Name</span>
-                    <input id="spouses_name" name="spouses_name" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">PEP</span>
-                    <div style="display:flex; gap:5px; align-items:center; flex:1;">
-                      <div class="detail-value checkbox" style="flex:0 0 auto; min-width:auto;">
-                        <input id="pep" name="pep" type="checkbox" value="1">
-                      </div>
-                      <input type="text" value="PEP Details" readonly style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; font-size:11px; font-family:inherit; box-sizing:border-box; min-height:22px;">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label"></span>
-                    <textarea id="pep_comment" name="pep_comment" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
-                  </div>
-                </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">ID Document Type</span>
+                <select id="id_document_type" name="id_document_type" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  <option value="NIN">NIN</option>
+                  <option value="Passport">Passport</option>
+                  <option value="Driver License">Driver License</option>
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Employer</span>
+                <input id="employer" name="employer" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <!-- Business fields -->
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">BCRN</span>
+                <input id="bcrn_business" name="nin_bcrn" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <!-- Common fields -->
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Island</span>
+                <select id="island_business" name="island" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['islands'] as $is) <option value="{{ $is }}">{{ $is }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Country</span>
+                <select id="country_business" name="country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['countries'] as $c) <option value="{{ $c }}">{{ $c }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" id="alternate_no_row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Alternate No</span>
+                <input id="alternate_no" name="alternate_no" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Island</span>
+                <select id="island" name="island" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['islands'] as $is) <option value="{{ $is }}">{{ $is }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Notes</span>
+                <textarea id="notes_business" name="notes" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Agent</span>
+                <input id="agent" name="agent" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
               </div>
             </div>
 
-            <!-- Column 4: Registration Details & Insurables -->
+            <!-- Column 4 -->
             <div>
-              <div class="detail-section">
-                <div class="detail-section-header">REGISTRATION DETAILS</div>
-                <div class="detail-section-body">
-                  <div class="detail-row">
-                    <span class="detail-label">Sign Up Date</span>
-                    <input id="signed_up" name="signed_up" type="date" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Agency</span>
-                    <input id="agency" name="agency" type="text" value="Keystone" readonly class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Agent</span>
-                    <input id="agent" name="agent" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Source</span>
-                    <select id="source" name="source" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                      <option value="">Select</option>
-                      @foreach($lookupData['sources'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
-                    </select>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Source Name</span>
-                    <input id="source_name" name="source_name" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
-                  </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Other Names</span>
+                <input id="other_names" name="other_names" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Salutation</span>
+                <select id="salutation" name="salutation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">ID Expiry Date</span>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                  <input id="id_expiry_date" name="id_expiry_date" type="date" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <input id="id_expiry_days" type="text" readonly class="detail-value" style="width:50px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#f5f5f5; font-size:11px; flex-shrink:0;">
                 </div>
               </div>
-              <div class="detail-section">
-                <div class="detail-section-header">INSURABLES</div>
-                <div class="detail-section-body">
-                  <div style="display:flex; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
-                    <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-                      <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Vehicle</span>
-                      <div class="detail-value checkbox" style="flex:0 0 auto;">
-                        <input id="has_vehicle" name="has_vehicle" type="checkbox" value="1">
-                      </div>
-                    </div>
-                    <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-                      <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">House</span>
-                      <div class="detail-value checkbox" style="flex:0 0 auto;">
-                        <input id="has_house" name="has_house" type="checkbox" value="1">
-                      </div>
-                    </div>
-                    <div class="detail-row" style="margin-bottom:0; flex:1; min-width:80px; align-items:center;">
-                      <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Business</span>
-                      <div class="detail-value checkbox" style="flex:0 0 auto;">
-                        <input id="has_business" name="has_business" type="checkbox" value="1">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="detail-row" style="margin-bottom:8px; align-items:center;">
-                    <span class="detail-label" style="min-width:auto; flex-shrink:0; margin-right:8px;">Boat</span>
-                    <div class="detail-value checkbox" style="flex:0 0 auto;">
-                        <input id="has_boat" name="has_boat" type="checkbox" value="1">
-                    </div>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Notes</span>
-                    <textarea id="notes" name="notes" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
-                  </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Income Source</span>
+                <select id="income_source" name="income_source" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['income_sources'] as $i) <option value="{{ $i }}">{{ $i }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Married</span>
+                <div class="detail-value checkbox">
+                  <input id="married" name="married" type="checkbox" value="1">
+                </div>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Spouse's Name</span>
+                <input id="spouses_name" name="spouses_name" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Passport No</span>
+                <input id="passport_no" name="passport_no" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Issuing Country</span>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                  <select id="issuing_country" name="issuing_country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                    <option value="">Select</option>
+                    @foreach($lookupData['countries'] as $c) <option value="{{ $c }}" {{ $c == 'Seychelles' ? 'selected' : '' }}>{{ $c }}</option> @endforeach
+                  </select>
+                  <input type="text" value="SEY" readonly style="width:60px; border:1px solid #ddd; padding:4px 6px; border-radius:2px; background:#fff; text-align:center; font-size:11px; flex-shrink:0;">
+                </div>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Email Address</span>
+                <input id="email_address" name="email_address" type="email" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">P.O. Box Number</span>
+                <input id="po_box_no" name="po_box_no" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Country</span>
+                <select id="country" name="country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['countries'] as $c) <option value="{{ $c }}">{{ $c }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Notes</span>
+                <textarea id="notes" name="notes" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
+              </div>
+              <!-- Business fields -->
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Contact Person</span>
+                <input id="contact_person" name="contact_person" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Designation</span>
+                <input id="designation" name="designation" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Email address</span>
+                <input id="email_address_business" name="email_address" type="email" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">P.O. Box Location</span>
+                <input id="po_box_location" name="po_box_no" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Country</span>
+                <select id="country_business" name="country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['countries'] as $c) <option value="{{ $c }}">{{ $c }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Notes</span>
+                <textarea id="notes_business" name="notes" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; min-height:40px; resize:vertical; font-size:11px;"></textarea>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Source</span>
+                <select id="source_business" name="source" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['sources'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                </select>
+              </div>
+              <div class="detail-row" data-field-type="business" style="display:none;">
+                <span class="detail-label">Source Name</span>
+                <input id="source_name_business" name="source_name" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Insurables Section (Below all columns) -->
+          <div style="margin-top:15px;">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <span style="font-weight:bold; font-size:13px; color:#000;">Insurables:</span>
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input id="has_vehicle" name="has_vehicle" type="checkbox" value="1" style="width:18px; height:18px; cursor:pointer;">
+                  <label for="has_vehicle" style="font-size:13px; cursor:pointer; margin:0;">Vehicle</label>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input id="has_house" name="has_house" type="checkbox" value="1" style="width:18px; height:18px; cursor:pointer;">
+                  <label for="has_house" style="font-size:13px; cursor:pointer; margin:0;">Home</label>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input id="has_business" name="has_business" type="checkbox" value="1" style="width:18px; height:18px; cursor:pointer;">
+                  <label for="has_business" style="font-size:13px; cursor:pointer; margin:0;">Business</label>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input id="has_boat" name="has_boat" type="checkbox" value="1" style="width:18px; height:18px; cursor:pointer;">
+                  <label for="has_boat" style="font-size:13px; cursor:pointer; margin:0;">Boat</label>
                 </div>
               </div>
             </div>

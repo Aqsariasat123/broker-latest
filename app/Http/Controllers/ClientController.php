@@ -64,8 +64,7 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            // 'client_name' => 'required|string|max:255', // REMOVE THIS LINE
+        $rules = [
             'client_type' => 'required|string|max:255',
             'nin_bcrn' => 'nullable|string|max:50',
             'dob_dor' => 'nullable|date',
@@ -91,9 +90,9 @@ class ClientController extends Controller
             'pep_comment' => 'nullable|string',
             'image' => 'nullable|string|max:255',
             'salutation' => 'nullable|string|max:50',
-            'first_name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
             'other_names' => 'nullable|string|max:255',
-            'surname' => 'required|string|max:255',
+            'surname' => 'nullable|string|max:255',
             'passport_no' => 'nullable|string|max:50',
             'id_expiry_date' => 'nullable|date',
             'monthly_income' => 'nullable|string|max:255',
@@ -105,16 +104,31 @@ class ClientController extends Controller
             'has_business' => 'boolean',
             'has_boat' => 'boolean',
             'notes' => 'nullable|string',
+            'business_name' => 'nullable|string|max:255',
+            'designation' => 'nullable|string|max:255',
             'image' => 'required|image|mimes:jpeg,jpg,png|max:5120',
-        ]);
+        ];
+        
+        // Conditional validation based on client type
+        if ($request->client_type === 'Individual') {
+            $rules['first_name'] = 'required|string|max:255';
+            $rules['surname'] = 'required|string|max:255';
+        } elseif (in_array($request->client_type, ['Business', 'Company', 'Organization'])) {
+            $rules['business_name'] = 'required|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
 
         // Generate unique CLID
         $latestClient = Client::orderBy('id', 'desc')->first();
         $nextId = $latestClient ? (int)str_replace('CL', '', $latestClient->clid) + 1 : 1001;
         $validated['clid'] = 'CL' . $nextId;
 
-        // Combine names for client_name
-        $validated['client_name'] = trim($validated['first_name'] . ' ' . ($validated['other_names'] ?? '') . ' ' . $validated['surname']);
+        // Set client_name - both Individual and Business use same format
+        $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
+        
+        // Remove business_name from validated as it's not a database field
+        unset($validated['business_name']);
 
         $client = Client::create($validated);
 
@@ -232,8 +246,7 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
-        $validated = $request->validate([
-            // 'client_name' => 'required|string|max:255', // REMOVE THIS LINE
+        $rules = [
             'client_type' => 'required|string|max:255',
             'nin_bcrn' => 'nullable|string|max:50',
             'dob_dor' => 'nullable|date',
@@ -259,9 +272,9 @@ class ClientController extends Controller
             'pep_comment' => 'nullable|string',
             'image' => 'nullable|string|max:255',
             'salutation' => 'nullable|string|max:50',
-            'first_name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
             'other_names' => 'nullable|string|max:255',
-            'surname' => 'required|string|max:255',
+            'surname' => 'nullable|string|max:255',
             'passport_no' => 'nullable|string|max:50',
             'id_expiry_date' => 'nullable|date',
             'monthly_income' => 'nullable|string|max:255',
@@ -273,8 +286,25 @@ class ClientController extends Controller
             'has_business' => 'boolean',
             'has_boat' => 'boolean',
             'notes' => 'nullable|string',
+            'business_name' => 'nullable|string|max:255',
+            'designation' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
-        ]);
+        ];
+        
+        // Conditional validation based on client type
+        // Both Individual and Business now use the same fields (first_name and surname)
+        if ($request->client_type === 'Individual' || in_array($request->client_type, ['Business', 'Company', 'Organization'])) {
+            $rules['first_name'] = 'required|string|max:255';
+            $rules['surname'] = 'required|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
+
+        // Set client_name - both Individual and Business use same format
+        $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
+        
+        // Remove business_name from validated as it's not a database field
+        unset($validated['business_name']);
 
         // Validate that image is required if no existing image
         if (!$client->image && !$request->hasFile('image')) {
@@ -354,8 +384,11 @@ class ClientController extends Controller
             $validated['image'] = $client->image;
         }
 
-        // Combine names for client_name
-        $validated['client_name'] = trim($validated['first_name'] . ' ' . ($validated['other_names'] ?? '') . ' ' . $validated['surname']);
+        // Set client_name - both Individual and Business use same format
+        $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
+
+        // Remove business_name from validated as it's not a database field
+        unset($validated['business_name']);
 
         $client->update($validated);
 
@@ -383,62 +416,153 @@ class ClientController extends Controller
     {
         $clients = Client::all();
         
+        // Get selected columns from session (same as index method)
+        $selectedColumns = session('client_columns', [
+            'client_name','client_type','nin_bcrn','dob_dor','mobile_no','wa','district','occupation','source','status','signed_up',
+            'employer','clid','contact_person','income_source','married','spouses_name','alternate_no','email_address','location',
+            'island','country','po_box_no','pep','pep_comment','image','salutation','first_name','other_names','surname','passport_no'
+        ]);
+        
+        // Column definitions matching the view
+        $columnDefinitions = [
+            'client_name' => ['label' => 'Client Name', 'filter' => true],
+            'client_type' => ['label' => 'Client Type', 'filter' => true],
+            'nin_bcrn' => ['label' => 'NIN/BCRN', 'filter' => true],
+            'dob_dor' => ['label' => 'DOB/DOR', 'filter' => false],
+            'mobile_no' => ['label' => 'MobileNo', 'filter' => false],
+            'wa' => ['label' => 'WA', 'filter' => false],
+            'district' => ['label' => 'District', 'filter' => false],
+            'occupation' => ['label' => 'Occupation', 'filter' => false],
+            'source' => ['label' => 'Source', 'filter' => false],
+            'status' => ['label' => 'Status', 'filter' => false],
+            'signed_up' => ['label' => 'Signed Up', 'filter' => false],
+            'employer' => ['label' => 'Employer', 'filter' => false],
+            'clid' => ['label' => 'CLID', 'filter' => false],
+            'contact_person' => ['label' => 'Contact Person', 'filter' => false],
+            'income_source' => ['label' => 'Income Source', 'filter' => false],
+            'married' => ['label' => 'Married', 'filter' => false],
+            'spouses_name' => ['label' => 'Spouses Name', 'filter' => false],
+            'alternate_no' => ['label' => 'Alternate No', 'filter' => false],
+            'email_address' => ['label' => 'Email Address', 'filter' => false],
+            'location' => ['label' => 'Location', 'filter' => false],
+            'island' => ['label' => 'Island', 'filter' => false],
+            'country' => ['label' => 'Country', 'filter' => false],
+            'po_box_no' => ['label' => 'P.O. Box No', 'filter' => false],
+            'pep' => ['label' => 'PEP', 'filter' => false],
+            'pep_comment' => ['label' => 'PEP Comment', 'filter' => false],
+            'image' => ['label' => 'Image', 'filter' => false],
+            'salutation' => ['label' => 'Salutation', 'filter' => false],
+            'first_name' => ['label' => 'First Name', 'filter' => false],
+            'other_names' => ['label' => 'Other Names', 'filter' => false],
+            'surname' => ['label' => 'Surname', 'filter' => false],
+            'passport_no' => ['label' => 'Passport No', 'filter' => false],
+        ];
+        
         $fileName = 'clients_export_' . date('Y-m-d') . '.csv';
         $headers = [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ];
 
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'Action', 'Client Name', 'Client Type', 'NIN/BCRN', 'DOB/DOR', 'MobileNo', 'WA',
-            'District', 'Occupation', 'Source', 'Status', 'Signed Up', 'Employer', 'CLID',
-            'Contact Person', 'Income Source', 'Married', 'Spouses Name', 'Alternate No',
-            'Email Address', 'Location', 'Island', 'Country', 'P.O. Box No', 'PEP', 'PEP Comment',
-            'Image', 'Salutation', 'First Name', 'Other Names', 'Surname', 'Passport No'
-        ]);
-
-        foreach ($clients as $client) {
-            fputcsv($handle, [
-                '⤢',
-                $client->client_name,
-                $client->client_type,
-                $client->nin_bcrn ?: '##########',
-                $client->dob_dor ? $client->dob_dor->format('d-M-y') : '##########',
-                $client->mobile_no,
-                $client->wa ?: '-',
-                $client->district ?: '-',
-                $client->occupation ?: '-',
-                $client->source,
-                $client->status,
-                $client->signed_up ? $client->signed_up->format('d-M-y') : '##########',
-                $client->employer ?: '-',
-                $client->clid,
-                $client->contact_person ?: '-',
-                $client->income_source ?: '-',
-                $client->married ? 'Yes' : 'No',
-                $client->spouses_name ?: '-',
-                $client->alternate_no ?: '-',
-                $client->email_address ?: '-',
-                $client->location ?: '-',
-                $client->island ?: '-',
-                $client->country ?: '-',
-                $client->po_box_no ?: '-',
-                $client->pep ? 'Yes' : 'No',
-                $client->pep_comment ?: '-',
-                $client->image ?: '-',
-                $client->salutation ?: '-',
-                $client->first_name,
-                $client->other_names ?: '-',
-                $client->surname,
-                $client->passport_no ?: '-'
-            ]);
+        // Build headers based on selected columns
+        $headers_array = ['Action']; // Always include Action column
+        foreach ($selectedColumns as $col) {
+            if (isset($columnDefinitions[$col])) {
+                $headers_array[] = $columnDefinitions[$col]['label'];
+            }
         }
 
-        fclose($handle);
-        return response()->streamDownload(function() use ($handle) {
-            //
-        }, $fileName, $headers);
+        $callback = function() use ($clients, $headers_array, $selectedColumns, $columnDefinitions) {
+            $handle = fopen('php://output', 'w');
+            
+            // Write headers
+            fputcsv($handle, $headers_array);
+            
+            // Helper function to get formatted value
+            $getValue = function($client, $column) {
+                switch ($column) {
+                    case 'client_name':
+                        return $client->client_name;
+                    case 'client_type':
+                        return $client->client_type;
+                    case 'nin_bcrn':
+                        return $client->nin_bcrn ?: '##########';
+                    case 'dob_dor':
+                        return $client->dob_dor ? $client->dob_dor->format('d-M-y') : '##########';
+                    case 'mobile_no':
+                        return $client->mobile_no;
+                    case 'wa':
+                        return $client->wa ? 'Yes' : 'No';
+                    case 'district':
+                        return $client->district ?: '-';
+                    case 'occupation':
+                        return $client->occupation ?: '-';
+                    case 'source':
+                        return $client->source;
+                    case 'status':
+                        return $client->status == 'Inactive' ? 'Dormant' : ($client->status == 'Active' ? 'Active' : $client->status);
+                    case 'signed_up':
+                        return $client->signed_up ? $client->signed_up->format('d-M-y') : '##########';
+                    case 'employer':
+                        return $client->employer ?: '-';
+                    case 'clid':
+                        return $client->clid;
+                    case 'contact_person':
+                        return $client->contact_person ?: '-';
+                    case 'income_source':
+                        return $client->income_source ?: '-';
+                    case 'married':
+                        return $client->married ? 'Yes' : 'No';
+                    case 'spouses_name':
+                        return $client->spouses_name ?: '-';
+                    case 'alternate_no':
+                        return $client->alternate_no ?: '-';
+                    case 'email_address':
+                        return $client->email_address ?: '-';
+                    case 'location':
+                        return $client->location ?: '-';
+                    case 'island':
+                        return $client->island ?: '-';
+                    case 'country':
+                        return $client->country ?: '-';
+                    case 'po_box_no':
+                        return $client->po_box_no ?: '-';
+                    case 'pep':
+                        return $client->pep ? 'Yes' : 'No';
+                    case 'pep_comment':
+                        return $client->pep_comment ?: '-';
+                    case 'image':
+                        return $client->image ? 'Yes' : 'No';
+                    case 'salutation':
+                        return $client->salutation ?: '-';
+                    case 'first_name':
+                        return $client->first_name;
+                    case 'other_names':
+                        return $client->other_names ?: '-';
+                    case 'surname':
+                        return $client->surname;
+                    case 'passport_no':
+                        return $client->passport_no ?: '-';
+                    default:
+                        return '-';
+                }
+            };
+            
+            // Write data rows
+            foreach ($clients as $client) {
+                $row = ['⤢']; // Always include Action column
+                foreach ($selectedColumns as $col) {
+                    if (isset($columnDefinitions[$col])) {
+                        $row[] = $getValue($client, $col);
+                    }
+                }
+                fputcsv($handle, $row);
+            }
+            
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function saveColumnSettings(Request $request)

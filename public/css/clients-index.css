@@ -1,7 +1,9 @@
 
     * { box-sizing: border-box; }
-    .dashboard { padding-left:0 !important; }
-    body { font-family: Arial, sans-serif; color: #000; margin: 0; background: #f5f5f5; }
+    .dashboard { padding-left:0 !important; height: 100vh !important; overflow: hidden !important; }
+    body { font-family: Arial, sans-serif; color: #000; margin: 0; background: #f5f5f5; overflow: hidden; }
+    html { overflow: hidden; }
+    .main-content { overflow: hidden !important; height: 100vh !important; }
     .container-table { max-width: 100%; margin: 0 auto; background: #fff; padding: 0; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; flex-wrap: wrap; gap: 15px; background: #f5f5f5; padding: 15px 20px; border-bottom: 1px solid #ddd; }
     .page-title-section { display: flex; align-items: center; gap: 15px; flex: 1; }
@@ -162,13 +164,13 @@
     .nav-tab { background:#2d2d2d; color:#fff; border:none; padding:8px 16px; cursor:pointer; font-size:13px; border-radius:2px; white-space:nowrap; }
     .nav-tab.active { background:#000; }
     .nav-tab:hover { background:#1a1a1a; }
-    .detail-section { background:#fff; margin-bottom:0; border-radius:0; overflow:hidden; margin-right:10px; }
+    .detail-section { background:transparent; margin-bottom:0; border-radius:0; overflow:visible; margin-right:0; border:none; }
     .detail-section:last-child { margin-right:0; }
-    .detail-section-header { background:#a0a0a0; color:#fff; padding:6px 10px; font-weight:bold; font-size:12px; border-bottom:1px solid #ddd; text-transform:uppercase; line-height:1.4; }
-    .detail-section-body { padding:8px; }
+    .detail-section-header { display:none; }
+    .detail-section-body { padding:0; background:transparent; }
     .detail-row { display:flex !important; flex-direction:row !important; align-items:center; margin-bottom:8px; gap:8px; }
     .detail-row:last-child { margin-bottom:0; }
-    .detail-label { font-size:10px; color:#555; font-weight:600; line-height:1.2; display:block; min-width:120px; flex-shrink:0; }
+    .detail-label { font-size:13px; color:#000; font-weight:600; line-height:1.2; display:block; min-width:120px; flex-shrink:0; }
     .detail-value { font-size:11px; color:#000; padding:4px 6px; border:1px solid #ddd; background:#fff; border-radius:2px; min-height:22px; display:flex; align-items:center; box-sizing:border-box; flex:1; }
     .detail-value.checkbox { border:none; padding:0; background:transparent; min-height:auto; flex:0 0 auto; }
     .detail-value.checkbox input[type="checkbox"] { 
