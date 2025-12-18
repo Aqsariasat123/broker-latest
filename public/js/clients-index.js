@@ -1,36 +1,548 @@
   // Data initialized in Blade template
 
-  // Toggle Alternate No field visibility based on "On Wattsapp" checkbox
-  function setupWaToggle() {
-    const waCheckbox = document.getElementById('wa');
-    const alternateNoRow = document.getElementById('alternate_no_row');
-    if (waCheckbox && alternateNoRow) {
-      // Function to toggle visibility
-      const toggleAlternateNo = function() {
-        if (this.checked) {
-          // Hide Alternate No if On Wattsapp is checked
-          alternateNoRow.style.display = 'none';
-        } else {
-          // Show Alternate No if On Wattsapp is unchecked
-          alternateNoRow.style.display = '';
-        }
-      };
-      
-      // Remove existing listener and add new one
-      waCheckbox.removeEventListener('change', toggleAlternateNo);
-      waCheckbox.addEventListener('change', toggleAlternateNo);
-      
-      // Set initial state based on checkbox
-      toggleAlternateNo.call(waCheckbox);
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  // Constants
+  const MANDATORY_FIELDS = ['client_name', 'client_type', 'mobile_no', 'source', 'status', 'signed_up', 'clid', 'first_name', 'surname'];
+  const BUSINESS_TYPES = ['Business', 'Company', 'Organization'];
+  const PASSPORT_PHOTO_DIMENSIONS = {
+    minWidth: 350,
+    maxWidth: 650,
+    minHeight: 350,
+    maxHeight: 650,
+    squareRatio: 1.0,
+    rectRatio: 0.78,
+    tolerance: 0.15
+  };
+
+  // Helper: Remove display:none from inline style
+  function removeDisplayNone(element) {
+    if (!element) return;
+    let currentStyle = element.getAttribute('style') || '';
+    if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+      currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+      currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+      if (currentStyle) {
+        element.setAttribute('style', currentStyle);
+      } else {
+        element.removeAttribute('style');
+      }
+    }
+    element.style.display = '';
+    element.style.removeProperty('display');
+  }
+
+  // Helper: Hide element with !important
+  function hideElement(element) {
+    if (!element) return;
+    element.style.display = 'none';
+    element.style.setProperty('display', 'none', 'important');
+    let currentStyle = element.getAttribute('style') || '';
+    if (!currentStyle.includes('display: none')) {
+      currentStyle = (currentStyle ? currentStyle + '; ' : '') + 'display: none !important;';
+      element.setAttribute('style', currentStyle);
     }
   }
 
-  document.getElementById('addClientBtn').addEventListener('click', () => openClientModal('add'));
-  document.getElementById('columnBtn').addEventListener('click', () => openColumnModal());
-  document.getElementById('filterToggle').addEventListener('change', function() {
-    const filtersVisible = this.checked;
-    const columnFilters = document.querySelectorAll('.column-filter');
+  // Helper: Show element by removing display restrictions
+  function showElement(element) {
+    if (!element) return;
+    // Remove display:none from inline style
+    let currentStyle = element.getAttribute('style') || '';
+    if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+      currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+      // Remove leading/trailing semicolons and spaces
+      currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+      if (currentStyle) {
+        element.setAttribute('style', currentStyle);
+      } else {
+        element.removeAttribute('style');
+      }
+    }
+    // Also set via style property
+    element.style.display = '';
+    element.style.removeProperty('display');
+  }
+
+  // Helper: Apply function with multiple delays (for DOM readiness)
+  function applyWithDelays(fn, delays = [10, 50, 100, 200]) {
+    fn();
+    requestAnimationFrame(fn);
+    delays.forEach(delay => setTimeout(fn, delay));
+  }
+
+  // Helper: Check if client type is Individual
+  function isIndividualType(type) {
+    return type === 'Individual';
+  }
+
+  // Helper: Check if client type is Business
+  function isBusinessType(type) {
+    return BUSINESS_TYPES.includes(type);
+  }
+
+  // Helper: Calculate age from DOB
+  function calculateAge(dob) {
+    if (!dob) return '';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  // Helper: Calculate days until expiry
+  function calculateDaysUntilExpiry(dateStr) {
+    if (!dateStr) return '';
+    const expiryDate = new Date(dateStr);
+    const today = new Date();
+    const diffTime = expiryDate - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  // Helper: Format date for display
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${date.getDate()}-${months[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`;
+  }
+
+  // Helper: Validate passport photo dimensions
+  function validatePassportPhoto(img, onSuccess, onError) {
+    const width = img.width;
+    const height = img.height;
+    const { minWidth, maxWidth, minHeight, maxHeight, squareRatio, rectRatio, tolerance } = PASSPORT_PHOTO_DIMENSIONS;
+
+    if (width < minWidth || width > maxWidth || height < minHeight || height > maxHeight) {
+      onError(`Photo must be passport size (approximately 600x600 pixels or 413x531 pixels).\nCurrent dimensions: ${width}x${height} pixels.\nPlease upload a passport-size photo.`);
+      return false;
+    }
+
+    const aspectRatio = width / height;
+    const isSquare = Math.abs(aspectRatio - squareRatio) <= tolerance;
+    const isRectangular = Math.abs(aspectRatio - rectRatio) <= tolerance;
+
+    if (!isSquare && !isRectangular) {
+      onError(`Photo must have passport size aspect ratio (square 1:1 or rectangular 35:45mm).\nCurrent ratio: ${aspectRatio.toFixed(2)}:1\nPlease upload a passport-size photo.`);
+      return false;
+    }
+
+    onSuccess();
+    return true;
+  }
+
+  // ============================================================================
+  // FIELD VISIBILITY FUNCTIONS
+  // ============================================================================
+
+  // Helper: Ensure container is valid DOM element
+  function ensureValidContainer(container) {
+    if (!container || typeof container.querySelectorAll !== 'function') {
+      return document;
+    }
+    return container;
+  }
+
+  // Hide all Business fields
+  function hideBusinessFields(container = document) {
+    container = ensureValidContainer(container);
+    container.querySelectorAll('[data-field-type="business"]').forEach(field => {
+      // Set multiple ways to ensure it's hidden
+      field.style.display = 'none';
+      field.style.setProperty('display', 'none', 'important');
+      // Update inline style attribute
+      let currentStyle = field.getAttribute('style') || '';
+      if (!currentStyle.includes('display: none')) {
+        currentStyle = (currentStyle ? currentStyle + '; ' : '') + 'display: none !important;';
+        field.setAttribute('style', currentStyle);
+      }
+    });
+  }
+
+  // Show all Individual fields
+  function showIndividualFields(container = document) {
+    container = ensureValidContainer(container);
+    // Show all Individual fields
+    container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+      // Remove display:none from inline style
+      let currentStyle = field.getAttribute('style') || '';
+      if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+        currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+        currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+        if (currentStyle) {
+          field.setAttribute('style', currentStyle);
+        } else {
+          field.removeAttribute('style');
+        }
+      }
+      // Also set via style property
+      field.style.display = '';
+      field.style.removeProperty('display');
+    });
+    // Show DOB row specifically
+    container.querySelectorAll('#dob_dor_row').forEach(row => {
+      let currentStyle = row.getAttribute('style') || '';
+      if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+        currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+        currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+        if (currentStyle) {
+          row.setAttribute('style', currentStyle);
+        } else {
+          row.removeAttribute('style');
+        }
+      }
+      row.style.display = '';
+      row.style.removeProperty('display');
+    });
+  }
+
+  // Force show Individual fields and hide Business fields
+  function forceIndividualFieldsVisible(container = document) {
+    container = ensureValidContainer(container);
+    // First, aggressively hide ALL Business fields everywhere
+    container.querySelectorAll('[data-field-type="business"]').forEach(field => {
+      // Set multiple ways to ensure it's hidden
+      field.style.display = 'none';
+      field.style.setProperty('display', 'none', 'important');
+      // Update inline style attribute
+      let currentStyle = field.getAttribute('style') || '';
+      if (!currentStyle.includes('display: none')) {
+        currentStyle = (currentStyle ? currentStyle + '; ' : '') + 'display: none !important;';
+        field.setAttribute('style', currentStyle);
+      }
+    });
     
+    // Then show all Individual fields
+    container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+      // Remove display:none from inline style
+      let currentStyle = field.getAttribute('style') || '';
+      if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+        currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+        // Remove leading/trailing semicolons and spaces
+        currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+        if (currentStyle) {
+          field.setAttribute('style', currentStyle);
+        } else {
+          field.removeAttribute('style');
+        }
+      }
+      // Also set via style property
+      field.style.display = '';
+      field.style.removeProperty('display');
+    });
+    
+    // Show DOB row specifically
+    container.querySelectorAll('#dob_dor_row').forEach(row => {
+      let currentStyle = row.getAttribute('style') || '';
+      if (currentStyle.includes('display:none') || currentStyle.includes('display: none')) {
+        currentStyle = currentStyle.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+        currentStyle = currentStyle.replace(/^[\s;]+|[\s;]+$/g, '');
+        if (currentStyle) {
+          row.setAttribute('style', currentStyle);
+        } else {
+          row.removeAttribute('style');
+        }
+      }
+      row.style.display = '';
+      row.style.removeProperty('display');
+    });
+  }
+
+  // Show Business fields and hide Individual fields
+  function showBusinessFields(container = document) {
+    container = ensureValidContainer(container);
+    // Hide Individual fields
+    container.querySelectorAll('[data-field-type="individual"]').forEach(hideElement);
+    // Hide DOB row for Business
+    container.querySelectorAll('#dob_dor_row').forEach(hideElement);
+    // Show Business fields
+    container.querySelectorAll('[data-field-type="business"]').forEach(showElement);
+  }
+
+  // Hide all conditional fields
+  function hideAllConditionalFields(container = document) {
+    container = ensureValidContainer(container);
+    container.querySelectorAll('[data-field-type="individual"], [data-field-type="business"]').forEach(hideElement);
+  }
+
+  // Update required fields based on client type
+  function updateRequiredFields(container, isIndividual, isBusiness) {
+    container = ensureValidContainer(container);
+    const firstNameInput = container.querySelector('#first_name') || document.getElementById('first_name');
+    const surnameInput = container.querySelector('#surname') || document.getElementById('surname');
+    const businessNameInput = container.querySelector('#business_name') || document.getElementById('business_name');
+
+    if (isIndividual) {
+      if (firstNameInput) firstNameInput.required = true;
+      if (surnameInput) surnameInput.required = true;
+      if (businessNameInput) businessNameInput.required = false;
+    } else if (isBusiness) {
+      if (businessNameInput) businessNameInput.required = true;
+      if (firstNameInput) firstNameInput.required = false;
+      if (surnameInput) surnameInput.required = false;
+    } else {
+      if (firstNameInput) firstNameInput.required = false;
+      if (surnameInput) surnameInput.required = false;
+      if (businessNameInput) businessNameInput.required = false;
+    }
+  }
+
+  // ============================================================================
+  // CLIENT TYPE CHANGE HANDLERS
+  // ============================================================================
+
+  // Handle client type change - main function
+  function handleClientTypeChange(eventTarget = null) {
+    // Use event target if provided, otherwise find by ID
+    const clientTypeSelect = eventTarget || document.getElementById('client_type');
+    if (!clientTypeSelect) {
+      // If no client_type select found, try to show Individual fields by default
+      document.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+        field.style.setProperty('display', 'flex', 'important');
+      });
+      document.querySelectorAll('[data-field-type="business"]').forEach(field => {
+        field.style.setProperty('display', 'none', 'important');
+      });
+      return;
+    }
+
+    const selectedType = clientTypeSelect.value || 'Individual';
+    const isIndividual = isIndividualType(selectedType);
+    const isBusiness = isBusinessType(selectedType);
+
+    // Find form container - check both modal and page view
+    let formContainer = clientTypeSelect.closest('form') ||
+                        clientTypeSelect.closest('.modal-body') ||
+                        clientTypeSelect.closest('.modal-content') ||
+                        document.querySelector('#clientModal .modal-body') ||
+                        document.querySelector('#clientFormPageContent') ||
+                        document;
+
+    // Ensure formContainer is valid
+    formContainer = ensureValidContainer(formContainer);
+
+    if (!selectedType) {
+      // Hide all conditional fields if no type selected
+      document.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+        field.style.display = 'none';
+      });
+      document.querySelectorAll('[data-field-type="business"]').forEach(field => {
+        field.style.display = 'none';
+      });
+      return;
+    }
+
+    // Show/hide fields based on client type
+    if (isIndividual) {
+      // First hide all Business fields aggressively
+      hideBusinessFields();
+      hideBusinessFields(formContainer);
+      // Then show Individual fields
+      showIndividualFields();
+      showIndividualFields(formContainer);
+    } else if (isBusiness) {
+      // Hide all Individual fields first
+      document.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+        field.style.display = 'none';
+        field.style.setProperty('display', 'none', 'important');
+      });
+      // Show all Business fields
+      document.querySelectorAll('[data-field-type="business"]').forEach(field => {
+        field.style.display = '';
+        field.style.removeProperty('display');
+      });
+      // Also apply to container
+      showBusinessFields(formContainer);
+    } else {
+      // Hide all conditional fields if no type selected
+      document.querySelectorAll('[data-field-type="individual"]').forEach(field => {
+        field.style.display = 'none';
+      });
+      hideBusinessFields();
+      hideBusinessFields(formContainer);
+    }
+
+    // Update required fields
+    updateRequiredFields(formContainer, isIndividual, isBusiness);
+  }
+
+  // Handle client type change for cloned form
+  function handleClientTypeChangeInForm(container) {
+    container = ensureValidContainer(container);
+    const clientTypeSelect = container.querySelector('#client_type');
+    if (!clientTypeSelect) return;
+
+    const selectedType = clientTypeSelect.value;
+    const isIndividual = isIndividualType(selectedType);
+    const isBusiness = isBusinessType(selectedType);
+
+    if (!selectedType) {
+      hideAllConditionalFields(container);
+      return;
+    }
+
+    if (isIndividual) {
+      hideBusinessFields(container);
+      showIndividualFields(container);
+    } else if (isBusiness) {
+      showBusinessFields(container);
+    }
+
+    updateRequiredFields(container, isIndividual, isBusiness);
+  }
+
+  // ============================================================================
+  // FORM FIELD HELPERS
+  // ============================================================================
+
+  // Toggle Alternate No field visibility based on WhatsApp checkbox
+  function toggleAlternateNoVisibility(waCheckbox, alternateNoRow) {
+    if (!waCheckbox || !alternateNoRow) return;
+    if (waCheckbox.checked) {
+      hideElement(alternateNoRow);
+    } else {
+      showElement(alternateNoRow);
+    }
+  }
+
+  function setupWaToggle(container = document) {
+    container = ensureValidContainer(container);
+    
+    // Setup individual WhatsApp checkbox
+    const waCheckbox = container.querySelector('#wa') || document.getElementById('wa');
+    const alternateNoRow = container.querySelector('#alternate_no_row') || document.getElementById('alternate_no_row');
+    if (waCheckbox && alternateNoRow) {
+      const handler = () => toggleAlternateNoVisibility(waCheckbox, alternateNoRow);
+      waCheckbox.removeEventListener('change', handler);
+      waCheckbox.addEventListener('change', handler);
+      toggleAlternateNoVisibility(waCheckbox, alternateNoRow);
+    }
+    
+    // Setup business WhatsApp checkbox
+    const waBusinessCheckbox = container.querySelector('#wa_business') || document.getElementById('wa_business');
+    const alternateNoRowBusiness = container.querySelector('#alternate_no_row_business') || document.getElementById('alternate_no_row_business');
+    if (waBusinessCheckbox && alternateNoRowBusiness) {
+      const handler = () => toggleAlternateNoVisibility(waBusinessCheckbox, alternateNoRowBusiness);
+      waBusinessCheckbox.removeEventListener('change', handler);
+      waBusinessCheckbox.addEventListener('change', handler);
+      toggleAlternateNoVisibility(waBusinessCheckbox, alternateNoRowBusiness);
+    }
+  }
+
+  // Calculate age from DOB input
+  function calculateAgeFromDOB(eventTarget = null) {
+    // If eventTarget is provided, use it to find the corresponding age input
+    let dobInput = eventTarget || document.getElementById('dob_dor');
+    let ageInput = null;
+    
+    if (dobInput) {
+      // Try to find age input in the same container
+      const container = dobInput.closest('form') || dobInput.closest('.modal-body') || dobInput.closest('div[style*="padding:12px"]') || document;
+      ageInput = container.querySelector('#dob_age') || document.getElementById('dob_age');
+      
+      if (dobInput && ageInput && dobInput.value) {
+        ageInput.value = calculateAge(dobInput.value);
+      } else if (ageInput) {
+        ageInput.value = '';
+      }
+    } else {
+      // Fallback: try to find both inputs
+      dobInput = document.getElementById('dob_dor');
+      ageInput = document.getElementById('dob_age');
+      if (dobInput && ageInput && dobInput.value) {
+        ageInput.value = calculateAge(dobInput.value);
+      } else if (ageInput) {
+        ageInput.value = '';
+      }
+    }
+  }
+
+  // Calculate days until ID expiry
+  function calculateIDExpiryDays(eventTarget = null) {
+    // If eventTarget is provided, use it to find the corresponding days input
+    let expiryInput = eventTarget || document.getElementById('id_expiry_date');
+    let daysInput = null;
+    
+    if (expiryInput) {
+      // Try to find days input in the same container
+      const container = expiryInput.closest('form') || expiryInput.closest('.modal-body') || expiryInput.closest('div[style*="padding:12px"]') || document;
+      daysInput = container.querySelector('#id_expiry_days') || document.getElementById('id_expiry_days');
+      
+      if (expiryInput && daysInput && expiryInput.value) {
+        daysInput.value = calculateDaysUntilExpiry(expiryInput.value);
+      } else if (daysInput) {
+        daysInput.value = '';
+      }
+    } else {
+      // Fallback: try to find both inputs
+      expiryInput = document.getElementById('id_expiry_date');
+      daysInput = document.getElementById('id_expiry_days');
+      if (expiryInput && daysInput && expiryInput.value) {
+        daysInput.value = calculateDaysUntilExpiry(expiryInput.value);
+      } else if (daysInput) {
+        daysInput.value = '';
+      }
+    }
+  }
+
+  // Populate form fields from client data
+  function populateFormFields(container, client, fieldNames) {
+    container = ensureValidContainer(container);
+    fieldNames.forEach(k => {
+      const el = container.querySelector(`#${k}`) || document.getElementById(k);
+      if (!el) return;
+
+      if (el.type === 'checkbox') {
+        el.checked = !!client[k];
+        if (k === 'wa') {
+          if (el.id === 'wa') {
+            const alternateNoRow = container.querySelector('#alternate_no_row') || document.getElementById('alternate_no_row');
+            if (alternateNoRow) {
+              if (el.checked) {
+                hideElement(alternateNoRow);
+              } else {
+                showElement(alternateNoRow);
+              }
+            }
+          } else if (el.id === 'wa_business') {
+            const alternateNoRowBusiness = container.querySelector('#alternate_no_row_business') || document.getElementById('alternate_no_row_business');
+            if (alternateNoRowBusiness) {
+              if (el.checked) {
+                hideElement(alternateNoRowBusiness);
+              } else {
+                showElement(alternateNoRowBusiness);
+              }
+            }
+          }
+        }
+      } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        if (el.type === 'date' && client[k]) {
+          const date = new Date(client[k]);
+          el.value = date.toISOString().split('T')[0];
+        } else {
+          el.value = client[k] ?? '';
+        }
+      }
+    });
+  }
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
+  document.getElementById('addClientBtn')?.addEventListener('click', () => openClientModal('add'));
+  document.getElementById('columnBtn')?.addEventListener('click', () => openColumnModal());
+
+  function handleFilterToggle(e) {
+    const filtersVisible = e.target.checked;
+    const columnFilters = document.querySelectorAll('.column-filter');
+
     columnFilters.forEach(filter => {
       if (filtersVisible) {
         filter.classList.add('visible');
@@ -38,236 +550,111 @@
       } else {
         filter.classList.remove('visible');
         filter.style.display = 'none';
-        filter.value = ''; // Clear filter values when hiding
-        // Reset table rows visibility
+        filter.value = '';
         document.querySelectorAll('tbody tr').forEach(row => {
           row.style.display = '';
         });
       }
     });
-  });
-  
-  // Handle client type change to show/hide fields - defined globally
-  function handleClientTypeChange() {
-      const clientTypeSelect = document.getElementById('client_type');
-      if (!clientTypeSelect) return;
-      
-      const selectedType = clientTypeSelect.value;
-      const isIndividual = selectedType === 'Individual';
-      const isBusiness = ['Business', 'Company', 'Organization'].includes(selectedType);
-      
-      // Find the form container (could be modal or page view)
-      const formContainer = clientTypeSelect.closest('form') || clientTypeSelect.closest('.modal-body') || document;
-      
-      if (!selectedType) {
-        // Hide all conditional fields if no type selected
-        formContainer.querySelectorAll('[data-field-type="Individual"]').forEach(field => {
-          field.style.display = 'none';
-        });
-        formContainer.querySelectorAll('[data-field-type="Business"]').forEach(field => {
-          field.style.display = 'none';
-        });
-        // Update labels to default
-        const dobDorLabel = document.getElementById('dob_dor_label');
-        if (dobDorLabel) {
-          dobDorLabel.textContent = 'DOB/DOR';
-        }
-        const ninBcrnLabel = document.getElementById('nin_bcrn_label');
-        if (ninBcrnLabel) {
-          ninBcrnLabel.textContent = 'NIN/BCRN';
-        }
-        return;
-      }
-      
-      // Show/hide fields based on client type
-      // Hide all conditional fields first
-      formContainer.querySelectorAll('[data-field-type="Individual"], [data-field-type="business"]').forEach(field => {
-        field.style.display = 'none';
-      });
-      
-      // Then show only the fields for the selected type
-      // Both Individual and Business show the same fields (Individual fields)
-      if (isIndividual || isBusiness) {
-        formContainer.querySelectorAll('[data-field-type="Individual"]').forEach(field => {
-          field.style.display = '';
-        });
-        // Hide all business-specific fields
-        formContainer.querySelectorAll('[data-field-type="business"]').forEach(field => {
-          field.style.display = 'none';
-        });
-      }
-      
-      // Show/hide DOB/DOR field (always shown when type is selected)
-      const dobDorRow = formContainer.querySelector('#dob_dor_row') || document.getElementById('dob_dor_row');
-      if (dobDorRow) {
-        dobDorRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
-        // Age field only for Individual, not Business
-        const ageField = dobDorRow.querySelector('.dob_age_field');
-        if (ageField) {
-          ageField.style.display = isIndividual ? '' : 'none';
-        }
-      }
-      
-      // Update labels dynamically
-      const dobDorLabel = formContainer.querySelector('#dob_dor_label') || document.getElementById('dob_dor_label');
-      if (dobDorLabel) {
-        if (isIndividual) {
-          dobDorLabel.textContent = 'DOB';
-        } else if (isBusiness) {
-          dobDorLabel.textContent = 'DOB'; // Business also shows DOB
-        } else {
-          dobDorLabel.textContent = 'DOB/DOR';
-        }
-      }
-      
-      // Show/hide NIN/BCRN field
-      const ninBcrnRow = formContainer.querySelector('[data-field-type="Individual"] #nin_bcrn')?.closest('.detail-row');
-      const bcrnBusinessRow = formContainer.querySelector('[data-field-type="business"] #bcrn_business_main')?.closest('.detail-row');
-      
-      if (ninBcrnRow) {
-        ninBcrnRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
-      }
-      if (bcrnBusinessRow) {
-        bcrnBusinessRow.style.display = 'none'; // Always hide business BCRN field
-      }
-      
-      const ninBcrnLabel = formContainer.querySelector('#nin_bcrn_label') || document.getElementById('nin_bcrn_label');
-      if (ninBcrnLabel) {
-        ninBcrnLabel.textContent = 'NIN';
-      }
-      
-      // Sync values between duplicate fields when type changes
-      if (isBusiness) {
-        // Sync BCRN fields
-        const ninBcrn = document.getElementById('nin_bcrn');
-        const bcrnBusiness = document.getElementById('bcrn_business_main');
-        if (ninBcrn && bcrnBusiness) {
-          if (bcrnBusiness.value && !ninBcrn.value) {
-            ninBcrn.value = bcrnBusiness.value;
-          } else if (ninBcrn.value && !bcrnBusiness.value) {
-            bcrnBusiness.value = ninBcrn.value;
-          }
-        }
-        
-        // Sync mobile no
-        const mobileNoIndividual = document.getElementById('mobile_no_individual');
-        const mobileNoBusiness = document.getElementById('mobile_no_business');
-        if (mobileNoIndividual && mobileNoBusiness) {
-          if (mobileNoBusiness.value && !mobileNoIndividual.value) {
-            mobileNoIndividual.value = mobileNoBusiness.value;
-          } else if (mobileNoIndividual.value && !mobileNoBusiness.value) {
-            mobileNoBusiness.value = mobileNoIndividual.value;
-          }
-        }
-      }
-      
-      // Update required fields
-      const firstNameInput = formContainer.querySelector('#first_name') || document.getElementById('first_name');
-      const surnameInput = formContainer.querySelector('#surname') || document.getElementById('surname');
-      const businessNameInput = formContainer.querySelector('#business_name') || document.getElementById('business_name');
-      
-      if (isIndividual || isBusiness) {
-        // Both Individual and Business use the same fields, so same validation
-        if (firstNameInput) {
-          firstNameInput.required = true;
-        }
-        if (surnameInput) {
-          surnameInput.required = true;
-        }
-        if (businessNameInput) {
-          businessNameInput.required = false;
-        }
-      } else {
-        // Reset required states if no type selected
-        if (firstNameInput) firstNameInput.required = false;
-        if (surnameInput) surnameInput.required = false;
-        if (businessNameInput) businessNameInput.required = false;
+  }
+
+  document.getElementById('filterToggle')?.addEventListener('change', handleFilterToggle);
+
+  // Use event delegation for client type change to catch all instances
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'client_type') {
+      handleClientTypeChange(e.target);
+      if (e.target.value === 'Individual') {
+        forceIndividualFieldsVisible();
+        applyWithDelays(forceIndividualFieldsVisible, [10, 50]);
       }
     }
-  
-  // Initialize filter visibility based on toggle state
+    // Handle DOB change event
+    if (e.target && e.target.id === 'dob_dor') {
+      calculateAgeFromDOB(e.target);
+    }
+    // Handle ID Expiry Date change event
+    if (e.target && e.target.id === 'id_expiry_date') {
+      calculateIDExpiryDays(e.target);
+    }
+    // Handle WhatsApp checkbox change event (individual)
+    if (e.target && e.target.id === 'wa') {
+      const container = e.target.closest('form') || e.target.closest('.modal-body') || e.target.closest('div[style*="padding:12px"]') || document;
+      const alternateNoRow = container.querySelector('#alternate_no_row') || document.getElementById('alternate_no_row');
+      if (alternateNoRow) {
+        toggleAlternateNoVisibility(e.target, alternateNoRow);
+      }
+    }
+    // Handle WhatsApp checkbox change event (business)
+    if (e.target && e.target.id === 'wa_business') {
+      const container = e.target.closest('form') || e.target.closest('.modal-body') || e.target.closest('div[style*="padding:12px"]') || document;
+      const alternateNoRowBusiness = container.querySelector('#alternate_no_row_business') || document.getElementById('alternate_no_row_business');
+      if (alternateNoRowBusiness) {
+        toggleAlternateNoVisibility(e.target, alternateNoRowBusiness);
+      }
+    }
+  });
+
+  // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
     const filterToggle = document.getElementById('filterToggle');
-    if (filterToggle && filterToggle.checked) {
+    if (filterToggle?.checked) {
       document.querySelectorAll('.column-filter').forEach(filter => {
         filter.classList.add('visible');
         filter.style.display = 'block';
       });
     }
-    
-    // Helper function to sync duplicate fields
-    function syncDuplicateFields(primaryId, duplicateIds) {
-      const primary = document.getElementById(primaryId);
-      if (!primary) return;
-      
-      duplicateIds.forEach(dupId => {
-        const duplicate = document.getElementById(dupId);
-        if (duplicate) {
-          if (duplicate.value && !primary.value) {
-            primary.value = duplicate.value;
-          } else if (primary.value && !duplicate.value) {
-            duplicate.value = primary.value;
-          }
-        }
-      });
+
+    const initialClientType = document.getElementById('client_type');
+    if (initialClientType && (initialClientType.value === 'Individual' || !initialClientType.value)) {
+      showIndividualFields();
     }
-    
-    // Initialize on page load - show fields based on selected type
-    // Since Individual is selected by default, show Individual fields immediately
-    handleClientTypeChange();
-    
-    // Also check fields on any form that might be created dynamically
-    setTimeout(() => {
-      handleClientTypeChange();
-    }, 100);
-    
-    // Listen for client type changes
+
+    // Also attach direct listener as backup
     const clientTypeSelect = document.getElementById('client_type');
     if (clientTypeSelect) {
-      clientTypeSelect.addEventListener('change', handleClientTypeChange);
-      
-      // Also handle changes in modal and page view forms (delegated event)
-      document.addEventListener('change', function(e) {
-        if (e.target && e.target.id === 'client_type') {
-          handleClientTypeChange();
+      clientTypeSelect.addEventListener('change', function() {
+        handleClientTypeChange(this);
+        if (this.value === 'Individual') {
+          forceIndividualFieldsVisible();
+          applyWithDelays(forceIndividualFieldsVisible, [10, 50]);
         }
       });
     }
   });
-  
+
   // Radio button selection highlighting
+  function handleRadioSelection(e) {
+    document.querySelectorAll('.action-radio').forEach(r => r.classList.remove('selected'));
+    if (e.target.checked) {
+      e.target.classList.add('selected');
+    }
+  }
+
   document.querySelectorAll('.action-radio').forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Remove previous selections
-      document.querySelectorAll('.action-radio').forEach(r => {
-        r.classList.remove('selected');
-      });
-      // Add selected class to current
-      if (this.checked) {
-        this.classList.add('selected');
-      }
-    });
+    radio.addEventListener('change', handleRadioSelection);
   });
-  
 
   const followUpBtn = document.getElementById('followUpBtn');
   const listAllBtn = document.getElementById('listAllBtn');
-  
+
   if (followUpBtn) {
     followUpBtn.addEventListener('click', () => {
       window.location.href = clientsIndexRoute + '?follow_up=true';
     });
   }
-  
+
   if (listAllBtn) {
     listAllBtn.addEventListener('click', () => {
       window.location.href = clientsIndexRoute;
     });
   }
-  
 
+  // ============================================================================
+  // CLIENT MODAL FUNCTIONS
+  // ============================================================================
 
-  async function openEditClient(id){
+  async function openEditClient(id) {
     try {
       const res = await fetch(`/clients/${id}/edit`, {
         headers: {
@@ -302,15 +689,13 @@
       }
       const client = await res.json();
       currentClientId = clientId;
-      
-      // Set client name in header
+
       const clientName = `${client.first_name || ''} ${client.surname || ''}`.trim() || 'Unknown';
       document.getElementById('clientPageName').textContent = clientName;
       document.getElementById('clientPageTitle').textContent = 'Client';
-      
+
       populateClientDetailsModal(client);
-      
-      // Hide table view, show page view
+
       document.getElementById('clientsTableView').classList.add('hidden');
       const clientPageView = document.getElementById('clientPageView');
       clientPageView.classList.add('show');
@@ -326,48 +711,14 @@
 
   // Populate client details modal with data
   function populateClientDetailsModal(client) {
-    // Use page view content if available, otherwise fall back to modal
     const content = document.getElementById('clientDetailsContent');
     if (!content) return;
-
-    // Calculate age from DOB
-    function calculateAge(dob) {
-      if (!dob) return '';
-      const birthDate = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    }
-
-    // Format date
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${date.getDate()}-${months[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`;
-    }
-
-    // Calculate days until expiry (for ID expiry)
-    function daysUntilExpiry(dateStr) {
-      if (!dateStr) return '';
-      const expiryDate = new Date(dateStr);
-      const today = new Date();
-      const diffTime = expiryDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
-    }
 
     const dob = client.dob_dor ? formatDate(client.dob_dor) : '';
     const dobAge = client.dob_dor ? calculateAge(client.dob_dor) : '';
     const idExpiry = client.id_expiry_date ? formatDate(client.id_expiry_date) : '';
-    const idExpiryDays = client.id_expiry_date ? daysUntilExpiry(client.id_expiry_date) : '';
-    const photoUrl = client.image ? (client.image.startsWith('http') ? client.image : `/storage/${client.image}`) : '';
+    const idExpiryDays = client.id_expiry_date ? calculateDaysUntilExpiry(client.id_expiry_date) : '';
 
-    // Column 1 (Leftmost): CUSTOMER DETAILS only
     const col1 = `
       <div class="detail-section">
         <div class="detail-section-header">CUSTOMER DETAILS</div>
@@ -402,7 +753,6 @@
       </div>
     `;
 
-    // Column 2 (Second from Left): CONTACT DETAILS only
     const col2 = `
       <div class="detail-section">
         <div class="detail-section-header">CONTACT DETAILS</div>
@@ -431,7 +781,6 @@
       </div>
     `;
 
-    // Column 3 (Second from Right): ADDRESS DETAILS only
     const col3 = `
       <div class="detail-section">
         <div class="detail-section-header">ADDRESS DETAILS</div>
@@ -460,7 +809,6 @@
       </div>
     `;
 
-    // Column 4 (Rightmost): OTHER DETAILS (Registration info)
     const col4 = `
       <div class="detail-section">
         <div class="detail-section-header">OTHER DETAILS</div>
@@ -489,59 +837,33 @@
       </div>
     `;
 
-    // Render columns in order: CUSTOMER, CONTACT, ADDRESS, OTHER DETAILS (left to right)
     content.innerHTML = col1 + col2 + col3 + col4;
 
-    // Load documents from documents table
+    // Load documents
     const documentsList = document.getElementById('clientDocumentsList');
     if (documentsList) {
-      let docsHTML = '';
-      if (client.documents && client.documents.length > 0) {
-        client.documents.forEach(doc => {
-          if (doc.file_path) {
-            const fileExt = doc.format ? doc.format.toUpperCase() : (doc.file_path.split('.').pop().toUpperCase());
-            const fileUrl = doc.file_path.startsWith('http') ? doc.file_path : `/storage/${doc.file_path}`;
-            const isImage = ['JPG', 'JPEG', 'PNG'].includes(fileExt);
-            const docName = doc.name || 'Document';
-            docsHTML += `
-              <div class="document-item" style="cursor:pointer;" onclick="previewUploadedDocument('${fileUrl}', '${fileExt}', '${docName}')">
-                ${isImage ? `<img src="${fileUrl}" alt="${docName}" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">` : `<div class="document-icon">${fileExt}</div>`}
-                <div style="font-size:11px; text-align:center;">${docName}</div>
-              </div>
-            `;
-          }
-        });
-      }
-      documentsList.innerHTML = docsHTML || '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
+      documentsList.innerHTML = renderDocumentsList(client.documents || []);
     }
 
     // Set edit button action
-     const editBtn = document.getElementById('editClientFromPageBtn');
+    const editBtn = document.getElementById('editClientFromPageBtn');
     if (editBtn) {
-      editBtn.onclick = function() {
-        openEditClient(currentClientId);
-      };
+      editBtn.onclick = () => openEditClient(currentClientId);
     }
 
-    // Tab navigation - make tabs clickable to navigate to respective pages
+    // Tab navigation
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', function(e) {
         e.preventDefault();
-        const tabType = this.getAttribute('data-tab');
         const clientId = currentClientId;
-        
         if (!clientId) return;
-        
-        // Close the modal first
+
         closeClientDetailsModal();
-        
-        // Get URL from data-url attribute
+
         const baseUrl = this.getAttribute('data-url');
         if (!baseUrl) return;
-        
-        // Navigate to the appropriate page with client filter
-        const url = baseUrl + '?client_id=' + clientId;
-          window.location.href = url;
+
+        window.location.href = baseUrl + '?client_id=' + clientId;
       });
     });
   }
@@ -549,7 +871,7 @@
   function closeClientDetailsModal() {
     closeClientPageView();
   }
-  
+
   function closeClientPageView() {
     const clientPageView = document.getElementById('clientPageView');
     clientPageView.classList.remove('show');
@@ -560,93 +882,65 @@
     currentClientId = null;
   }
 
+  // ============================================================================
+  // PHOTO & DOCUMENT UPLOAD
+  // ============================================================================
+
   // Photo upload handler
   async function handlePhotoUpload(event) {
     const file = event.target.files[0];
-    if (!file) return;
-
-    if (!currentClientId) {
-      alert('No client selected');
+    if (!file || !currentClientId) {
+      if (!currentClientId) alert('No client selected');
       return;
     }
 
-    // Validate passport photo dimensions before upload
     const img = new Image();
     const reader = new FileReader();
-    
+
     reader.onload = async function(e) {
       img.onload = async function() {
-        const width = img.width;
-        const height = img.height;
-        
-        // Passport photo standard dimensions (in pixels at 300 DPI):
-        // Square format: 600x600 pixels (2x2 inches) - most common
-        // Rectangular format: 413x531 pixels (35x45 mm)
-        // Allow some tolerance: ±50 pixels for width/height
-        const minWidth = 350;
-        const maxWidth = 650;
-        const minHeight = 350;
-        const maxHeight = 650;
-        
-        // Check if dimensions are within acceptable range
-        if (width < minWidth || width > maxWidth || height < minHeight || height > maxHeight) {
-          alert('Photo must be passport size (approximately 600x600 pixels or 413x531 pixels).\nCurrent dimensions: ' + width + 'x' + height + ' pixels.\nPlease upload a passport-size photo.');
-          event.target.value = '';
-          return;
-        }
-        
-        // Check aspect ratio (should be close to 1:1 for square or 0.78:1 for rectangular)
-        const aspectRatio = width / height;
-        const squareRatio = 1.0; // 1:1 for square passport photos
-        const rectRatio = 0.78; // 35:45 mm ratio
-        const tolerance = 0.15; // Allow 15% tolerance
-        
-        const isSquare = Math.abs(aspectRatio - squareRatio) <= tolerance;
-        const isRectangular = Math.abs(aspectRatio - rectRatio) <= tolerance;
-        
-        if (!isSquare && !isRectangular) {
-          alert('Photo must have passport size aspect ratio (square 1:1 or rectangular 35:45mm).\nCurrent ratio: ' + aspectRatio.toFixed(2) + ':1\nPlease upload a passport-size photo.');
-          event.target.value = '';
-          return;
-        }
-        
-        // If validation passes, proceed with upload
-        const formData = new FormData();
-        formData.append('photo', file);
+        const isValid = validatePassportPhoto(img,
+          async () => {
+            const formData = new FormData();
+            formData.append('photo', file);
 
-        try {
-          const response = await fetch(`/clients/${currentClientId}/upload-photo`, {
-            method: 'POST',
-            headers: {
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || csrfToken,
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-          });
+            try {
+              const response = await fetch(`/clients/${currentClientId}/upload-photo`, {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || csrfToken,
+                  'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+              });
 
-          const result = await response.json();
-          
-          if (result.success) {
-            // Reload client data to update the photo
-            const clientRes = await fetch(`/clients/${currentClientId}`, {
-              headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+              const result = await response.json();
+
+              if (result.success) {
+                const clientRes = await fetch(`/clients/${currentClientId}`, {
+                  headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }
+                });
+                const client = await clientRes.json();
+                populateClientDetailsModal(client);
+                alert('Photo uploaded successfully!');
+              } else {
+                alert('Error uploading photo: ' + (result.message || 'Unknown error'));
               }
-            });
-            const client = await clientRes.json();
-            populateClientDetailsModal(client);
-            alert('Photo uploaded successfully!');
-          } else {
-            alert('Error uploading photo: ' + (result.message || 'Unknown error'));
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error uploading photo: ' + error.message);
-        }
+            } catch (error) {
+              console.error('Error:', error);
+              alert('Error uploading photo: ' + error.message);
+            }
 
-        // Reset input
-        event.target.value = '';
+            event.target.value = '';
+          },
+          (errorMsg) => {
+            alert(errorMsg);
+            event.target.value = '';
+          }
+        );
       };
       img.src = e.target.result;
     };
@@ -667,7 +961,6 @@
     document.getElementById('documentUploadModal').classList.remove('show');
     document.body.style.overflow = '';
     document.getElementById('documentUploadForm').reset();
-    // Clear preview
     const previewContainer = document.getElementById('documentPreviewContainer');
     const previewContent = document.getElementById('documentPreviewContent');
     const previewInfo = document.getElementById('documentPreviewInfo');
@@ -691,21 +984,17 @@
 
     const fileType = file.type;
     const fileName = file.name;
-    const fileSize = (file.size / 1024 / 1024).toFixed(2); // Size in MB
+    const fileSize = (file.size / 1024 / 1024).toFixed(2);
 
-    // Show file info
     previewInfo.innerHTML = `<strong>File:</strong> ${fileName}<br><strong>Size:</strong> ${fileSize} MB<br><strong>Type:</strong> ${fileType || 'Unknown'}`;
 
-    // Preview based on file type
     if (fileType.startsWith('image/')) {
-      // Image preview
       const reader = new FileReader();
       reader.onload = function(e) {
         previewContent.innerHTML = `<img src="${e.target.result}" alt="Document Preview" style="max-width:100%; max-height:400px; border:1px solid #ddd; border-radius:4px;">`;
       };
       reader.readAsDataURL(file);
     } else if (fileType === 'application/pdf') {
-      // PDF preview using embed
       const reader = new FileReader();
       reader.onload = function(e) {
         previewContent.innerHTML = `
@@ -717,7 +1006,6 @@
       };
       reader.readAsDataURL(file);
     } else {
-      // For other file types (DOC, DOCX), show icon
       const fileExt = fileName.split('.').pop().toUpperCase();
       previewContent.innerHTML = `
         <div class="document-item" style="margin:0 auto;">
@@ -763,9 +1051,8 @@
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        // Reload client data to update documents
         const clientRes = await fetch(`/clients/${currentClientId}`, {
           headers: {
             'Accept': 'application/json',
@@ -773,16 +1060,14 @@
           }
         });
         const client = await clientRes.json();
-        
-        // Update documents in both modals
+
         updateDocumentsList(client);
-        
-        // If client details modal is open, refresh it
+
         const clientDetailsModal = document.getElementById('clientDetailsModal');
-        if (clientDetailsModal && clientDetailsModal.classList.contains('show')) {
+        if (clientDetailsModal?.classList.contains('show')) {
           populateClientDetailsModal(client);
         }
-        
+
         closeDocumentUploadModal();
         alert('Document uploaded successfully!');
       } else {
@@ -794,29 +1079,35 @@
     }
   }
 
+  // Render documents list HTML
+  function renderDocumentsList(documents) {
+    if (!documents || documents.length === 0) {
+      return '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
+    }
+
+    let docsHTML = '';
+    documents.forEach(doc => {
+      if (doc.file_path) {
+        const fileExt = doc.format ? doc.format.toUpperCase() : (doc.file_path.split('.').pop().toUpperCase());
+        const fileUrl = doc.file_path.startsWith('http') ? doc.file_path : `/storage/${doc.file_path}`;
+        const isImage = ['JPG', 'JPEG', 'PNG'].includes(fileExt);
+        const docName = doc.name || 'Document';
+        docsHTML += `
+          <div class="document-item" style="cursor:pointer;" onclick="previewUploadedDocument('${fileUrl}', '${fileExt}', '${docName}')">
+            ${isImage ? `<img src="${fileUrl}" alt="${docName}" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">` : `<div class="document-icon">${fileExt}</div>`}
+            <div style="font-size:11px; text-align:center;">${docName}</div>
+          </div>
+        `;
+      }
+    });
+    return docsHTML;
+  }
+
   // Update documents list in Edit Client modal
   function updateDocumentsList(client) {
     const editDocumentsList = document.getElementById('editClientDocumentsList');
     if (editDocumentsList) {
-      let docsHTML = '';
-      // Load from documents table
-      if (client.documents && client.documents.length > 0) {
-        client.documents.forEach(doc => {
-          if (doc.file_path) {
-            const fileExt = doc.format ? doc.format.toUpperCase() : (doc.file_path.split('.').pop().toUpperCase());
-            const fileUrl = doc.file_path.startsWith('http') ? doc.file_path : `/storage/${doc.file_path}`;
-            const isImage = ['JPG', 'JPEG', 'PNG'].includes(fileExt);
-            const docName = doc.name || 'Document';
-            docsHTML += `
-              <div class="document-item" style="cursor:pointer;" onclick="previewUploadedDocument('${fileUrl}', '${fileExt}', '${docName}')">
-                ${isImage ? `<img src="${fileUrl}" alt="${docName}" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">` : `<div class="document-icon">${fileExt}</div>`}
-                <div style="font-size:11px; text-align:center;">${docName}</div>
-              </div>
-            `;
-          }
-        });
-      }
-      editDocumentsList.innerHTML = docsHTML || '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
+      editDocumentsList.innerHTML = renderDocumentsList(client.documents || []);
     }
   }
 
@@ -827,150 +1118,101 @@
     }
   }
 
-  // Calculate age from DOB
-  function calculateAgeFromDOB() {
-    const dobInput = document.getElementById('dob_dor');
-    const ageInput = document.getElementById('dob_age');
-    if (dobInput && ageInput && dobInput.value) {
-      const birthDate = new Date(dobInput.value);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      ageInput.value = age;
-    } else if (ageInput) {
-      ageInput.value = '';
-    }
-  }
-
-  // Calculate days until ID expiry
-  function calculateIDExpiryDays() {
-    const expiryInput = document.getElementById('id_expiry_date');
-    const daysInput = document.getElementById('id_expiry_days');
-    if (expiryInput && daysInput && expiryInput.value) {
-      const expiryDate = new Date(expiryInput.value);
-      const today = new Date();
-      const diffTime = expiryDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      daysInput.value = diffDays;
-    } else if (daysInput) {
-      daysInput.value = '';
-    }
-  }
-
   // Preview client photo and validate passport size
   function previewClientPhoto(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('clientPhotoImg');
     const previewContainer = document.getElementById('clientPhotoPreview');
     const imageInput = event.target;
-    
-    if (file && preview && previewContainer) {
-      // Validate passport photo dimensions
-      const img = new Image();
-      const reader = new FileReader();
-      
-      reader.onload = function(e) {
-        img.onload = function() {
-          const width = img.width;
-          const height = img.height;
-          
-          // Passport photo standard dimensions (in pixels at 300 DPI):
-          // Square format: 600x600 pixels (2x2 inches) - most common
-          // Rectangular format: 413x531 pixels (35x45 mm)
-          // Allow some tolerance: ±50 pixels for width/height
-          const minWidth = 350;
-          const maxWidth = 650;
-          const minHeight = 350;
-          const maxHeight = 650;
-          
-          // Check if dimensions are within acceptable range
-          if (width < minWidth || width > maxWidth || height < minHeight || height > maxHeight) {
-            alert('Photo must be passport size (approximately 600x600 pixels or 413x531 pixels).\nCurrent dimensions: ' + width + 'x' + height + ' pixels.\nPlease upload a passport-size photo.');
+
+    if (!file || !preview || !previewContainer) return;
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      img.onload = function() {
+        validatePassportPhoto(img,
+          () => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            const photoSpan = previewContainer.querySelector('span');
+            if (photoSpan) photoSpan.style.display = 'none';
+          },
+          (errorMsg) => {
+            alert(errorMsg);
             imageInput.value = '';
             preview.src = '';
             preview.style.display = 'none';
-            if (previewContainer.querySelector('span')) {
-              previewContainer.querySelector('span').style.display = 'block';
-            }
-            return;
+            const photoSpan = previewContainer.querySelector('span');
+            if (photoSpan) photoSpan.style.display = 'block';
           }
-          
-          // Check aspect ratio (should be close to 1:1 for square or 0.78:1 for rectangular)
-          const aspectRatio = width / height;
-          const squareRatio = 1.0; // 1:1 for square passport photos
-          const rectRatio = 0.78; // 35:45 mm ratio
-          const tolerance = 0.15; // Allow 15% tolerance
-          
-          const isSquare = Math.abs(aspectRatio - squareRatio) <= tolerance;
-          const isRectangular = Math.abs(aspectRatio - rectRatio) <= tolerance;
-          
-          if (!isSquare && !isRectangular) {
-            alert('Photo must have passport size aspect ratio (square 1:1 or rectangular 35:45mm).\nCurrent ratio: ' + aspectRatio.toFixed(2) + ':1\nPlease upload a passport-size photo.');
-            imageInput.value = '';
-            preview.src = '';
-            preview.style.display = 'none';
-            if (previewContainer.querySelector('span')) {
-              previewContainer.querySelector('span').style.display = 'block';
-            }
-            return;
-          }
-          
-          // If validation passes, show preview
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-          if (previewContainer.querySelector('span')) {
-            previewContainer.querySelector('span').style.display = 'none';
-          }
-        };
-        img.src = e.target.result;
+        );
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  function openClientModal(mode, client = null){
+  // ============================================================================
+  // CLIENT MODAL MANAGEMENT
+  // ============================================================================
+
+  function openClientModal(mode, client = null) {
     const modal = document.getElementById('clientModal');
     const modalForm = modal.querySelector('form');
     const formMethod = document.getElementById('clientFormMethod');
     const deleteBtn = document.getElementById('clientDeleteBtn');
 
-    // Don't force all fields visible - let handleClientTypeChange handle it based on client type
-    // This allows conditional fields to be properly hidden/shown
+    const fieldNames = ['salutation', 'first_name', 'other_names', 'surname', 'client_type', 'nin_bcrn', 'dob_dor', 'id_expiry_date', 'passport_no', 'mobile_no', 'alternate_no', 'email_address', 'occupation', 'employer', 'income_source', 'monthly_income', 'source', 'source_name', 'agent', 'agency', 'status', 'signed_up', 'location', 'district', 'island', 'country', 'po_box_no', 'spouses_name', 'contact_person', 'pep_comment', 'notes'];
 
     if (mode === 'add') {
       modalForm.action = clientsStoreRoute;
       formMethod.innerHTML = '';
       deleteBtn.style.display = 'none';
       modalForm.reset();
-      
-      // Set Individual as default client type
+
       const clientTypeSelect = document.getElementById('client_type');
       if (clientTypeSelect && !clientTypeSelect.value) {
         clientTypeSelect.value = 'Individual';
       }
-      
-      // Make photo required for new clients
+
+      if (clientTypeSelect && (clientTypeSelect.value === 'Individual' || !clientTypeSelect.value)) {
+        // Immediately show Individual fields
+        forceIndividualFieldsVisible();
+        // Also apply with delays to catch any dynamically added fields
+        applyWithDelays(forceIndividualFieldsVisible, [10, 50, 100, 200, 300, 500]);
+        let checkCount = 0;
+        const maxChecks = 20;
+        const checkInterval = setInterval(() => {
+          if (checkCount >= maxChecks) {
+            clearInterval(checkInterval);
+            return;
+          }
+          const currentType = document.getElementById('client_type')?.value;
+          if (currentType === 'Individual' || !currentType) {
+            forceIndividualFieldsVisible();
+          }
+          checkCount++;
+        }, 100);
+      }
+
       const imageInput = document.getElementById('image');
       if (imageInput) imageInput.required = true;
+
       // Clear checkboxes
-      document.getElementById('married').checked = false;
-      document.getElementById('pep').checked = false;
+      ['married', 'pep', 'has_vehicle', 'has_house', 'has_business', 'has_boat'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = false;
+      });
+
       const waCheckbox = document.getElementById('wa');
       if (waCheckbox) {
         waCheckbox.checked = false;
-        // Show Alternate No field by default (since wa is unchecked)
         const alternateNoRow = document.getElementById('alternate_no_row');
-        if (alternateNoRow) {
-          alternateNoRow.style.display = '';
-        }
+        if (alternateNoRow) alternateNoRow.style.display = '';
       }
-      document.getElementById('has_vehicle').checked = false;
-      document.getElementById('has_house').checked = false;
-      document.getElementById('has_business').checked = false;
-      document.getElementById('has_boat').checked = false;
+
       // Clear photo preview
       const photoImg = document.getElementById('clientPhotoImg');
       const photoPreview = document.getElementById('clientPhotoPreview');
@@ -979,69 +1221,64 @@
         const photoSpan = photoPreview.querySelector('span');
         if (photoSpan) photoSpan.style.display = 'block';
       }
+
       // Clear calculated fields
-      document.getElementById('dob_age').value = '';
-      document.getElementById('id_expiry_days').value = '';
+      ['dob_age', 'id_expiry_days'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.value = '';
+      });
+
       // Clear documents list
       const editDocumentsList = document.getElementById('editClientDocumentsList');
       if (editDocumentsList) editDocumentsList.innerHTML = '<div style="color:#999; font-size:12px;">No documents uploaded</div>';
-      
-      // Hide "Add Document" buttons in add mode (no client ID yet)
-      const addDocumentBtns = ['addDocumentBtn1', 'addDocumentBtn2', 'addDocumentBtn3'];
-      addDocumentBtns.forEach(btnId => {
+
+      // Hide "Add Document" buttons
+      ['addDocumentBtn1', 'addDocumentBtn2', 'addDocumentBtn3'].forEach(btnId => {
         const btn = document.getElementById(btnId);
         if (btn) btn.style.display = 'none';
       });
-      
-      // Re-setup WA toggle after form reset
+
       setupWaToggle();
     } else {
       modalForm.action = `/clients/${currentClientId}`;
       formMethod.innerHTML = `@method('PUT')`;
       deleteBtn.style.display = 'inline-block';
 
-      const fields = ['salutation','first_name','other_names','surname','client_type','nin_bcrn','dob_dor','id_expiry_date','passport_no','mobile_no','alternate_no','email_address','occupation','employer','income_source','monthly_income','source','source_name','agent','agency','status','signed_up','location','district','island','country','po_box_no','spouses_name','contact_person','pep_comment','notes'];
-      fields.forEach(k => {
-        const el = document.getElementById(k);
-        if (!el) return;
-        if (el.type === 'checkbox') {
-          el.checked = !!client[k];
-          // If this is the wa checkbox, update alternate_no_row visibility
-          if (k === 'wa' && el.id === 'wa') {
-            const alternateNoRow = document.getElementById('alternate_no_row');
-            if (alternateNoRow) {
-              alternateNoRow.style.display = el.checked ? 'none' : '';
-            }
-          }
-        } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-          if (el.type === 'date' && client[k]) {
-            // Format date for date inputs (YYYY-MM-DD)
-            const date = new Date(client[k]);
-            el.value = date.toISOString().split('T')[0];
-          } else {
-            el.value = client[k] ?? '';
-          }
-        }
+      populateFormFields(document, client, fieldNames);
+
+      // Set checkboxes
+      ['married', 'pep', 'has_vehicle', 'has_house', 'has_business', 'has_boat'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = !!client[id];
       });
-      document.getElementById('married').checked = !!client.married;
-      document.getElementById('pep').checked = !!client.pep;
+
       const waCheckboxEdit = document.getElementById('wa');
       if (waCheckboxEdit) {
         waCheckboxEdit.checked = !!client.wa;
-        // Update alternate_no_row visibility based on wa checkbox state
         const alternateNoRow = document.getElementById('alternate_no_row');
         if (alternateNoRow) {
-          alternateNoRow.style.display = waCheckboxEdit.checked ? 'none' : '';
+          if (waCheckboxEdit.checked) {
+            hideElement(alternateNoRow);
+          } else {
+            showElement(alternateNoRow);
+          }
         }
       }
-      document.getElementById('has_vehicle').checked = !!client.has_vehicle;
-      document.getElementById('has_house').checked = !!client.has_house;
-      document.getElementById('has_business').checked = !!client.has_business;
-      document.getElementById('has_boat').checked = !!client.has_boat;
-      
-      // Re-setup WA toggle after populating form data
+      const waBusinessCheckboxEdit = document.getElementById('wa_business');
+      if (waBusinessCheckboxEdit) {
+        waBusinessCheckboxEdit.checked = !!client.wa;
+        const alternateNoRowBusiness = document.getElementById('alternate_no_row_business');
+        if (alternateNoRowBusiness) {
+          if (waBusinessCheckboxEdit.checked) {
+            hideElement(alternateNoRowBusiness);
+          } else {
+            showElement(alternateNoRowBusiness);
+          }
+        }
+      }
+
       setupWaToggle();
-      
+
       // Set existing image if present
       const imageInput = document.getElementById('image');
       if (client.image) {
@@ -1054,24 +1291,16 @@
           const photoSpan = photoPreview.querySelector('span');
           if (photoSpan) photoSpan.style.display = 'none';
         }
-        // Photo not required if existing image exists
         if (imageInput) imageInput.required = false;
       } else {
-        // Photo required if no existing image
         if (imageInput) imageInput.required = true;
       }
 
-      // Update documents list
       updateDocumentsList(client);
-
-      // Calculate age and expiry days
       calculateAgeFromDOB();
       calculateIDExpiryDays();
-      
-      // After populating form, update field visibility based on client type
-      setTimeout(() => {
-        handleClientTypeChange();
-      }, 150);
+
+      setTimeout(() => handleClientTypeChange(), 150);
     }
 
     // Add event listeners for calculations
@@ -1086,71 +1315,75 @@
       expiryInput.addEventListener('change', calculateIDExpiryDays);
     }
 
-    // Setup toggle on page load
     setupWaToggle();
 
-    // Call handleClientTypeChange after modal opens to properly show/hide fields based on selected type
-    // Also ensure the change listener is attached
+    // Setup client type change listener
     const clientTypeSelect = document.getElementById('client_type');
     if (clientTypeSelect) {
-      // If no value is set (in add mode), default to Individual
       if (mode === 'add' && !clientTypeSelect.value) {
         clientTypeSelect.value = 'Individual';
       }
-      
-      // Remove existing listeners to avoid duplicates
-      const newClientTypeSelect = clientTypeSelect.cloneNode(true);
-      clientTypeSelect.parentNode.replaceChild(newClientTypeSelect, clientTypeSelect);
-      
-      newClientTypeSelect.addEventListener('change', handleClientTypeChange);
-      
-      // Call immediately and after a delay to ensure fields are shown
-      handleClientTypeChange();
-      setTimeout(() => {
+
+      // Initialize fields based on current value
+      const initializeFields = () => {
         handleClientTypeChange();
-      }, 200);
+        const currentValue = clientTypeSelect.value || 'Individual';
+        if (currentValue === 'Individual') {
+          forceIndividualFieldsVisible();
+        }
+      };
+
+      applyWithDelays(initializeFields, [10, 50, 100, 200]);
     }
 
     // Clone form content from modal to page view
     const pageFormContainer = document.getElementById('clientFormPageContent');
-    // Get the page form specifically from the page view container (not the modal)
-    const pageForm = pageFormContainer ? pageFormContainer.querySelector('form') : null;
-    const formContentDiv = pageForm ? pageForm.querySelector('div[style*="padding:12px"]') : null;
-    
+    const pageForm = pageFormContainer?.querySelector('form');
+    const formContentDiv = pageForm?.querySelector('div[style*="padding:12px"]');
+
     if (modalForm && pageForm && pageFormContainer && formContentDiv) {
-      // Get the modal body content
       const modalBody = modalForm.querySelector('.modal-body');
       if (modalBody) {
-        // Clear form content div completely first
         formContentDiv.innerHTML = '';
-        
-        // Clone the grid container and all its content - only clone once
+
         const gridContainer = modalBody.querySelector('div[style*="grid-template-columns"]');
         if (gridContainer && !formContentDiv.querySelector('div[style*="grid-template-columns"]')) {
           const clonedGrid = gridContainer.cloneNode(true);
           formContentDiv.appendChild(clonedGrid);
+
+          setTimeout(() => {
+            const clonedClientType = formContentDiv.querySelector('#client_type');
+            if (clonedClientType && (clonedClientType.value === 'Individual' || !clonedClientType.value)) {
+              hideBusinessFields();
+              showIndividualFields();
+            }
+          }, 10);
         }
-        
-        // Clone documents section - find it in modal body and place in separate card
+
+        // Clone Insurables section
+        const insurablesSection = modalBody.querySelector('#insurablesSection');
+        if (insurablesSection && !formContentDiv.querySelector('#insurablesSection')) {
+          const clonedInsurables = insurablesSection.cloneNode(true);
+          formContentDiv.appendChild(clonedInsurables);
+          // Ensure it's always visible
+          clonedInsurables.style.display = 'block';
+          clonedInsurables.style.setProperty('display', 'block', 'important');
+        }
+
+        // Clone documents section
         const editDocumentsList = modalBody.querySelector('#editClientDocumentsList');
         const editFormDocumentsSection = document.getElementById('editFormDocumentsSection');
         if (editDocumentsList && editFormDocumentsSection) {
-          // Find the parent container (Documents section)
-          let documentsSection = editDocumentsList.closest('div[style*="margin-top"]') || 
+          let documentsSection = editDocumentsList.closest('div[style*="margin-top"]') ||
                                  editDocumentsList.parentElement?.parentElement;
           if (documentsSection) {
-            // Clear existing content
             editFormDocumentsSection.innerHTML = '';
-            
-            // Clone the documents section content
+
             const clonedDocs = documentsSection.cloneNode(true);
-            
-            // Extract the content (h4, documents list, buttons)
             const docsTitle = clonedDocs.querySelector('h4');
             const docsList = clonedDocs.querySelector('#editClientDocumentsList');
             const docsButtons = clonedDocs.querySelector('div[style*="justify-content:flex-end"]');
-            
-            // Rebuild in the card structure
+
             if (docsTitle) {
               const titleClone = docsTitle.cloneNode(true);
               titleClone.style.marginBottom = '10px';
@@ -1159,76 +1392,50 @@
               titleClone.style.fontWeight = 'bold';
               editFormDocumentsSection.appendChild(titleClone);
             }
-            
+
             if (docsList) {
               const listClone = docsList.cloneNode(true);
               listClone.style.marginBottom = '10px';
               editFormDocumentsSection.appendChild(listClone);
             }
-            
+
             if (docsButtons) {
-              const buttonsClone = docsButtons.cloneNode(true);
-              editFormDocumentsSection.appendChild(buttonsClone);
+              editFormDocumentsSection.appendChild(docsButtons.cloneNode(true));
             }
-            
-            // Show the documents section
+
             editFormDocumentsSection.style.display = 'block';
           }
         }
-        
-        // Update form attributes
+
         pageForm.method = 'POST';
         pageForm.action = modalForm.action;
         pageForm.enctype = 'multipart/form-data';
-        
-        // Update method field
+
         const pageMethodDiv = pageForm.querySelector('#clientFormMethod');
         if (pageMethodDiv && formMethod) {
           pageMethodDiv.innerHTML = formMethod.innerHTML;
         }
-        
-        // If editing, populate the cloned form fields with client data
+
+        // If editing, populate the cloned form fields
         if (mode === 'edit' && client) {
-          const fields = ['salutation','first_name','other_names','surname','client_type','nin_bcrn','dob_dor','id_expiry_date','passport_no','mobile_no','alternate_no','email_address','occupation','employer','income_source','monthly_income','source','source_name','agent','agency','status','signed_up','location','district','island','country','po_box_no','spouses_name','contact_person','pep_comment','notes','designation'];
-          fields.forEach(k => {
-            const el = formContentDiv.querySelector(`#${k}`);
-            if (!el) return;
-            if (el.type === 'checkbox') {
-              el.checked = !!client[k];
-            } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-              if (el.type === 'date' && client[k]) {
-                // Format date for date inputs (YYYY-MM-DD)
-                const date = new Date(client[k]);
-                el.value = date.toISOString().split('T')[0];
-            } else {
-              el.value = client[k] ?? '';
-            }
-          }
-          });
-          
-          // Handle business_name for business clients
+          populateFormFields(formContentDiv, client, [...fieldNames, 'designation']);
+
           const businessNameInput = formContentDiv.querySelector('#business_name');
-          if (businessNameInput && ['Business', 'Company', 'Organization'].includes(client.client_type)) {
+          if (businessNameInput && BUSINESS_TYPES.includes(client.client_type)) {
             businessNameInput.value = client.client_name || '';
           }
-          
+
           // Set checkboxes in cloned form
-          const marriedCheckbox = formContentDiv.querySelector('#married');
-          const pepCheckbox = formContentDiv.querySelector('#pep');
-          const waCheckbox = formContentDiv.querySelector('#wa');
-          const hasVehicleCheckbox = formContentDiv.querySelector('#has_vehicle');
-          const hasHouseCheckbox = formContentDiv.querySelector('#has_house');
-          const hasBusinessCheckbox = formContentDiv.querySelector('#has_business');
-          const hasBoatCheckbox = formContentDiv.querySelector('#has_boat');
-          
-          if (marriedCheckbox) marriedCheckbox.checked = !!client.married;
-          if (pepCheckbox) pepCheckbox.checked = !!client.pep;
-          if (waCheckbox) waCheckbox.checked = !!client.wa;
-          if (hasVehicleCheckbox) hasVehicleCheckbox.checked = !!client.has_vehicle;
-          if (hasHouseCheckbox) hasHouseCheckbox.checked = !!client.has_house;
-          if (hasBusinessCheckbox) hasBusinessCheckbox.checked = !!client.has_business;
-          if (hasBoatCheckbox) hasBoatCheckbox.checked = !!client.has_boat;
-          
+          ['married', 'pep', 'wa', 'has_vehicle', 'has_house', 'has_business', 'has_boat'].forEach(id => {
+            const checkbox = formContentDiv.querySelector(`#${id}`);
+            if (checkbox) checkbox.checked = !!client[id];
+          });
+          // Also set business wa checkbox if it exists
+          const waBusinessCheckbox = formContentDiv.querySelector('#wa_business');
+          if (waBusinessCheckbox) {
+            waBusinessCheckbox.checked = !!client.wa;
+          }
+
           // Set existing image if present
           const imageInput = formContentDiv.querySelector('#image');
           const existingImageInput = formContentDiv.querySelector('#existing_image');
@@ -1242,222 +1449,115 @@
               const photoSpan = photoPreview.querySelector('span');
               if (photoSpan) photoSpan.style.display = 'none';
             }
-            // Photo not required if existing image exists
             if (imageInput) imageInput.required = false;
           } else {
-            // Photo required if no existing image
             if (imageInput) imageInput.required = true;
           }
-          
+
           // Calculate age and expiry days for cloned form
           const dobInput = formContentDiv.querySelector('#dob_dor');
           const ageInput = formContentDiv.querySelector('#dob_age');
           const expiryInput = formContentDiv.querySelector('#id_expiry_date');
           const daysInput = formContentDiv.querySelector('#id_expiry_days');
-          
+
           if (dobInput && ageInput && dobInput.value) {
-            const birthDate = new Date(dobInput.value);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-              age--;
-            }
-            ageInput.value = age;
+            ageInput.value = calculateAge(dobInput.value);
           }
-          
+
           if (expiryInput && daysInput && expiryInput.value) {
-            const expiryDate = new Date(expiryInput.value);
-            const today = new Date();
-            const diffTime = expiryDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            daysInput.value = diffDays;
+            daysInput.value = calculateDaysUntilExpiry(expiryInput.value);
           }
-          
-          // Toggle Alternate No field visibility based on "On Wattsapp" checkbox in cloned form
+
+          // Toggle Alternate No field visibility
+          const waCheckbox = formContentDiv.querySelector('#wa');
           if (waCheckbox) {
             const alternateNoRow = formContentDiv.querySelector('#alternate_no_row');
             if (alternateNoRow) {
-              if (waCheckbox.checked) {
-                alternateNoRow.style.display = 'none';
-              } else {
-                alternateNoRow.style.display = '';
-              }
+              alternateNoRow.style.display = waCheckbox.checked ? 'none' : '';
             }
           }
-          
+
           // Attach event listeners to cloned form elements
           const clonedDobInput = formContentDiv.querySelector('#dob_dor');
           const clonedExpiryInput = formContentDiv.querySelector('#id_expiry_date');
           if (clonedDobInput) {
-            clonedDobInput.addEventListener('change', function() {
+            clonedDobInput.addEventListener('change', () => {
               const dobInput = formContentDiv.querySelector('#dob_dor');
               const ageInput = formContentDiv.querySelector('#dob_age');
               if (dobInput && ageInput && dobInput.value) {
-                const birthDate = new Date(dobInput.value);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                  age--;
-                }
-                ageInput.value = age;
+                ageInput.value = calculateAge(dobInput.value);
               }
             });
           }
           if (clonedExpiryInput) {
-            clonedExpiryInput.addEventListener('change', function() {
+            clonedExpiryInput.addEventListener('change', () => {
               const expiryInput = formContentDiv.querySelector('#id_expiry_date');
               const daysInput = formContentDiv.querySelector('#id_expiry_days');
               if (expiryInput && daysInput && expiryInput.value) {
-                const expiryDate = new Date(expiryInput.value);
-                const today = new Date();
-                const diffTime = expiryDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                daysInput.value = diffDays;
+                daysInput.value = calculateDaysUntilExpiry(expiryInput.value);
               }
             });
           }
-          
-          // Handle client type change for cloned form
-          function handleClientTypeChangeInForm(container) {
-            const clientTypeSelect = container.querySelector('#client_type');
-            if (!clientTypeSelect) return;
-            
-            const selectedType = clientTypeSelect.value;
-            const isIndividual = selectedType === 'Individual';
-            const isBusiness = ['Business', 'Company', 'Organization'].includes(selectedType);
-            
-            if (!selectedType) {
-              // Hide all conditional fields if no type selected
-              container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
-                field.style.display = 'none';
-              });
-              container.querySelectorAll('[data-field-type="business"]').forEach(field => {
-                field.style.display = 'none';
-              });
-              return;
-            }
-            
-            // Hide all conditional fields first
-            container.querySelectorAll('[data-field-type="individual"], [data-field-type="business"]').forEach(field => {
-              field.style.display = 'none';
-            });
-            
-            // Then show only the fields for the selected type
-            // Both Individual and Business show the same fields (Individual fields)
-            if (isIndividual || isBusiness) {
-              container.querySelectorAll('[data-field-type="individual"]').forEach(field => {
-                field.style.display = '';
-              });
-              // Hide all business-specific fields
-              container.querySelectorAll('[data-field-type="business"]').forEach(field => {
-                field.style.display = 'none';
-              });
-            }
-            
-            // Show/hide DOB/DOR field (always shown when type is selected)
-            const dobDorRow = container.querySelector('#dob_dor_row');
-            if (dobDorRow) {
-              dobDorRow.style.display = (isIndividual || isBusiness) ? '' : 'none';
-              // Age field only for Individual, not Business
-              const ageField = dobDorRow.querySelector('.dob_age_field');
-              if (ageField) {
-                ageField.style.display = isIndividual ? '' : 'none';
-              }
-            }
-            
-            // Update labels dynamically
-            const dobDorLabel = container.querySelector('#dob_dor_label');
-            if (dobDorLabel) {
-              if (isIndividual) {
-                dobDorLabel.textContent = 'DOB';
-              } else if (isBusiness) {
-                dobDorLabel.textContent = 'DOB'; // Business also shows DOB
-              } else {
-                dobDorLabel.textContent = 'DOB/DOR';
-              }
-            }
-            
-            const ninBcrnLabel = container.querySelector('#nin_bcrn_label');
-            if (ninBcrnLabel) {
-              ninBcrnLabel.textContent = 'NIN'; // Both use NIN
-            }
-            
-            // Show/hide NIN/BCRN field
-            const ninBcrnRowInContainer = container.querySelector('[data-field-type="individual"] #nin_bcrn')?.closest('.detail-row');
-            if (ninBcrnRowInContainer) {
-              ninBcrnRowInContainer.style.display = (isIndividual || isBusiness) ? '' : 'none';
-            }
-            
-            // Note: No sections to show/hide anymore - all fields are in the grid
-            
-            // Update required fields
-            const firstNameInput = container.querySelector('#first_name');
-            const surnameInput = container.querySelector('#surname');
-            const businessNameInput = container.querySelector('#business_name');
-            
-            if (isIndividual || isBusiness) {
-              // Both Individual and Business use the same fields, so same validation
-              if (firstNameInput) {
-                firstNameInput.required = true;
-              }
-              if (surnameInput) {
-                surnameInput.required = true;
-              }
-              if (businessNameInput) {
-                businessNameInput.required = false;
-              }
-            } else {
-              // Reset required states if no type selected
-              if (firstNameInput) firstNameInput.required = false;
-              if (surnameInput) surnameInput.required = false;
-              if (businessNameInput) businessNameInput.required = false;
-            }
-          }
-          
+
           // Attach client type change listener to cloned form
           const clonedClientTypeSelect = formContentDiv.querySelector('#client_type');
           if (clonedClientTypeSelect) {
-            // If no value is set (in add mode), default to Individual
             if (mode === 'add' && !clonedClientTypeSelect.value) {
               clonedClientTypeSelect.value = 'Individual';
             }
-            
+
             clonedClientTypeSelect.addEventListener('change', function() {
+              const selectedType = this.value;
+              if (selectedType === 'Individual') {
+                hideBusinessFields(formContentDiv);
+                showIndividualFields(formContentDiv);
+                forceIndividualFieldsVisible(formContentDiv);
+              } else if (isBusinessType(selectedType)) {
+                showBusinessFields(formContentDiv);
+              }
               handleClientTypeChangeInForm(formContentDiv);
             });
-            
-            // Trigger on initial load after form is populated to show correct fields
-            setTimeout(() => {
+
+            const initClonedFormFields = () => {
+              const selectedType = clonedClientTypeSelect.value || 'Individual';
+              if (selectedType === 'Individual') {
+                hideBusinessFields(formContentDiv);
+                showIndividualFields(formContentDiv);
+                forceIndividualFieldsVisible(formContentDiv);
+              } else if (isBusinessType(selectedType)) {
+                showBusinessFields(formContentDiv);
+              }
               handleClientTypeChangeInForm(formContentDiv);
-            }, 100);
+            };
+
+            applyWithDelays(initClonedFormFields, [10, 50, 100]);
           } else {
-            // Even if no client type select, hide all conditional fields
-            formContentDiv.querySelectorAll('[data-field-type="individual"]').forEach(field => {
-              field.style.display = 'none';
-            });
-            formContentDiv.querySelectorAll('[data-field-type="business"]').forEach(field => {
-              field.style.display = 'none';
-            });
+            hideAllConditionalFields(formContentDiv);
           }
-          
-          // Attach WA checkbox listener to cloned form
+
+          // Attach WA checkbox listener to cloned form (individual)
           const clonedWaCheckbox = formContentDiv.querySelector('#wa');
           const clonedAlternateNoRow = formContentDiv.querySelector('#alternate_no_row');
           if (clonedWaCheckbox && clonedAlternateNoRow) {
-            clonedWaCheckbox.addEventListener('change', function() {
-              if (this.checked) {
-                clonedAlternateNoRow.style.display = 'none';
-              } else {
-                clonedAlternateNoRow.style.display = '';
-              }
+            clonedWaCheckbox.addEventListener('change', () => {
+              toggleAlternateNoVisibility(clonedWaCheckbox, clonedAlternateNoRow);
             });
           }
+          // Attach WA checkbox listener to cloned form (business)
+          const clonedWaBusinessCheckbox = formContentDiv.querySelector('#wa_business');
+          const clonedAlternateNoRowBusiness = formContentDiv.querySelector('#alternate_no_row_business');
+          if (clonedWaBusinessCheckbox && clonedAlternateNoRowBusiness) {
+            clonedWaBusinessCheckbox.addEventListener('change', () => {
+              toggleAlternateNoVisibility(clonedWaBusinessCheckbox, clonedAlternateNoRowBusiness);
+            });
+          }
+          
+          // Setup WA toggle for cloned form
+          setupWaToggle(formContentDiv);
         }
       }
     }
-    
+
     // Set page title
     if (mode === 'add') {
       document.getElementById('clientPageTitle').textContent = 'Add Client';
@@ -1469,7 +1569,7 @@
       document.getElementById('clientPageName').textContent = clientName;
       document.getElementById('editClientFromPageBtn').style.display = 'none';
     }
-    
+
     // Hide table view, show page view
     document.getElementById('clientsTableView').classList.add('hidden');
     const clientPageView = document.getElementById('clientPageView');
@@ -1477,166 +1577,161 @@
     clientPageView.style.display = 'block';
     document.getElementById('clientDetailsPageContent').style.display = 'none';
     document.getElementById('clientFormPageContent').style.display = 'block';
-    
-    // Ensure "Add Document" buttons are shown/hidden correctly based on mode
-    // Use setTimeout to ensure DOM is ready after page content is displayed
-    setTimeout(() => {
-      if (mode === 'edit') {
-        // Show "Add Document" button in edit mode (addDocumentBtn2 is in clientFormPageContent)
-        const addDocumentBtn2 = document.getElementById('addDocumentBtn2');
-        if (addDocumentBtn2) {
-          addDocumentBtn2.style.display = 'inline-block';
-        }
-      } else {
-        // Hide "Add Document" buttons in add mode
-        const addDocumentBtn2 = document.getElementById('addDocumentBtn2');
-        if (addDocumentBtn2) {
-          addDocumentBtn2.style.display = 'none';
-        }
+
+    // Ensure Insurables section is always visible
+    const insurablesSection = document.getElementById('insurablesSection');
+    if (insurablesSection) {
+      insurablesSection.style.display = 'block';
+      insurablesSection.style.setProperty('display', 'block', 'important');
+    }
+
+    // Initialize page view fields
+    const initializePageViewFields = () => {
+      const clientTypeSelect = document.getElementById('client_type');
+      if (clientTypeSelect && (clientTypeSelect.value === 'Individual' || !clientTypeSelect.value)) {
+        forceIndividualFieldsVisible();
       }
-    }, 100);
+      handleClientTypeChange();
+
+      // Ensure Insurables section is always visible
+      const insurablesSection = document.getElementById('insurablesSection');
+      if (insurablesSection) {
+        insurablesSection.style.display = 'block';
+        insurablesSection.style.setProperty('display', 'block', 'important');
+      }
+
+      const addDocumentBtn2 = document.getElementById('addDocumentBtn2');
+      if (addDocumentBtn2) {
+        addDocumentBtn2.style.display = mode === 'edit' ? 'inline-block' : 'none';
+      }
+    };
+
+    applyWithDelays(initializePageViewFields, [10, 50, 100, 200, 300]);
   }
 
-  function closeClientModal(){
+  function closeClientModal() {
     closeClientPageView();
   }
 
-  function deleteClient(){
+  function deleteClient() {
     if (!currentClientId) return;
     if (!confirm('Delete this client?')) return;
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = `/clients/${currentClientId}`;
-    const csrf = document.createElement('input'); csrf.type='hidden'; csrf.name='_token'; csrf.value=csrfToken; form.appendChild(csrf);
-    const method = document.createElement('input'); method.type='hidden'; method.name='_method'; method.value='DELETE'; form.appendChild(method);
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = csrfToken;
+    form.appendChild(csrf);
+    const method = document.createElement('input');
+    method.type = 'hidden';
+    method.name = '_method';
+    method.value = 'DELETE';
+    form.appendChild(method);
     document.body.appendChild(form);
     form.submit();
   }
 
-  // Column modal functions
-  function openColumnModal(){
-    // Mandatory fields that should always be checked
-    const mandatoryFields = ['client_name', 'client_type', 'mobile_no', 'source', 'status', 'signed_up', 'clid', 'first_name', 'surname'];
-    
+  // ============================================================================
+  // COLUMN MODAL FUNCTIONS
+  // ============================================================================
+
+  function openColumnModal() {
     document.getElementById('tableResponsive').classList.add('no-scroll');
     document.querySelectorAll('.column-checkbox').forEach(cb => {
-      // Always check mandatory fields, otherwise check if in selectedColumns
-      cb.checked = mandatoryFields.includes(cb.value) || selectedColumns.includes(cb.value);
+      cb.checked = MANDATORY_FIELDS.includes(cb.value) || selectedColumns.includes(cb.value);
     });
     document.body.style.overflow = 'hidden';
     document.getElementById('columnModal').classList.add('show');
-    // Initialize drag and drop after modal is shown
     setTimeout(initDragAndDrop, 100);
   }
-  function closeColumnModal(){
+
+  function closeColumnModal() {
     document.getElementById('tableResponsive').classList.remove('no-scroll');
     document.getElementById('columnModal').classList.remove('show');
     document.body.style.overflow = '';
   }
-  function selectAllColumns(){ 
-    const mandatoryFields = ['client_name', 'client_type', 'mobile_no', 'source', 'status', 'signed_up', 'clid', 'first_name', 'surname'];
+
+  function selectAllColumns() {
     document.querySelectorAll('.column-checkbox').forEach(cb => {
       cb.checked = true;
     });
   }
-  function deselectAllColumns(){ 
-    const mandatoryFields = ['client_name', 'client_type', 'mobile_no', 'source', 'status', 'signed_up', 'clid', 'first_name', 'surname'];
+
+  function deselectAllColumns() {
     document.querySelectorAll('.column-checkbox').forEach(cb => {
-      // Don't uncheck mandatory fields
-      if (!mandatoryFields.includes(cb.value)) {
+      if (!MANDATORY_FIELDS.includes(cb.value)) {
         cb.checked = false;
       }
     });
   }
 
-  function saveColumnSettings(){
-    // Mandatory fields that should always be included
-    const mandatoryFields = ['client_name', 'client_type', 'mobile_no', 'source', 'status', 'signed_up', 'clid', 'first_name', 'surname'];
-    
-    // Get order from DOM - this preserves the drag and drop order
+  function saveColumnSettings() {
     const items = Array.from(document.querySelectorAll('#columnSelection .column-item'));
     const order = items.map(item => item.dataset.column);
-    const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n=>n.value);
-    
-    // Ensure mandatory fields are always included
-    mandatoryFields.forEach(field => {
+    const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n => n.value);
+
+    MANDATORY_FIELDS.forEach(field => {
       if (!checked.includes(field)) {
         checked.push(field);
       }
     });
-    
-    // Maintain order of checked items based on DOM order (drag and drop order)
+
     const orderedChecked = order.filter(col => checked.includes(col));
-    
+
     const form = document.getElementById('columnForm');
-    const existing = form.querySelectorAll('input[name="columns[]"]'); 
-    existing.forEach(e=>e.remove());
-    
-    // Add columns in the order they appear in the DOM (after drag and drop)
+    const existing = form.querySelectorAll('input[name="columns[]"]');
+    existing.forEach(e => e.remove());
+
     orderedChecked.forEach(c => {
-      const i = document.createElement('input'); 
-      i.type='hidden'; 
-      i.name='columns[]'; 
-      i.value=c; 
+      const i = document.createElement('input');
+      i.type = 'hidden';
+      i.name = 'columns[]';
+      i.value = c;
       form.appendChild(i);
     });
-    
+
     form.submit();
   }
 
   // Drag and drop functionality
   let draggedElement = null;
   let dragOverElement = null;
-  
-  // Initialize drag and drop when column modal opens
+
   function initDragAndDrop() {
     const columnSelection = document.getElementById('columnSelection');
     if (!columnSelection) return;
-    
-    // Make all column items draggable
+
     const columnItems = columnSelection.querySelectorAll('.column-item');
-    
+
     columnItems.forEach(item => {
-      // Skip if already initialized
-      if (item.dataset.dragInitialized === 'true') {
-        return;
-      }
+      if (item.dataset.dragInitialized === 'true') return;
       item.dataset.dragInitialized = 'true';
-      // Prevent checkbox from interfering with drag
+
       const checkbox = item.querySelector('.column-checkbox');
       if (checkbox) {
-        checkbox.addEventListener('mousedown', function(e) {
-          e.stopPropagation();
-        });
-        checkbox.addEventListener('click', function(e) {
-          e.stopPropagation();
-        });
+        checkbox.addEventListener('mousedown', e => e.stopPropagation());
+        checkbox.addEventListener('click', e => e.stopPropagation());
       }
-      
-      // Prevent label from interfering with drag
+
       const label = item.querySelector('label');
       if (label) {
-        label.addEventListener('mousedown', function(e) {
-          // Only prevent if clicking on the label text, not the checkbox
-          if (e.target === label) {
-            e.preventDefault();
-          }
+        label.addEventListener('mousedown', e => {
+          if (e.target === label) e.preventDefault();
         });
       }
-      
-      // Drag start
-      item.addEventListener('dragstart', function(e) {
-        draggedElement = this;
-        this.classList.add('dragging');
+
+      item.addEventListener('dragstart', e => {
+        draggedElement = item;
+        item.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.outerHTML);
-        e.dataTransfer.setData('text/plain', this.dataset.column);
+        e.dataTransfer.setData('text/html', item.outerHTML);
+        e.dataTransfer.setData('text/plain', item.dataset.column);
       });
-      
-      // Drag end
-      item.addEventListener('dragend', function(e) {
-        this.classList.remove('dragging');
-        // Remove drag-over from all items
+
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
         columnItems.forEach(i => i.classList.remove('drag-over'));
         if (dragOverElement) {
           dragOverElement.classList.remove('drag-over');
@@ -1644,74 +1739,69 @@
         }
         draggedElement = null;
       });
-      
-      // Drag over
-      item.addEventListener('dragover', function(e) {
+
+      item.addEventListener('dragover', e => {
         e.preventDefault();
         e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
-        
-        if (draggedElement && this !== draggedElement) {
-          // Remove drag-over class from previous element
-          if (dragOverElement && dragOverElement !== this) {
+
+        if (draggedElement && item !== draggedElement) {
+          if (dragOverElement && dragOverElement !== item) {
             dragOverElement.classList.remove('drag-over');
           }
-          
-          // Add drag-over class to current element
-          this.classList.add('drag-over');
-          dragOverElement = this;
-          
-          const rect = this.getBoundingClientRect();
+
+          item.classList.add('drag-over');
+          dragOverElement = item;
+
+          const rect = item.getBoundingClientRect();
           const midpoint = rect.top + (rect.height / 2);
           const next = e.clientY > midpoint;
-          
+
           if (next) {
-            if (this.nextSibling && this.nextSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this.nextSibling);
-            } else if (!this.nextSibling) {
-              this.parentNode.appendChild(draggedElement);
+            if (item.nextSibling && item.nextSibling !== draggedElement) {
+              item.parentNode.insertBefore(draggedElement, item.nextSibling);
+            } else if (!item.nextSibling) {
+              item.parentNode.appendChild(draggedElement);
             }
           } else {
-            if (this.previousSibling !== draggedElement) {
-              this.parentNode.insertBefore(draggedElement, this);
+            if (item.previousSibling !== draggedElement) {
+              item.parentNode.insertBefore(draggedElement, item);
             }
           }
         }
       });
-      
-      // Drag enter
-      item.addEventListener('dragenter', function(e) {
+
+      item.addEventListener('dragenter', e => {
         e.preventDefault();
-        if (draggedElement && this !== draggedElement) {
-          this.classList.add('drag-over');
+        if (draggedElement && item !== draggedElement) {
+          item.classList.add('drag-over');
         }
       });
-      
-      // Drag leave
-      item.addEventListener('dragleave', function(e) {
-        // Only remove if we're actually leaving the element
-        if (!this.contains(e.relatedTarget)) {
-          this.classList.remove('drag-over');
-          if (dragOverElement === this) {
+
+      item.addEventListener('dragleave', e => {
+        if (!item.contains(e.relatedTarget)) {
+          item.classList.remove('drag-over');
+          if (dragOverElement === item) {
             dragOverElement = null;
           }
         }
       });
-      
-      // Drop
-      item.addEventListener('drop', function(e) {
+
+      item.addEventListener('drop', e => {
         e.preventDefault();
         e.stopPropagation();
-        this.classList.remove('drag-over');
+        item.classList.remove('drag-over');
         dragOverElement = null;
         return false;
       });
     });
   }
 
-  // Preview uploaded document in modal
+  // ============================================================================
+  // DOCUMENT PREVIEW MODALS
+  // ============================================================================
+
   function previewUploadedDocument(fileUrl, fileExt, documentName) {
-    // Create preview modal
     let previewModal = document.getElementById('documentPreviewModal');
     if (!previewModal) {
       previewModal = document.createElement('div');
@@ -1766,7 +1856,6 @@
     }
   }
 
-  // Preview client photo in modal
   function previewClientPhotoModal(photoUrl) {
     let photoModal = document.getElementById('clientPhotoPreviewModal');
     if (!photoModal) {
@@ -1806,107 +1895,128 @@
   }
 
   // Close modals on ESC or backdrop
-  document.addEventListener('keydown', e => { 
-    if (e.key === 'Escape') { 
-      closeClientModal(); 
-      closeColumnModal(); 
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeClientModal();
+      closeColumnModal();
       closeClientDetailsModal();
       closeDocumentUploadModal();
       closeDocumentPreviewModal();
       closeClientPhotoPreviewModal();
-    } 
+    }
   });
+
   document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', e => { 
-      if (e.target === m) { 
-        m.classList.remove('show'); 
-        document.body.style.overflow = ''; 
+    m.addEventListener('click', e => {
+      if (e.target === m) {
+        m.classList.remove('show');
+        document.body.style.overflow = '';
         if (m.id === 'documentUploadModal') {
           document.getElementById('documentUploadForm').reset();
         }
-      } 
+      }
     });
   });
 
-  // Simple validation
-  document.getElementById('clientForm').addEventListener('submit', async function(e){
+  // ============================================================================
+  // FORM SUBMISSION
+  // ============================================================================
+
+  document.getElementById('clientForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const form = this;
-    
-    // Disable hidden duplicate fields to prevent submission conflicts
     const clientType = form.querySelector('#client_type')?.value;
-    const isIndividual = clientType === 'Individual';
-    const isBusiness = ['Business', 'Company', 'Organization'].includes(clientType);
-    
-    // Sync values from visible fields to primary fields and disable hidden duplicates
+    const isIndividual = isIndividualType(clientType);
+    const isBusiness = isBusinessType(clientType);
+
+    // Remove required attribute from hidden fields to prevent browser validation errors
+    const fieldsWithRequiredRemoved = [];
+    form.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
+      const parentRow = field.closest('[data-field-type]');
+      let isVisible = true;
+      
+      if (parentRow) {
+        isVisible = parentRow.offsetParent !== null && 
+                   !parentRow.style.display.includes('none') && 
+                   parentRow.style.display !== 'none' &&
+                   window.getComputedStyle(parentRow).display !== 'none';
+      } else {
+        isVisible = field.offsetParent !== null && 
+                   field.style.display !== 'none' && 
+                   !field.style.display.includes('none') &&
+                   window.getComputedStyle(field).display !== 'none';
+      }
+      
+      if (!isVisible) {
+        field.removeAttribute('required');
+        fieldsWithRequiredRemoved.push(field);
+      }
+    });
+
+    // Disable hidden duplicate fields to prevent submission conflicts
     if (isBusiness) {
-        // Sync business fields
-        const businessName = form.querySelector('#business_name');
-        const mobileNo = form.querySelector('#mobile_no_business') || form.querySelector('#mobile_no_individual');
-      const district = form.querySelector('#district_business') || form.querySelector('#district_business_col3') || form.querySelector('#district');
-      const signedUp = form.querySelector('#signed_up_business') || form.querySelector('#signed_up_business_col4') || form.querySelector('#signed_up');
-      const agency = form.querySelector('#agency_business') || form.querySelector('#agency');
-      const agent = form.querySelector('#agent_business') || form.querySelector('#agent');
-      const source = form.querySelector('#source_business') || form.querySelector('#source');
-      const sourceName = form.querySelector('#source_name_business') || form.querySelector('#source_name');
-      const location = form.querySelector('#location_business') || form.querySelector('#location');
-      const island = form.querySelector('#island_business') || form.querySelector('#island');
-      const country = form.querySelector('#country_business') || form.querySelector('#country');
-      const notes = form.querySelector('#notes_business') || form.querySelector('#notes');
-      const alternateNo = form.querySelector('#alternate_no_business') || form.querySelector('#alternate_no');
-      const emailAddress = form.querySelector('#email_address_business') || form.querySelector('#email_address');
-      const poBox = form.querySelector('#po_box_location') || form.querySelector('#po_box_no');
-      const bcrn = form.querySelector('#bcrn_business_main') || form.querySelector('#nin_bcrn');
-      const wa = form.querySelector('#wa_business') || form.querySelector('#wa');
-      
-      // Sync values to primary fields (if they exist)
-      if (businessName && form.querySelector('#first_name')) {
-        form.querySelector('#first_name').value = businessName.value;
-      }
-      if (mobileNo && form.querySelector('#mobile_no')) {
-        form.querySelector('#mobile_no').value = mobileNo.value;
-      }
-      
-      // Disable all hidden individual fields
       form.querySelectorAll('[data-field-type="individual"] input, [data-field-type="individual"] select, [data-field-type="individual"] textarea').forEach(field => {
-        if (field.offsetParent === null) { // Check if hidden
+        if (field.offsetParent === null) {
           field.disabled = true;
         }
       });
     } else if (isIndividual) {
-      // Disable all hidden business fields
       form.querySelectorAll('[data-field-type="business"] input, [data-field-type="business"] select, [data-field-type="business"] textarea').forEach(field => {
-        if (field.offsetParent === null) { // Check if hidden
+        if (field.offsetParent === null) {
           field.disabled = true;
         }
       });
     }
-    
-    // Check required fields
+
+    // Check required fields (only visible ones)
     const req = form.querySelectorAll('[required]:not([disabled])');
     let ok = true;
-    req.forEach(f => { if (!String(f.value||'').trim()) { ok = false; f.style.borderColor='red'; } else { f.style.borderColor=''; } });
-    if (!ok) { 
-      // Re-enable disabled fields
+    req.forEach(f => {
+      // Double check field is actually visible
+      const parentRow = f.closest('[data-field-type]');
+      const isVisible = !parentRow || (parentRow.offsetParent !== null && 
+                         !parentRow.style.display.includes('none') && 
+                         parentRow.style.display !== 'none');
+      
+      if (isVisible && !String(f.value || '').trim()) {
+        ok = false;
+        f.style.borderColor = 'red';
+      } else {
+        f.style.borderColor = '';
+      }
+    });
+
+    if (!ok) {
       form.querySelectorAll('input[disabled], select[disabled], textarea[disabled]').forEach(f => f.disabled = false);
-      alert('Please fill required fields'); 
-      return; 
+      // Restore required attributes for next attempt
+      form.querySelectorAll('input, select, textarea').forEach(field => {
+        if (field.hasAttribute('data-was-required')) {
+          field.setAttribute('required', '');
+          field.removeAttribute('data-was-required');
+        }
+      });
+      alert('Please fill required fields');
+      return;
     }
-    
+
     const formData = new FormData(form);
-    
+
     // Re-enable disabled fields after form data is collected
     form.querySelectorAll('input[disabled], select[disabled], textarea[disabled]').forEach(f => f.disabled = false);
-    const isEdit = form.action.includes('/clients/') && form.action !== clientsStoreRoute;
-    const url = isEdit ? form.action : form.action;
-    const method = isEdit ? 'PUT' : 'POST';
     
-    // Add method override for PUT
+    // Restore required attributes that were removed
+    fieldsWithRequiredRemoved.forEach(field => {
+      field.setAttribute('required', '');
+    });
+
+    const isEdit = form.action.includes('/clients/') && form.action !== clientsStoreRoute;
+    const url = form.action;
+
     if (isEdit) {
       formData.append('_method', 'PUT');
     }
-    
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -1916,15 +2026,13 @@
         },
         body: formData
       });
-      
+
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success) {
-          // If this was a create operation, set currentClientId and switch to edit mode
-          if (!isEdit && result.client && result.client.id) {
+          if (!isEdit && result.client?.id) {
             currentClientId = result.client.id;
-            // Fetch full client data and switch to edit mode to allow document upload
             try {
               const clientRes = await fetch(`/clients/${result.client.id}`, {
                 headers: {
@@ -1948,16 +2056,14 @@
               location.reload();
             }
           } else {
-            // For edit, just show success and close modal
             alert('Client updated successfully!');
             closeClientModal();
-            location.reload(); // Reload to show updated data
+            location.reload();
           }
         } else {
           alert('Error: ' + (result.message || 'Unknown error'));
         }
       } else {
-        // Handle validation errors
         const errorData = await response.json();
         if (errorData.errors) {
           let errorMsg = 'Validation errors:\n';
@@ -1975,7 +2081,10 @@
     }
   });
 
-  // Toggle scrollbar helper for responsive table
+  // ============================================================================
+  // TABLE FUNCTIONS
+  // ============================================================================
+
   function toggleTableScroll() {
     const table = document.getElementById('clientsTable');
     const wrapper = document.getElementById('tableResponsive');
@@ -1984,15 +2093,14 @@
     const hasVerticalOverflow = table.offsetHeight > wrapper.offsetHeight;
     wrapper.classList.toggle('no-scroll', !hasHorizontalOverflow && !hasVerticalOverflow);
   }
+
   window.addEventListener('load', toggleTableScroll);
   window.addEventListener('resize', toggleTableScroll);
 
-  // Column filter functionality - apply all filters together
   function applyFilters() {
     const rows = document.querySelectorAll('tbody tr');
     const activeFilters = {};
-    
-    // Collect all active filter values
+
     document.querySelectorAll('.column-filter.visible').forEach(filter => {
       const column = filter.dataset.column;
       const value = filter.value.trim().toLowerCase();
@@ -2000,12 +2108,10 @@
         activeFilters[column] = value;
       }
     });
-    
-    // Apply filters to rows
+
     rows.forEach(row => {
       let shouldShow = true;
-      
-      // Check if row matches all active filters
+
       for (const [column, filterValue] of Object.entries(activeFilters)) {
         const cell = row.querySelector(`td[data-column="${column}"]`);
         if (cell) {
@@ -2019,111 +2125,82 @@
           break;
         }
       }
-      
+
       row.style.display = shouldShow ? '' : 'none';
     });
-    
-    // Update records count
+
     const visibleRows = Array.from(document.querySelectorAll('tbody tr')).filter(row => {
       return row.style.display !== 'none' && !row.style.display.includes('none');
     }).length;
     const recordsFound = document.querySelector('.records-found');
     if (recordsFound && Object.keys(activeFilters).length > 0) {
-      const total = clientsTotal;
-      recordsFound.textContent = `Records Found - ${visibleRows} of ${total} (filtered)`;
+      recordsFound.textContent = `Records Found - ${visibleRows} of ${clientsTotal} (filtered)`;
     } else if (recordsFound) {
       recordsFound.textContent = `Records Found - ${clientsTotal}`;
     }
   }
-  
-  // Print table function - creates a new print-friendly table
+
+  // Escape HTML to prevent XSS
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   function printTable() {
     const table = document.getElementById('clientsTable');
     if (!table) return;
-    
-    // Get table headers - preserve order
+
     const headers = [];
     const headerCells = table.querySelectorAll('thead th');
     headerCells.forEach(th => {
       let headerText = '';
-      // Get text, excluding filter input
       const clone = th.cloneNode(true);
       const filterInput = clone.querySelector('.column-filter');
       if (filterInput) filterInput.remove();
       headerText = clone.textContent.trim();
-      // Handle bell icon column
       if (clone.querySelector('svg')) {
-        headerText = '🔔'; // Bell icon
+        headerText = '🔔';
       }
       if (headerText) {
         headers.push(headerText);
       }
     });
-    
-    // Get table rows data
+
     const rows = [];
     const tableRows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
     tableRows.forEach(row => {
-      if (row.style.display === 'none') return; // Skip hidden rows
-      
+      if (row.style.display === 'none') return;
+
       const cells = [];
       const rowCells = row.querySelectorAll('td');
       rowCells.forEach((cell) => {
         let cellContent = '';
-        
-        // Handle notification column (bell-cell)
+
         if (cell.classList.contains('bell-cell')) {
           const radio = cell.querySelector('input[type="radio"]');
-          if (radio && radio.checked) {
-            cellContent = '●'; // Filled circle for checked
-          } else {
-            cellContent = '○'; // Empty circle for unchecked
-          }
-        } 
-        // Handle action column
-        else if (cell.classList.contains('action-cell')) {
-          const expandIcon = cell.querySelector('.action-expand');
-          const clockIcon = cell.querySelector('.action-clock');
-          const ellipsis = cell.querySelector('.action-ellipsis');
+          cellContent = radio && radio.checked ? '●' : '○';
+        } else if (cell.classList.contains('action-cell')) {
           const icons = [];
-          if (expandIcon) icons.push('⤢');
-          if (clockIcon) icons.push('🕐');
-          if (ellipsis) icons.push('⋯');
+          if (cell.querySelector('.action-expand')) icons.push('⤢');
+          if (cell.querySelector('.action-clock')) icons.push('🕐');
+          if (cell.querySelector('.action-ellipsis')) icons.push('⋯');
           cellContent = icons.join(' ');
-        } 
-        // Handle checkbox cells
-        else if (cell.classList.contains('checkbox-cell')) {
+        } else if (cell.classList.contains('checkbox-cell')) {
           const checkbox = cell.querySelector('input[type="checkbox"]');
           cellContent = checkbox && checkbox.checked ? '✓' : '';
-        } 
-        // Handle regular cells
-        else {
-          // Get text content, handling links
+        } else {
           const link = cell.querySelector('a');
-          if (link) {
-            cellContent = link.textContent.trim();
-          } else {
-            cellContent = cell.textContent.trim();
-          }
+          cellContent = link ? link.textContent.trim() : cell.textContent.trim();
         }
-        
+
         cells.push(cellContent || '-');
       });
       rows.push(cells);
     });
-    
-    // Escape HTML to prevent XSS and syntax issues
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    // Build headers HTML
+
     const headersHTML = headers.map(h => '<th>' + escapeHtml(h) + '</th>').join('');
-    
-    // Build rows HTML
     const rowsHTML = rows.map(row => {
       const cellsHTML = row.map(cell => {
         const cellText = escapeHtml(String(cell || '-'));
@@ -2131,10 +2208,9 @@
       }).join('');
       return '<tr>' + cellsHTML + '</tr>';
     }).join('');
-    
-    // Create print window with minimal delay
+
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-    
+
     const printHTML = '<!DOCTYPE html>' +
       '<html>' +
       '<head>' +
@@ -2168,37 +2244,31 @@
       '</scr' + 'ipt>' +
       '</body>' +
       '</html>';
-    
+
     if (printWindow) {
       printWindow.document.open();
       printWindow.document.write(printHTML);
       printWindow.document.close();
     }
   }
-  
-  // Add event listeners to all column filters
-  document.addEventListener('DOMContentLoaded', function() {
-    // Print button event listener
+
+  function initializeFilters() {
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
-      printBtn.addEventListener('click', function() {
-        printTable();
-      });
+      printBtn.addEventListener('click', printTable);
     }
-    
+
     document.querySelectorAll('.column-filter').forEach(filter => {
-      filter.addEventListener('input', function() {
-        applyFilters();
-      });
+      filter.addEventListener('input', applyFilters);
     });
-    
-    // Initialize filter visibility
+
     const filterToggle = document.getElementById('filterToggle');
-    if (filterToggle && filterToggle.checked) {
+    if (filterToggle?.checked) {
       document.querySelectorAll('.column-filter').forEach(filter => {
         filter.classList.add('visible');
         filter.style.display = 'block';
       });
     }
-  });
+  }
 
+  document.addEventListener('DOMContentLoaded', initializeFilters);
