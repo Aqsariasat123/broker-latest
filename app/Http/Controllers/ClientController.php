@@ -88,7 +88,6 @@ class ClientController extends Controller
             'po_box_no' => 'nullable|string|max:50',
             'pep' => 'boolean',
             'pep_comment' => 'nullable|string',
-            'image' => 'nullable|string|max:255',
             'salutation' => 'nullable|string|max:50',
             'first_name' => 'nullable|string|max:255',
             'other_names' => 'nullable|string|max:255',
@@ -106,7 +105,7 @@ class ClientController extends Controller
             'notes' => 'nullable|string',
             'business_name' => 'nullable|string|max:255',
             'designation' => 'nullable|string|max:255',
-            'image' => 'required|image|mimes:jpeg,jpg,png|max:5120',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
         ];
         
         // Conditional validation based on client type
@@ -128,8 +127,14 @@ class ClientController extends Controller
         $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
         
         // Remove business_name from validated as it's not a database field
-        unset($validated['business_name']);
+        // unset($validated['business_name']);
+        if (in_array($request->client_type, ['Business', 'Company', 'Organization'])) {
+            $validated['client_name'] = $validated['business_name'];
+            $validated['surname'] =  $validated['business_name'];
+            $validated['first_name'] = '';
+            $validated['other_names'] = '';
 
+        }
         $client = Client::create($validated);
 
         // Handle image upload - store in documents table
@@ -293,7 +298,7 @@ class ClientController extends Controller
         
         // Conditional validation based on client type
         // Both Individual and Business now use the same fields (first_name and surname)
-        if ($request->client_type === 'Individual' || in_array($request->client_type, ['Business', 'Company', 'Organization'])) {
+        if ($request->client_type === 'Individual' ) {
             $rules['first_name'] = 'required|string|max:255';
             $rules['surname'] = 'required|string|max:255';
         }
@@ -301,15 +306,12 @@ class ClientController extends Controller
         $validated = $request->validate($rules);
 
         // Set client_name - both Individual and Business use same format
+
         $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
         
-        // Remove business_name from validated as it's not a database field
-        unset($validated['business_name']);
+     
 
-        // Validate that image is required if no existing image
-        if (!$client->image && !$request->hasFile('image')) {
-            return redirect()->back()->withErrors(['image' => 'Passport size photo is required.'])->withInput();
-        }
+        // Image is optional - no validation required
 
         // Handle image upload if new file provided - store in documents table
         if ($request->hasFile('image')) {
@@ -386,9 +388,16 @@ class ClientController extends Controller
 
         // Set client_name - both Individual and Business use same format
         $validated['client_name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['other_names'] ?? '') . ' ' . ($validated['surname'] ?? ''));
-
+        
         // Remove business_name from validated as it's not a database field
-        unset($validated['business_name']);
+        if (in_array($request->client_type, ['Business', 'Company', 'Organization'])) {
+            $validated['client_name'] = $validated['contact_person'];
+            $validated['surname'] =  $validated['contact_person'];
+            $validated['first_name'] = $validated['contact_person'];
+            $validated['other_names'] = $validated['contact_person'];
+
+        }
+        // Remove business_name from validated as it's not a database field
 
         $client->update($validated);
 
