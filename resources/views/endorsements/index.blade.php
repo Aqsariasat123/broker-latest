@@ -83,12 +83,52 @@
                 </td>
               </tr>
               @endforeach
+
+              @foreach($endorsements as $e)
+                <tr class="{{ $e->hasExpired ?? false ? 'has-expired' : ($e->hasExpiring ?? false ? 'has-expiring' : '') }}">
+                    <td class="bell-cell {{ $inc->hasExpired ?? false ? 'expired' : ($inc->hasExpiring ?? false ? 'expiring' : '') }}">
+                      <div style="display:flex; align-items:center; justify-content:center;">
+                        @php
+                          $isExpired = $e->hasExpired ?? false;
+                          $isExpiring = $e->hasExpiring ?? false;
+                        @endphp
+                        <div class="status-indicator {{ $isExpired ? 'expired' : ($isExpiring ? 'expiring' : 'normal') }}" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : ($isExpiring ? '#ffc107' : 'transparent') }};"></div>
+                      </div>
+                    </td>
+                    <td class="action-cell">
+                      <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openIncomeDetails({{ $inc->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                    
+                    </td>
+                    @foreach($selectedColumns as $col)
+                      @if($col == 'endorsement_id')
+                        <td data-column="endorsement_id">{{ $e->endorsement_id }}</td>
+                      @elseif($col == 'endorsement_no')
+                        <td data-column="endorsement_no">{{ $e->endorsement_no }}</td>
+                      @elseif($col == 'policy_no')
+                        <td data-column="policy_no">{{ $e->policy_no  }}</td>
+                      @elseif($col == 'date')
+                        <td data-column="date">{{ $e->date  }}</td>
+                      @elseif($col == 'date')
+                        <td data-column="date">{{ $e->date  }}</td>
+                      @elseif($col == 'type')
+                        <td data-column="date">{{ $e->type  }}</td>
+                      @elseif($col == 'description')
+                        <td data-column="description">{{ $e->description  }}</td>
+                      @elseif($col == 'notes')
+                        <td data-column="description">{{ $e->notes  }}</td>
+                      @endif
+                    @endforeach
+                </tr>
+
+               @endforeach
             </tbody>
           </table>
         </div>
         <div class="footer" style="background:#fff; border-top:1px solid #ddd; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
           <div class="footer-left">
             <a class="btn btn-export" href="{{ route('endorsements.export', array_merge(request()->query(), ['page' => $endorsements->currentPage()])) }}">Export</a>
+            <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
+
           </div>
           <div class="paginator">
             @php
