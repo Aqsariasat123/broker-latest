@@ -270,7 +270,7 @@
                 <button class="policy-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
                 <button class="policy-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
                 <button class="policy-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
-                <button class="policy-tab" data-tab="endorsements" data-url="{{ route('documents.index') }}">Endorsements</button>
+                <button class="policy-tab" data-tab="endorsements" data-url="{{ route('endorsements.index') }}">Endorsements</button>
                 <button class="policy-tab" data-tab="commissions" data-url="{{ route('commissions.index') }}">Commission</button>
                 <button class="policy-tab" data-tab="nominees" data-url="{{ route('nominees.index') }}">Nominees</button>
 
