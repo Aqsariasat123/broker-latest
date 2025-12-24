@@ -285,8 +285,6 @@ class TableConfigHelper
                     'income_notes' => 'Income Notes',
                 ],
             ],
-<<<<<<< HEAD
-=======
             'endorsements' => [
                 'module' => 'endorsements',
                 'route_prefix' => 'endorsements',
@@ -306,7 +304,6 @@ class TableConfigHelper
 
                 ],
             ],
->>>>>>> 6231512... endorsement done
             'commissions' => [
                 'module' => 'commissions',
                 'route_prefix' => 'commissions',
