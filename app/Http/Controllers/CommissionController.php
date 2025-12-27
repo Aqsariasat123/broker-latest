@@ -11,22 +11,6 @@ class CommissionController extends Controller
 {
     public function index(Request $request)
     {
-<<<<<<< HEAD
-        // Lookup values for selects
-        $insurers = LookupValue::whereHas('lookupCategory', function($q){
-            $q->where('name', 'Insurers');
-        })->where('active', 1)->orderBy('seq')->get();
-
-        $paymentStatuses = LookupValue::whereHas('lookupCategory', function($q){
-            $q->where('name', 'Payment Status');
-        })->where('active', 1)->orderBy('seq')->get();
-
-        $modesOfPayment = LookupValue::whereHas('lookupCategory', function($q){
-            $q->where('name', 'Mode Of Payment (Life)');
-        })->where('active', 1)->orderBy('seq')->get();
-
-        // Filter by insurer if requested
-=======
         $policy = null;
         $policyId = $request->get('policy_id');
 
@@ -62,7 +46,6 @@ class CommissionController extends Controller
         }
     
         // ✅ INSURER FILTER
->>>>>>> 6231512... endorsement done
         $insurerFilter = $request->get('insurer');
         $commissions = Commission::with(['insurer', 'paymentStatus', 'modeOfPayment'])
             ->when($insurerFilter, function($q) use ($insurerFilter, $insurers) {
@@ -77,10 +60,6 @@ class CommissionController extends Controller
         // Use TableConfigHelper for selected columns
         $config = \App\Helpers\TableConfigHelper::getConfig('commissions');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('commissions');
-<<<<<<< HEAD
-
-        return view('commissions.index', compact('commissions', 'insurers', 'paymentStatuses', 'modesOfPayment', 'insurerFilter', 'selectedColumns'));
-=======
     
         return view(
             'commissions.index',
@@ -95,7 +74,6 @@ class CommissionController extends Controller
                 'selectedColumns'
             )
         );
->>>>>>> 6231512... endorsement done
     }
 
     public function store(Request $request)

@@ -123,44 +123,53 @@ class ContactController extends Controller
         return view('contacts.edit', compact('contact'));
     }
 
-    public function update(Request $request, Contact $contact)
-    {
-        $validated = $request->validate([
-            'contact_name' => 'required|string|max:255',
-            'contact_no' => 'nullable|string|max:20',
-            'wa' => 'nullable|string|max:20',
-            'type' => 'required|string',
-            'occupation' => 'nullable|string|max:255',
-            'employer' => 'nullable|string|max:255',
-            'acquired' => 'nullable|date',
-            'source' => 'required|string',
-            'status' => 'required|string',
-            'rank' => 'nullable|string',
-            'first_contact' => 'nullable|date',
-            'next_follow_up' => 'nullable|date',
-            'coid' => 'nullable|string|max:50',
-            'dob' => 'nullable|date',
-            'salutation' => 'required|string',
-            'source_name' => 'nullable|string|max:255',
-            'agency' => 'nullable|string|max:255',
-            'agent' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'email_address' => 'nullable|email',
-            'savings_budget' => 'nullable|numeric',
-            'married' => 'boolean',
-            'children' => 'nullable|integer|min:0',
-            'children_details' => 'nullable|string',
-            'vehicle' => 'nullable|string|max:255',
-            'house' => 'nullable|string|max:255',
-            'business' => 'nullable|string|max:255',
-            'other' => 'nullable|string',
+  public function update(Request $request, Contact $contact)
+{
+    $validated = $request->validate([
+        'contact_name' => 'required|string|max:255',
+        'contact_no' => 'nullable|string|max:20',
+        'wa' => 'nullable|string|max:20',
+        'type' => 'required|string',
+        'occupation' => 'nullable|string|max:255',
+        'employer' => 'nullable|string|max:255',
+        'acquired' => 'nullable|date',
+        'source' => 'required|string',
+        'status' => 'required|string',
+        'rank' => 'nullable|string',
+        'first_contact' => 'nullable|date',
+        'next_follow_up' => 'nullable|date',
+        'coid' => 'nullable|string|max:50',
+        'dob' => 'nullable|date',
+        'salutation' => 'required|string',
+        'source_name' => 'nullable|string|max:255',
+        'agency' => 'nullable|string|max:255',
+        'agent' => 'nullable|string|max:255',
+        'address' => 'nullable|string',
+        'location' => 'nullable|string|max:255',
+        'email_address' => 'nullable|email',
+        'savings_budget' => 'nullable|numeric',
+        'married' => 'boolean',
+        'children' => 'nullable|integer|min:0',
+        'children_details' => 'nullable|string',
+        'vehicle' => 'nullable|string|max:255',
+        'house' => 'nullable|string|max:255',
+        'business' => 'nullable|string|max:255',
+        'other' => 'nullable|string',
+    ]);
+
+    $contact->update($validated);
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'contact' => $contact,
+            'message' => 'Contact updated successfully.'
         ]);
-
-        $contact->update($validated);
-
-        return redirect()->route('contacts.index')->with('success', 'Contact updated successfully.');
     }
+
+    return redirect()->route('contacts.index')
+        ->with('success', 'Contact updated successfully.');
+}
 
     public function destroy(Contact $contact)
     {

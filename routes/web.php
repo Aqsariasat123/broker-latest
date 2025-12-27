@@ -156,10 +156,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/clients/{client}/upload-document', [ClientController::class, 'uploadDocument'])->name('clients.upload-document');
 
     // Contacts Routes
-    Route::get('/contacts/export', [ContactController::class, 'export'])->name('contacts.export');
-    Route::resource('contacts', ContactController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
-    Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
-    Route::post('/contacts/save-column-settings', [ContactController::class, 'saveColumnSettings'])->name('contacts.save-column-settings');
+        Route::get('/contacts/export', [ContactController::class, 'export'])->name('contacts.export');
+        Route::resource('contacts', ContactController::class)
+            ->only(['index', 'store', 'update', 'destroy', 'show']);
+        Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
+        Route::post('/contacts/save-column-settings', [ContactController::class, 'saveColumnSettings'])
+            ->name('contacts.save-column-settings');
 
     // Life Proposals Routes
     Route::get('/life-proposals/export', [LifeProposalController::class, 'export'])->name('life-proposals.export');

@@ -242,9 +242,24 @@
                 <button class="contact-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Follow Up</button>
 
                 </div>
-                <div class="client-page-actions" id="policyHeaderActions">
+                <div class="client-page-actions" id="contactHeaderActions">
                   <button class="btn btn-edit" id="editContactFromPageBtn" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px; display:none;" onclick="if(currentContactId) openEditContract(currentContactId)">Edit</button>
-                  <button class="btn" id="contactContactPageBtn" onclick="closecontactPageView()" style="background:#e0e0e0; color:#000; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px;">Cancel</button>
+                  <button class="btn" id="contactContactPageBtn" onclick="closecontactPageView()" style="background:#e0e0e0; color:#000; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px;display:none;">Cancel</button>
+                   <button
+                    class="btn"
+                    id="saveContactFromPageBtn"
+                   style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px; display:none;"
+                    onclick="saveContactFromPage()">
+                    Save
+                  </button>
+                  
+                <button
+                  class="btn"
+                  id="deleteContactFromPageBtn"
+                  style="background:#dc3545; color:#fff; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px; display:none;"
+                  onclick="deleteContactFromPage()">
+                  Delete
+                </button>
                 </div>
               </div>
             </div>
@@ -383,6 +398,13 @@
                 @foreach($lookupData['contact_types'] as $t) <option value="{{ $t['id'] }}">{{ $t['name'] }}</option> @endforeach
               </select>
             </div>
+             <div>
+                 <label for="salutation" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Salutation</label>
+               <select id="salutation" name="salutation" class="form-control" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+                  <option value="">Select</option>
+                  @foreach($lookupData['salutations'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+                </select>
+              </div>
             <div>
               <label for="contact_name" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Contact Name</label>
               <input id="contact_name" name="contact_name" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
@@ -485,7 +507,6 @@
               <input id="children" name="children" type="number" min="0" class="form-control" value="0" style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
             </div>
 
-          <input type="hidden" id="salutation" name="salutation" value="Mr">
           <input type="hidden" id="first_contact" name="first_contact">
           <input type="hidden" id="next_follow_up" name="next_follow_up">
           <input type="hidden" id="coid" name="coid">
