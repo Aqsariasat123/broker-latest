@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log; // <-- Add this
 
 use App\Models\Contact;
 use App\Models\LookupCategory;
@@ -36,7 +37,7 @@ class ContactController extends Controller
         }
         
         // Use paginate instead of get
-        $contacts = $query->orderBy('created_at', 'desc')->paginate(10);
+        $contacts = $query->with(['contact_types', 'source_value', 'agent_user', 'agency_user'])->orderBy('created_at', 'desc')->paginate(10);
 
         // Calculate expiration status for each contact
         $contacts->getCollection()->transform(function ($contact) {
@@ -59,6 +60,8 @@ class ContactController extends Controller
         
         // Get users for agents
         $users = \App\Models\User::where('is_active', true)->select('id', 'name')->orderBy('name')->get();
+
+        Log::info('Selected contacts: ', $contacts->toArray());
         
         return view('contacts.index', compact('contacts', 'lookupData', 'allEmployers', 'allOccupations', 'users'));
     }

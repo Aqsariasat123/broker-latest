@@ -2,6 +2,7 @@
 // app/Http/Controllers/TaskController.php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log; // <-- Add this
 
 use App\Models\Task;
 use App\Models\LookupCategory;
@@ -32,7 +33,12 @@ class TaskController extends Controller
         }
     
         // paginate 10 per page
-        $tasks = $query->orderBy('due_date', 'desc')->paginate(10);
+        $tasks = $query->with([
+            'categoryValues',   // joins Task Category
+            'assigneeUser',     // joins User
+            'contact',          // joins Contact
+            'client'            // joins Client
+        ])->orderBy('due_date', 'desc')->paginate(10);
 
         // Get selected columns from session using TableConfigHelper
         $config = \App\Helpers\TableConfigHelper::getConfig('tasks');
@@ -50,6 +56,8 @@ class TaskController extends Controller
         // Get users for assignee dropdown
         $users = User::where('is_active', true)->select('id', 'name')->orderBy('name')->get();
 
+
+        Log::info('Selected Columns: ', $tasks->toArray());
         return view('tasks.index', compact('tasks', 'selectedColumns', 'categories', 'frequencyCategories', 'contacts', 'clients', 'users'));
     }
 

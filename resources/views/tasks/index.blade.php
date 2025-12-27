@@ -83,74 +83,94 @@
                 </tr>
               </thead>
               <tbody>
-                @foreach($tasks as $task)
-                <tr class="{{ $task->isOverdue() ? 'overdue' : '' }}">
-                <td class="bell-cell {{ $task->isOverdue() ? 'expired' : ($task->isExpiringSoon() ? 'expiring' : '') }}">
-                  <div style="display:flex; align-items:center; justify-content:center;">
-                    @php
-                      $isExpired = $task->isOverdue();
-                      $isExpiring = $task->isExpiringSoon();
-                    @endphp
-                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : ($isExpiring ? '#f3742a' : 'transparent') }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
-                  </div>
-                </td>
-                  <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" 
-                  onclick="openEditTask({{ $task->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+               @foreach($tasks as $task)
+<tr class="{{ $task->isOverdue() ? 'overdue' : '' }}">
+    <td class="bell-cell {{ $task->isOverdue() ? 'expired' : ($task->isExpiringSoon() ? 'expiring' : '') }}">
+        <div style="display:flex; align-items:center; justify-content:center;">
+            @php
+                $isExpired = $task->isOverdue();
+                $isExpiring = $task->isExpiringSoon();
+            @endphp
+            <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}"
+                 style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : ($isExpiring ? '#f3742a' : 'transparent') }}; 
+                        background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};">
+            </div>
+        </div>
+    </td>
 
-                    
-                  </td>
-                      @foreach($selectedColumns as $col)
-                      @if($col == 'task_id')
-                        <td data-column="task_id">
-                            {{ $task->task_id }}
-                        </td>
-                      @elseif($col == 'category')
-                        <td data-column="category">{{ $task->category }}</td>
-                      @elseif($col == 'item')
-                        <td data-column="item">{{ $task->item ?? '-' }}</td>
-                      @elseif($col == 'description')
-                        <td data-column="description">{{ $task->description }}</td>
-                      @elseif($col == 'name')
-                        <td data-column="name">{{ $task->name }}</td>
-                      @elseif($col == 'contact_no')
-                        <td data-column="contact_no">{{ $task->contact_no }}</td>
-                      @elseif($col == 'due_date')
-                        <td data-column="due_date">{{ $task->due_date? \Carbon\Carbon::parse($task->due_date)->format('d-M-y') : '' }}</td>
-                      @elseif($col == 'due_time')
-                        <td data-column="due_time">{{ $task->due_time ? $task->due_time : '' }}</td>
-                      @elseif($col == 'due_in')
-                        <td data-column="due_in">
-                          @php
-                            $dueIn = $task->getDueInDays();
-                          @endphp
-                          @if($dueIn !== null)
-                            {{ $dueIn }}
-                          @else
-                            -
-                          @endif
-                        </td>
-                      @elseif($col == 'date_in')
-                        <td data-column="date_in">{{ $task->date_in ? \Carbon\Carbon::parse($task->date_in)->format('d-M-y') : '' }}</td>
-                      @elseif($col == 'assignee')
-                        <td data-column="assignee">{{ $task->assignee }}</td> 
-                      @elseif($col == 'task_status')
-                        <td data-column="task_status">{{ $task->task_status }}</td>
-                      @elseif($col == 'date_done')
-                        <td data-column="date_done">{{ $task->date_done ? \Carbon\Carbon::parse($task->date_done)->format('d-M-y') : '' }}</td>
-                      @elseif($col == 'repeat')
-                        <td data-column="repeat">{{ $task->repeat ? 'Y' : 'N' }}</td>
-                      @elseif($col == 'frequency')
-                        <td data-column="frequency">{{ $task->frequency }}</td>
-                      @elseif($col == 'rpt_date')
-                        <td data-column="rpt_date">{{ $task->rpt_date ? \Carbon\Carbon::parse($task->rpt_date)->format('d-M-y') : '' }}</td>
-                      @elseif($col == 'rpt_stop_date')
-                        <td data-column="rpt_stop_date">{{ $task->rpt_stop_date ? \Carbon\Carbon::parse($task->rpt_stop_date)->format('d-M-y') : '' }}</td>
-                      @endif
-                    @endforeach
-                
-                </tr>
-                @endforeach
+    <td class="action-cell">
+        <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" 
+             onclick="openEditTask({{ $task->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+    </td>
+
+        @foreach($selectedColumns as $col)
+            @php
+                $value = '-';
+            @endphp
+
+            @switch($col)
+                @case('task_id')
+                    @php $value = $task->task_id; @endphp
+                    @break
+                @case('category')
+                    @php $value = $task->categoryValues->value ?? '-'; @endphp
+                    @break
+                @case('item')
+                    @php $value = $task->item ?? '-'; @endphp
+                    @break
+                @case('description')
+                    @php $value = $task->description ?? '-'; @endphp
+                    @break
+                @case('name')
+                    @php 
+                        $value = $task->contact->contact_name ?? $task->client->client_name ?? '-'; 
+                    @endphp
+                    @break
+                @case('contact_no')
+                    @php 
+                        $value = $task->contact->contact_no ?? $task->client->mobile_no ?? '-'; 
+                    @endphp
+                    @break
+                @case('due_date')
+                    @php $value = $task->due_date ? $task->due_date->format('d-M-y') : ''; @endphp
+                    @break
+                @case('due_time')
+                    @php $value = $task->due_time ?? ''; @endphp
+                    @break
+                @case('due_in')
+                    @php $value = $task->getDueInDays() ?? '-'; @endphp
+                    @break
+                @case('date_in')
+                    @php $value = $task->date_in ? $task->date_in->format('d-M-y') : ''; @endphp
+                    @break
+                @case('assignee')
+                    @php $value = $task->assigneeUser->name ?? '-'; @endphp
+                    @break
+                @case('task_status')
+                    @php $value = $task->task_status ?? '-'; @endphp
+                    @break
+                @case('date_done')
+                    @php $value = $task->date_done ? $task->date_done->format('d-M-y') : ''; @endphp
+                    @break
+                @case('repeat')
+                    @php $value = $task->repeat ? 'Y' : 'N'; @endphp
+                    @break
+                @case('frequency')
+                    @php $value = $task->frequency ?? '-'; @endphp
+                    @break
+                @case('rpt_date')
+                    @php $value = $task->rpt_date ? $task->rpt_date->format('d-M-y') : ''; @endphp
+                    @break
+                @case('rpt_stop_date')
+                    @php $value = $task->rpt_stop_date ? $task->rpt_stop_date->format('d-M-y') : ''; @endphp
+                    @break
+            @endswitch
+
+            <td data-column="{{ $col }}">{{ $value }}</td>
+          @endforeach
+        </tr>
+        @endforeach
+
               </tbody>
             </table>
           </div>
@@ -211,7 +231,7 @@
               <select class="form-control" id="category" name="category" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
                 <option value="">Select Category</option>
                 @foreach($categories as $cat)
-                  <option value="{{ $cat->name }}">{{ $cat->name }}</option>
+                  <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                 @endforeach
               </select>
             </div>
@@ -232,12 +252,12 @@
                 <option value="">Select Name</option>
                 <optgroup label="Contacts">
                   @foreach($contacts as $contact)
-                    <option value="{{ $contact->name }}" data-contact-no="{{ $contact->contact_no }}">{{ $contact->name }}</option>
+                    <option value="{{ $contact->id }}" data-contact-no="{{ $contact->contact_no }}">{{ $contact->name }}</option>
                   @endforeach
                 </optgroup>
                 <optgroup label="Clients">
                   @foreach($clients as $client)
-                    <option value="{{ $client->name }}" data-contact-no="{{ $client->contact_no }}">{{ $client->name }}</option>
+                    <option value="{{ $client->id }}" data-contact-no="{{ $client->contact_no }}">{{ $client->name }}</option>
                   @endforeach
                 </optgroup>
               </select>
@@ -273,7 +293,7 @@
               <select class="form-control" id="assignee" name="assignee" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
                 <option value="">Select Assignee</option>
                 @foreach($users as $user)
-                  <option value="{{ $user->name }}">{{ $user->name }}</option>
+                  <option value="{{ $user->id }}">{{ $user->name }}</option>
                 @endforeach
               </select>
             </div>

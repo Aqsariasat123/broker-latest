@@ -120,69 +120,167 @@
 
                     
                     </td>
-                    @foreach($selectedColumns as $col)
-                      @if($col == 'contact_name')
-                        <td data-column="contact_name">
-                        {{ $contact->contact_name }}
-                        </td>
-                      @elseif($col == 'contact_id')
-                        <td data-column="contact_id">
-                          {{ $contact->contact_id }}
-                        </td>
-                      @elseif($col == 'contact_no')
-                        <td data-column="contact_no">{{ $contact->contact_no ?? '##########' }}</td>
-                      @elseif($col == 'type')
-                        <td data-column="type">{{ $contact->type }}</td>
-                      @elseif($col == 'occupation')
-                        <td data-column="occupation">{{ $contact->occupation ?? '-' }}</td>
-                      @elseif($col == 'employer')
-                        <td data-column="employer">{{ $contact->employer ?? '-' }}</td>
-                      @elseif($col == 'acquired')
-                        <td data-column="acquired">{{ $contact->acquired ? $contact->acquired->format('d-M-y') : '##########' }}</td>
-                      @elseif($col == 'source')
-                        <td data-column="source">{{ $contact->source }}</td>
-                      @elseif($col == 'status')
-                        <td data-column="status"><span class="badge-status" style="background:{{ $contact->status == 'Archived' ? '#343a40' : ($contact->status=='Proposal Made' ? '#28a745' : ($contact->status=='In Discussion' ? '#ffc107' : '#6c757d')) }}">{{ $contact->status }}</span></td>
-                      @elseif($col == 'rank')
-                        <td data-column="rank">{{ $contact->rank ?? '-' }}</td>
-                      @elseif($col == 'first_contact')
-                        <td data-column="first_contact">{{ $contact->first_contact ? $contact->first_contact->format('d-M-y') : '##########' }}</td>
-                      @elseif($col == 'next_follow_up')
-                        <td data-column="next_follow_up">{{ $contact->next_follow_up ? $contact->next_follow_up->format('d-M-y') : '##########' }}</td>
-                      @elseif($col == 'coid')
-                        <td data-column="coid">{{ $contact->coid ?? '##########' }}</td>
-                      @elseif($col == 'dob')
-                        <td data-column="dob">{{ $contact->dob ? $contact->dob->format('d-M-y') : '##########' }}</td>
-                      @elseif($col == 'salutation')
-                        <td data-column="salutation">{{ $contact->salutation }}</td>
-                      @elseif($col == 'source_name')
-                        <td data-column="source_name">{{ $contact->source_name ?? '-' }}</td>
-                      @elseif($col == 'agency')
-                        <td data-column="agency">{{ $contact->agency ?? '-' }}</td>
-                      @elseif($col == 'agent')
-                        <td data-column="agent">{{ $contact->agent ?? '-' }}</td>
-                      @elseif($col == 'address')
-                        <td data-column="address">{{ $contact->address ?? '-' }}</td>
-                      @elseif($col == 'email_address')
-                        <td data-column="email_address">{{ $contact->email_address ?? '-' }}</td>
-                      @elseif($col == 'savings_budget')
-                        <td data-column="savings_budget">{{ $contact->savings_budget ? number_format($contact->savings_budget,2) : '##########' }}</td>
-                      @elseif($col == 'married')
-                        <td data-column="married">{{ $contact->married ? 'Yes' : 'No' }}</td>
-                      @elseif($col == 'children')
-                        <td data-column="children">{{ $contact->children ?? '0' }}</td>
-                      @elseif($col == 'children_details')
-                        <td data-column="children_details">{{ $contact->children_details ?? '-' }}</td>
-                      @elseif($col == 'vehicle')
-                        <td data-column="vehicle">{{ $contact->vehicle ?? '-' }}</td>
-                      @elseif($col == 'house')
-                        <td data-column="house">{{ $contact->house ?? '-' }}</td>
-                      @elseif($col == 'business')
-                        <td data-column="business">{{ $contact->business ?? '-' }}</td>
-                      @elseif($col == 'other')
-                        <td data-column="other">{{ $contact->other ?? '-' }}</td>
-                      @endif
-                    @endforeach
+                  @foreach($selectedColumns as $col)
+                    @php
+                        $value = '-'; // default fallback
+                    @endphp
+
+                    @switch($col)
+
+                        {{-- Contact Name --}}
+                        @case('contact_name')
+                            @php $value = $contact->contact_name ?? '-' @endphp
+                            @break
+
+                        {{-- Contact ID --}}
+                        @case('contact_id')
+                            @php $value = $contact->contact_id ?? '##########' @endphp
+                            @break
+
+                        {{-- Contact Number --}}
+                        @case('contact_no')
+                            @php $value = $contact->contact_no ?? '##########' @endphp
+                            @break
+
+                        {{-- Type --}}
+                        @case('type')
+                            @php $value = $contact->type_value->name ?? $contact->type ?? '-' @endphp
+                            @break
+
+                        {{-- Occupation --}}
+                        @case('occupation')
+                            @php $value = $contact->occupation ?? '-' @endphp
+                            @break
+
+                        {{-- Employer --}}
+                        @case('employer')
+                            @php $value = $contact->employer ?? '-' @endphp
+                            @break
+
+                        {{-- Acquired --}}
+                        @case('acquired')
+                            @php $value = $contact->acquired ? $contact->acquired->format('d-M-y') : '##########' @endphp
+                            @break
+
+                        {{-- Source --}}
+                        @case('source')
+                            @php $value = $contact->source_value->name ?? $contact->source ?? '-' @endphp
+                            @break
+
+                        {{-- Status with color badge --}}
+                        @case('status')
+                            @php
+                                $statusColor = match($contact->status) {
+                                    'Archived' => '#343a40',
+                                    'Proposal Made' => '#28a745',
+                                    'In Discussion' => '#ffc107',
+                                    default => '#6c757d'
+                                };
+                                $value = "<span class='badge-status' style='background:{$statusColor}'>{$contact->status}</span>";
+                            @endphp
+                            @break
+
+                        {{-- Rank --}}
+                        @case('rank')
+                            @php $value = $contact->rank ?? '-' @endphp
+                            @break
+
+                        {{-- First Contact --}}
+                        @case('first_contact')
+                            @php $value = $contact->first_contact ? $contact->first_contact->format('d-M-y') : '##########' @endphp
+                            @break
+
+                        {{-- Next Follow Up --}}
+                        @case('next_follow_up')
+                            @php $value = $contact->next_follow_up ? $contact->next_follow_up->format('d-M-y') : '##########' @endphp
+                            @break
+
+                        {{-- COID --}}
+                        @case('coid')
+                            @php $value = $contact->coid ?? '##########' @endphp
+                            @break
+
+                        {{-- DOB --}}
+                        @case('dob')
+                            @php $value = $contact->dob ? $contact->dob->format('d-M-y') : '##########' @endphp
+                            @break
+
+                        {{-- Salutation --}}
+                        @case('salutation')
+                            @php $value = $contact->salutation ?? '-' @endphp
+                            @break
+
+                        {{-- Source Name --}}
+                        @case('source_name')
+                            @php $value = $contact->source_name ?? '-' @endphp
+                            @break
+
+                        {{-- Agency --}}
+                        @case('agency')
+                            @php $value = $contact->agency_user->name ?? $contact->agency ?? '-' @endphp
+                            @break
+
+                        {{-- Agent --}}
+                        @case('agent')
+                            @php $value = $contact->agent_user->name ?? $contact->agent ?? '-' @endphp
+                            @break
+
+                        {{-- Address --}}
+                        @case('address')
+                            @php $value = $contact->address ?? '-' @endphp
+                            @break
+
+                        {{-- Email Address --}}
+                        @case('email_address')
+                            @php $value = $contact->email_address ?? '-' @endphp
+                            @break
+
+                        {{-- Savings Budget --}}
+                        @case('savings_budget')
+                            @php $value = $contact->savings_budget ? number_format($contact->savings_budget, 2) : '##########' @endphp
+                            @break
+
+                        {{-- Married --}}
+                        @case('married')
+                            @php $value = $contact->married ? 'Yes' : 'No' @endphp
+                            @break
+
+                        {{-- Children --}}
+                        @case('children')
+                            @php $value = $contact->children ?? '0' @endphp
+                            @break
+
+                        {{-- Children Details --}}
+                        @case('children_details')
+                            @php $value = $contact->children_details ?? '-' @endphp
+                            @break
+
+                        {{-- Vehicle --}}
+                        @case('vehicle')
+                            @php $value = $contact->vehicle ?? '-' @endphp
+                            @break
+
+                        {{-- House --}}
+                        @case('house')
+                            @php $value = $contact->house ?? '-' @endphp
+                            @break
+
+                        {{-- Business --}}
+                        @case('business')
+                            @php $value = $contact->business ?? '-' @endphp
+                            @break
+
+                        {{-- Other --}}
+                        @case('other')
+                            @php $value = $contact->other ?? '-' @endphp
+                            @break
+
+                    @endswitch
+
+                    <td data-column="{{ $col }}">{!! $value !!}</td>
+                  @endforeach
+ 
+
                   </tr>
                 @endforeach
               </tbody>
