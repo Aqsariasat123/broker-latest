@@ -1026,7 +1026,6 @@ function populateCompactAddForm(formContent, formScheduleContent, formDocumentsC
         </div>
       </div>
     `;
-
   // Payment Plan Section
   const paymentPlan = `
       <div style="padding:12px 24px; background:white;">
@@ -1110,9 +1109,13 @@ function populateCompactAddForm(formContent, formScheduleContent, formDocumentsC
 
 
   if (formScheduleContent) {
+      console.log(formScheduleContent);
+
+console.log(paymentPlan);
     formScheduleContent.innerHTML = scheduleDetails + paymentPlan;
     formScheduleContent.style.display = 'block';
   }
+
 
   // Handle client selection to populate source fields
   const clientSelect = document.getElementById('client_id');

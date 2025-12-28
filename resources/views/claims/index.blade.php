@@ -55,9 +55,20 @@
           </div>
         </div>
       </div>
+           <!-- @if(isset($client) && $client)
       <div class="action-buttons">
-        <button class="btn btn-add" id="addClaimBtn">Add</button>
+        <button class="btn btn-add" id="addDocumentBtn">Add</button>
       </div>
+      @endif -->
+      @if(isset($client) && $client)
+        <div class="action-buttons">
+          <button class="btn btn-add" id="addClaimBtn">Add</button>
+        </div>
+      @endif
+        <div class="action-buttons">
+          <button class="btn btn-close" onclick="window.history.back()">Close</button>
+        </div>
+
     </div>
 
     @if(session('success'))

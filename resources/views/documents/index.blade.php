@@ -32,8 +32,14 @@
       <div class="page-title-section">
         <div class="records-found">Records Found - {{ $documents->total() }}</div>
       </div>
+      
+       @if(isset($client) && $client)
       <div class="action-buttons">
         <button class="btn btn-add" id="addDocumentBtn">Add</button>
+      </div>
+      @endif 
+      <div class="action-buttons">
+        <button class="btn btn-close" onclick="window.history.back()">Close</button>
       </div>
     </div>
 
@@ -341,6 +347,7 @@
   // Note: mandatoryColumns is already declared in partials-table-scripts
   let currentDocumentId = null;
   const selectedColumns = @json($selectedColumns);
+    const client = @json($client);
   const documentsStoreRoute = '{{ route("documents.store") }}';
   const csrfToken = '{{ csrf_token() }}';
 </script>

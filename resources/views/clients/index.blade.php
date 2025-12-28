@@ -56,7 +56,7 @@
       </div>
       <div class="action-buttons">
         <button class="btn btn-add" id="addClientBtn">Add</button>
-        <!-- <button class="btn btn-close" id="closeBtn">Close</button> -->
+          <button class="btn btn-close" onclick="window.history.back()">Close</button>
       </div>
     </div>
 

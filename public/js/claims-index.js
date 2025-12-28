@@ -53,7 +53,24 @@
         field.style.backgroundColor = '#fff';
         field.style.cursor = 'text';
       });
-      
+        const policyIdFromUrl = getQueryParam('policy_id');
+    const policySelect = document.getElementById('policy_id');
+
+    if (policyIdFromUrl && policySelect) {
+        policySelect.value = policyIdFromUrl;
+        policySelect.setAttribute('disabled', 'disabled');
+
+        // 🔥 Important: ensure disabled value is submitted
+        let hiddenPolicy = document.getElementById('hidden_policy_id');
+        if (!hiddenPolicy) {
+            hiddenPolicy = document.createElement('input');
+            hiddenPolicy.type = 'hidden';
+            hiddenPolicy.name = 'policy_id';
+            hiddenPolicy.id = 'hidden_policy_id';
+            form.appendChild(hiddenPolicy);
+        }
+        hiddenPolicy.value = policyIdFromUrl;
+    }
       currentClaimId = null;
     } else if (mode === 'edit' && claimId) {
       try {
@@ -111,7 +128,10 @@
     console.log('Modal classes:', modal.className);
     console.log('Modal display style:', window.getComputedStyle(modal).display);
   }
-
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
   function closeClaimModal() {
     const modal = document.getElementById('claimModal');
     if (modal) {

@@ -168,7 +168,30 @@
       if (proposalPageView) {
         proposalPageView.setAttribute('data-prid', proposal.prid);
       }
-      
+    document.querySelectorAll('#proposalPageView .proposal-nav-tab').forEach(tab => {
+      // Remove existing listeners by cloning
+      const newTab = tab.cloneNode(true);
+      tab.parentNode.replaceChild(newTab, tab);
+      // Add click listener
+
+      newTab.addEventListener('click', function (e) {
+        e.preventDefault();
+        let actionType = ''; // default
+        if (!currentProposalId) return;
+        const baseUrl = this.getAttribute('data-url');
+        if (!baseUrl || baseUrl === '#') return;
+        const tabType = this.getAttribute('data-tab');
+        
+        if (tabType === 'life-proposals-follow-up') {
+           window.location.href = baseUrl + '?follow_up=' + 1;
+
+        } else if (tabType === 'nominee') {
+           window.location.href = baseUrl + '?life-proposal-id=' + currentProposalId;
+            
+        }
+      });
+    });
+
       // Load documents
       loadProposalDocuments(proposal.prid);
     } catch (e) {

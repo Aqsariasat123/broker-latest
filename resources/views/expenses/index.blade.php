@@ -37,6 +37,8 @@
         @if(auth()->check() && (auth()->user()->hasPermission('expenses.create') || auth()->user()->isAdmin()))
         <button class="btn btn-add" id="addExpenseBtn">Add</button>
         @endif
+        <button class="btn btn-close" onclick="window.history.back()">Close</button>
+
       </div>
     </div>
 

@@ -111,8 +111,13 @@
       title.textContent = 'Add Document';
       form.action = documentsStoreRoute;
       formMethod.innerHTML = '';
-      if (deleteBtn) deleteBtn.style.display = 'none';
-      form.reset();
+      client ? document.getElementById('tied_to').value = client.clid : document.getElementById('tied_to').value = '';
+      client ? document.getElementById('name').value = 'Client Photo' : document.getElementById('name').value = '';
+      client ? document.getElementById('group').value = 'Photo' : document.getElementById('group').value = '';
+      client ? document.getElementById('type').value = 'Photo' : document.getElementById('type').value = '';
+    
+       if (deleteBtn) deleteBtn.style.display = 'none';
+       if (!client) form.reset();
     } else if (id) {
       // Load document data for edit
       fetch(`/documents/${id}/edit`, {

@@ -18,6 +18,8 @@
                   Statements
               </h3>
            </div>
+         
+          
       </div>
   </div>
   <!-- Main Statements Table View -->
@@ -38,9 +40,14 @@
           </div>
         </div>
       </div>
+        @if(isset($client) && $client)
       <div class="action-buttons">
         <button class="btn btn-add" id="addStatementBtn">Add</button>
       </div>
+      @endif
+        <div class="action-buttons">
+              <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            </div>
     </div>
 
     @if(session('success'))

@@ -9,6 +9,12 @@ class DocumentController extends Controller
 {
     public function index(Request $request)
     {
+
+          // Get client information if filtering by client_id
+        $client = null;
+        if ($request->has('client_id') && $request->client_id) {
+            $client = \App\Models\Client::find($request->client_id);
+        }
         // If tied_to parameter is provided and request expects JSON, return JSON
         if ($request->has('tied_to') && $request->expectsJson()) {
             $documents = Document::where('tied_to', $request->tied_to)
@@ -24,7 +30,8 @@ class DocumentController extends Controller
         if ($request->has('client_id') && $request->client_id) {
             $client = \App\Models\Client::find($request->client_id);
             if ($client && $client->clid) {
-                $query->where('tied_to', $client->clid);
+                $query->where('tied_to', $client->clid)
+                ->Where('name', 'Client Photo');
             }
         }
         if ($request->filled('policy_id')) {
@@ -39,11 +46,7 @@ class DocumentController extends Controller
         $config = \App\Helpers\TableConfigHelper::getConfig('documents');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('documents');
         
-        // Get client information if filtering by client_id
-        $client = null;
-        if ($request->has('client_id') && $request->client_id) {
-            $client = \App\Models\Client::find($request->client_id);
-        }
+      
         
         return view('documents.index', compact('documents', 'selectedColumns', 'client'));
     }

@@ -15,19 +15,29 @@
 @endphp
 
 <div class="dashboard">
+
   <!-- Main Vehicles Table View -->
   <div class="clients-table-view" id="clientsTableView">
+    <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:18px; font-weight:600;">
+          @if($policy)
+            {{ $policy->policy_no }} - 
+          @endif
+            Vehicles
+            @if(isset($client) && $client)
+              <span class="client-name" style="color:#f3742a; font-size:16px; font-weight:500;"> - {{ $client->client_name }}</span>
+            @endif
+          </h3>
+       
+      </div>
+    </div>
   <div class="container-table">
     <!-- Vehicles Card -->
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
-        <h3>
-          @if($policy)
-            {{ $policy->policy_no }} - 
-          @endif
-          <span style="color:#f3742a;">Vehicles</span>
-        </h3>
+    
         <div class="records-found">Records Found - {{ $vehicles->total() }}</div>
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
           <div class="filter-group">
@@ -221,7 +231,9 @@
   </div>
 
   <!-- Add/Edit Vehicle Modal (hidden, used for form structure) -->
-  <div class="modal" id="vehicleModal">
+
+  <!-- Add/Edit Vehicle Modal (hidden, used for form structure) -->
+<div class="modal" id="vehicleModal">
     <div class="modal-content">
       <div class="modal-header">
         <h4 id="vehicleModalTitle">Add Vehicle</h4>
@@ -316,6 +328,7 @@
       </form>
     </div>
   </div>
+
 
   <!-- Column Selection Modal -->
   <div class="modal" id="columnModal">

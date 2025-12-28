@@ -62,11 +62,15 @@ class ClaimController extends Controller
         
         // Get client information if filtering by client_id
         $client = null;
+        $policy = null;
         if ($request->has('client_id') && $request->client_id) {
             $client = \App\Models\Client::find($request->client_id);
         }
+          if ($request->has('policy_id') && $request->policy_id) {
+            $policy = Policy::find($request->policy_id);
+        }
         
-        return view('claims.index', compact('claims', 'selectedColumns', 'lookupData', 'policies', 'client'));
+        return view('claims.index', compact('claims', 'selectedColumns', 'lookupData', 'policies', 'client', 'policy'));
     }
 
     public function store(Request $request)

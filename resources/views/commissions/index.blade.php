@@ -160,7 +160,8 @@ input:checked + .slider:before {
             <button class="btn btn-add" id="addCommissionBtn">Add</button>
           </div>
       @endif
-   
+             <button class="btn btn-close" onclick="window.history.back()">Close</button>
+
     </div>
 
     @if(session('success'))

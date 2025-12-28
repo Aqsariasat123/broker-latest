@@ -219,9 +219,8 @@
            <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 20px; ">
                <div class="proposal-nav-tabs" id="proposalNavTabs" style="display:none;">
-                 <!-- <button class="proposal-nav-tab active" data-tab="details">Nominees</button> -->
-                  <button  class="proposal-nav-tab active" data-tab="details" onclick="window.location.href = '{{ route('nominees.index') }}'">Nominees</button>
-                  <button class="proposal-nav-tab" data-tab="followups">Follow Ups</button>
+                  <button class="proposal-nav-tab active" data-tab="nominee" data-url="{{ route('nominees.index') }}">Nominees</button>
+                  <button class="proposal-nav-tab" data-tab="life-proposals-follow-up" data-url="{{ route('life-proposals.index') }}">Follow Ups</button>
                </div>
                <div class="client-page-actions">
                  <button class="btn" id="generatePolicyBtn" onclick="generatePolicyFromProposal()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; display:none;">Generate Policy</button>
