@@ -78,4 +78,27 @@ class Task extends Model
         $number = intval(substr($latest->task_id, 2)) + 1;
         return 'TK' . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
+
+     public function categoryValues()
+    {
+        return $this->belongsTo(LookupCategory::class, 'category', 'id');
+    }
+
+    // Assignee relationship
+    public function assigneeUser()
+    {
+        return $this->belongsTo(User::class, 'assignee', 'id');
+    }
+
+    // Contact relationship
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class, 'name', 'id'); // if `name` stores contact id
+    }
+
+    // Client relationship
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'name', 'id'); // if `name` stores client id
+    }
 }

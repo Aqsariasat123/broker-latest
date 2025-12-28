@@ -94,4 +94,46 @@ class Contact extends Model
     {
         return $this->hasMany(Followup::class);
     }
+ /**
+     * Lookup type/category
+     */
+   public function contact_types()
+    {
+        return $this->belongsTo(LookupValue::class, 'type', 'id'); // 'type' stores LookupValue ID
+     }
+
+    /**
+     * Lookup source
+     */
+    public function source_value()
+    {
+        return $this->belongsTo(LookupValue::class, 'source', 'id'); // 'source' stores LookupValue ID
+    }
+
+    public function salutations()
+    {
+        return $this->belongsTo(LookupValue::class, 'salutation', 'id'); // 'source' stores LookupValue ID
+    }
+
+    
+
+    /**
+     * Assigned agent
+     */
+    public function agent_user()
+    {
+        return $this->belongsTo(User::class, 'agent', 'id');
+    }
+    public function rank()
+    {
+        return $this->belongsTo(LookupValue::class, 'rank', 'id');
+    }
+    /**
+     * Assigned agency
+     */
+    public function agency_user()
+    {
+        return $this->belongsTo(User::class, 'agency', 'id'); // if agency stores user ID
+    }
+
 }

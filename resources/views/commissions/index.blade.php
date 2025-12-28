@@ -15,7 +15,10 @@
       <div style="display:flex; justify-content:space-between; align-items:center;">
             <div class="page-title-section">
               <h3 style="margin:0; font-size:18px; font-weight:600;">
-                  Commissions
+              @if($policy)
+                {{ $policy->policy_code }} - 
+              @endif
+          Commissions
               </h3>
            </div>
       </div>
@@ -28,18 +31,136 @@
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
         <div class="records-found">Records Found - {{ $commissions->total() }}</div>
-        <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+        <!-- <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
           <div class="filter-group">
             @foreach(['SACOS','Alliance','Hsavy','MUA'] as $insurerBtn)
               <button class="btn btn-column" onclick="filterByInsurer('{{ $insurerBtn }}')" style="margin-left:5px;{{ isset($insurerFilter) && $insurerFilter==$insurerBtn ? 'background:#007bff;color:#fff;' : '' }}">{{ $insurerBtn }}</button>
             @endforeach
             <button class="btn btn-back" onclick="window.location.href='{{ route('commissions.index') }}'">All</button>
           </div>
-        </div>
+        </div> -->
+        <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+  <div class="filter-group" style="display:flex; align-items:center; gap:12px;">
+
+    <!-- Custom Toggle Switch -->
+    <label class="switch">
+      <input type="checkbox" id="insurerFilterToggle" {{ request()->has('insurer') ? 'checked' : '' }}>
+      <span class="slider round"></span>
+    </label>
+
+    <span style="font-size:13px; font-weight:normal;">Filter</span>
+
+    <!-- Show All Button (green when no filter) -->
+    @php $hasInsurer = request()->has('insurer'); @endphp
+    <button class="btn filter-btn {{ !$hasInsurer ? 'active-all' : '' }}" 
+            type="button" 
+            onclick="filterByInsurer()">
+      Show All
+    </button>
+
+    <!-- Insurer Buttons -->
+    @foreach(['SACOS', 'Alliance', 'Hsavy', 'MUA'] as $insurerBtn)
+      @php $isActive = request()->get('insurer') === $insurerBtn; @endphp
+      <button class="btn filter-btn {{ $isActive ? 'active-insurer' : '' }}" 
+              type="button"
+              onclick="filterByInsurer('{{ $insurerBtn }}')">
+        {{ $insurerBtn }}
+      </button>
+    @endforeach
+
+
+  </div>
+ <style>
+/* Custom Toggle Switch - Green when ON */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  margin-right: 8px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Filter Buttons Base Style */
+.filter-btn {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: normal;
+  transition: background-color 0.2s ease;
+}
+
+/* Show All Active - Green */
+.filter-btn.active-all {
+  background: #28a745 !important;
+}
+
+/* Selected Insurer - Blue */
+.filter-btn.active-insurer {
+  background: #007bff !important;
+}
+
+/* HOVER STATES - This is the fix! */
+
+/* Hover on inactive buttons (black → dark gray) */
+.filter-btn:hover:not(.active-all):not(.active-insurer) {
+  background: #333;
+}
+
+/* Hover on "Show All" when active (green → darker green) */
+.filter-btn.active-all:hover {
+  background: #218838 !important; /* Darker green */
+}
+
+/* Hover on selected insurer when active (blue → darker blue) */
+.filter-btn.active-insurer:hover {
+  background: #0056b3 !important; /* Darker blue */
+}
+</style>
+</div>
       </div>
-      <div class="action-buttons">
-        <button class="btn btn-add" id="addCommissionBtn">Add</button>
-      </div>
+      
+      @if($policy)
+          <div class="action-buttons">
+            <button class="btn btn-add" id="addCommissionBtn">Add</button>
+          </div>
+      @endif
+   
     </div>
 
     @if(session('success'))
@@ -210,45 +331,45 @@
         <div id="commissionFormMethod" style="display:none;"></div>
         <div class="modal-body">
           <div class="form-row">
-            <div class="form-group">
-              <label for="policy_number">Policy Number</label>
-              <input type="text" class="form-control" name="policy_number" id="policy_number">
+          <div class="form-group">
+              <label for="client_name">Com Note no</label>
+              <input type="text" class="form-control" name="com_note_no" id="com_note_no" readonly>
             </div>
             <div class="form-group">
-              <label for="client_name">Client's Name</label>
-              <input type="text" class="form-control" name="client_name" id="client_name">
-            </div>
-            <div class="form-group">
-              <label for="insurer_id">Insurer</label>
-              <select class="form-control" name="insurer_id" id="insurer_id">
+
+              <label for="policy_id">Policy Number</label>
+              <select class="form-control" name="policy_id" id="policy_id">
                 <option value="">Select</option>
-                @foreach($insurers as $ins)
-                  <option value="{{ $ins->id }}">{{ $ins->name }}</option>
+                @foreach($policies as $policy)
+                  <option value="{{ $policy->id }}">{{ $policy->policy_code }}</option>
                 @endforeach
               </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="grouping">Grouping</label>
-              <input type="text" class="form-control" name="grouping" id="grouping">
             </div>
             <div class="form-group">
               <label for="basic_premium">Basic Premium</label>
               <input type="number" step="0.01" class="form-control" name="basic_premium" id="basic_premium">
             </div>
-            <div class="form-group">
+       
+          </div>
+          
+          <div class="form-row">
+          <div class="form-group">
               <label for="rate">Rate</label>
               <input type="number" step="0.01" class="form-control" name="rate" id="rate">
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label for="amount_due">Amount Due</label>
               <input type="number" step="0.01" class="form-control" name="amount_due" id="amount_due">
             </div>
             <div class="form-group">
-              <label for="payment_status_id">Payment Status</label>
+              <label for="date_due">Date Due</label>
+              <input type="date" class="form-control" name="date_due" id="date_due">
+            </div>
+        
+          </div>
+          <div class="form-row">
+          <div class="form-group">
+              <label for="payment_status_id"> Status</label>
               <select class="form-control" name="payment_status_id" id="payment_status_id">
                 <option value="">Select</option>
                 @foreach($paymentStatuses as $ps)
@@ -256,22 +377,17 @@
                 @endforeach
               </select>
             </div>
-            <div class="form-group">
+          
+          <div class="form-group">
               <label for="amount_rcvd">Amount Rcvd</label>
               <input type="number" step="0.01" class="form-control" name="amount_rcvd" id="amount_rcvd">
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label for="date_rcvd">Date Rcvd</label>
               <input type="date" class="form-control" name="date_rcvd" id="date_rcvd">
             </div>
             <div class="form-group">
-              <label for="state_no">State No</label>
-              <input type="text" class="form-control" name="state_no" id="state_no">
-            </div>
-            <div class="form-group">
-              <label for="mode_of_payment_id">Mode Of Payment (Life)</label>
+              <label for="mode_of_payment_id">Mode</label>
               <select class="form-control" name="mode_of_payment_id" id="mode_of_payment_id">
                 <option value="">Select</option>
                 @foreach($modesOfPayment as $mode)
@@ -279,19 +395,16 @@
                 @endforeach
               </select>
             </div>
+            <div class="form-group">
+              <label for="state_no">Statement No</label>
+              <input type="text" class="form-control" name="state_no" id="state_no">
+            </div>
+         
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="variance">Variance</label>
-              <input type="number" step="0.01" class="form-control" name="variance" id="variance">
-            </div>
-            <div class="form-group">
-              <label for="reason">Reason</label>
-              <input type="text" class="form-control" name="reason" id="reason">
-            </div>
-            <div class="form-group">
-              <label for="date_due">Date Due</label>
-              <input type="date" class="form-control" name="date_due" id="date_due">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1 1 100%;">
+              <label for="comission_notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Comission  Notes</label>
+              <textarea class="form-control" name="comission_notes" id="comission_notes" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
             </div>
           </div>
         </div>

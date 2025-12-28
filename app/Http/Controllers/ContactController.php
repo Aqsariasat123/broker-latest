@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log; // <-- Add this
 
 use App\Models\Contact;
 use App\Models\LookupCategory;
@@ -36,7 +37,7 @@ class ContactController extends Controller
         }
         
         // Use paginate instead of get
-        $contacts = $query->orderBy('created_at', 'desc')->paginate(10);
+        $contacts = $query->with(['contact_types', 'source_value', 'agent_user', 'agency_user'])->orderBy('created_at', 'desc')->paginate(10);
 
         // Calculate expiration status for each contact
         $contacts->getCollection()->transform(function ($contact) {
@@ -59,6 +60,8 @@ class ContactController extends Controller
         
         // Get users for agents
         $users = \App\Models\User::where('is_active', true)->select('id', 'name')->orderBy('name')->get();
+
+        Log::info('Selected contacts: ', $contacts->toArray());
         
         return view('contacts.index', compact('contacts', 'lookupData', 'allEmployers', 'allOccupations', 'users'));
     }
@@ -123,44 +126,53 @@ class ContactController extends Controller
         return view('contacts.edit', compact('contact'));
     }
 
-    public function update(Request $request, Contact $contact)
-    {
-        $validated = $request->validate([
-            'contact_name' => 'required|string|max:255',
-            'contact_no' => 'nullable|string|max:20',
-            'wa' => 'nullable|string|max:20',
-            'type' => 'required|string',
-            'occupation' => 'nullable|string|max:255',
-            'employer' => 'nullable|string|max:255',
-            'acquired' => 'nullable|date',
-            'source' => 'required|string',
-            'status' => 'required|string',
-            'rank' => 'nullable|string',
-            'first_contact' => 'nullable|date',
-            'next_follow_up' => 'nullable|date',
-            'coid' => 'nullable|string|max:50',
-            'dob' => 'nullable|date',
-            'salutation' => 'required|string',
-            'source_name' => 'nullable|string|max:255',
-            'agency' => 'nullable|string|max:255',
-            'agent' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'email_address' => 'nullable|email',
-            'savings_budget' => 'nullable|numeric',
-            'married' => 'boolean',
-            'children' => 'nullable|integer|min:0',
-            'children_details' => 'nullable|string',
-            'vehicle' => 'nullable|string|max:255',
-            'house' => 'nullable|string|max:255',
-            'business' => 'nullable|string|max:255',
-            'other' => 'nullable|string',
+  public function update(Request $request, Contact $contact)
+{
+    $validated = $request->validate([
+        'contact_name' => 'required|string|max:255',
+        'contact_no' => 'nullable|string|max:20',
+        'wa' => 'nullable|string|max:20',
+        'type' => 'required|string',
+        'occupation' => 'nullable|string|max:255',
+        'employer' => 'nullable|string|max:255',
+        'acquired' => 'nullable|date',
+        'source' => 'required|string',
+        'status' => 'required|string',
+        'rank' => 'nullable|string',
+        'first_contact' => 'nullable|date',
+        'next_follow_up' => 'nullable|date',
+        'coid' => 'nullable|string|max:50',
+        'dob' => 'nullable|date',
+        'salutation' => 'required|string',
+        'source_name' => 'nullable|string|max:255',
+        'agency' => 'nullable|string|max:255',
+        'agent' => 'nullable|string|max:255',
+        'address' => 'nullable|string',
+        'location' => 'nullable|string|max:255',
+        'email_address' => 'nullable|email',
+        'savings_budget' => 'nullable|numeric',
+        'married' => 'boolean',
+        'children' => 'nullable|integer|min:0',
+        'children_details' => 'nullable|string',
+        'vehicle' => 'nullable|string|max:255',
+        'house' => 'nullable|string|max:255',
+        'business' => 'nullable|string|max:255',
+        'other' => 'nullable|string',
+    ]);
+
+    $contact->update($validated);
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'contact' => $contact,
+            'message' => 'Contact updated successfully.'
         ]);
-
-        $contact->update($validated);
-
-        return redirect()->route('contacts.index')->with('success', 'Contact updated successfully.');
     }
+
+    return redirect()->route('contacts.index')
+        ->with('success', 'Contact updated successfully.');
+}
 
     public function destroy(Contact $contact)
     {
@@ -248,13 +260,68 @@ class ContactController extends Controller
         $rankCategory = LookupCategory::where('name', 'Rank')->first();
         
         return [
-            'contact_types' => $contactTypeCategory ? $contactTypeCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'sources' => $sourceCategory ? $sourceCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'agents' => $agentCategory ? $agentCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'contact_statuses' => $statusCategory ? $statusCategory->values()->where('active', true)->pluck('name')->toArray() : ['Not Contacted', 'In Discussion', 'Proposal Made', 'Keep In View', 'Archived', 'RNR', 'Differed'],
-            'ranks' => $rankCategory ? $rankCategory->values()->where('active', true)->pluck('name')->toArray() : ['VIP', 'High', 'Medium', 'Low', 'Warm'],
-            'agencies' => $agencyCategory ? $agencyCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'salutations' => $salutationCategory ? $salutationCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-        ];
+        'contact_types' => $contactTypeCategory
+            ? $contactTypeCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [],
+
+        'sources' => $sourceCategory
+            ? $sourceCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [],
+
+        'agents' => $agentCategory
+            ? $agentCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [],
+
+        'contact_statuses' => $statusCategory
+            ? $statusCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [
+                ['id' => 1, 'name' => 'Not Contacted'],
+                ['id' => 2, 'name' => 'In Discussion'],
+                ['id' => 3, 'name' => 'Proposal Made'],
+                ['id' => 4, 'name' => 'Keep In View'],
+                ['id' => 5, 'name' => 'Archived'],
+                ['id' => 6, 'name' => 'RNR'],
+                ['id' => 7, 'name' => 'Differed'],
+            ],
+
+        'ranks' => $rankCategory
+            ? $rankCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [
+                ['id' => 1, 'name' => 'VIP'],
+                ['id' => 2, 'name' => 'High'],
+                ['id' => 3, 'name' => 'Medium'],
+                ['id' => 4, 'name' => 'Low'],
+                ['id' => 5, 'name' => 'Warm'],
+            ],
+
+        'agencies' => $agencyCategory
+            ? $agencyCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [],
+
+        'salutations' => $salutationCategory
+            ? $salutationCategory->values()
+                ->where('active', true)
+                ->get(['id', 'name'])
+                ->toArray()
+            : [],
+    ];
     }
 }

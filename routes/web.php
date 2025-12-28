@@ -108,7 +108,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{task}/get', [TaskController::class, 'getTask'])->name('tasks.get');
         Route::get('/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');
         Route::get('/{task}', [TaskController::class, 'show'])->name('tasks.show');
-        Route::put('/{task}', [TaskController::class, 'update'])->name('tasks.update');
+        Route::post('/{task}', [TaskController::class, 'update'])->name('tasks.update');
         Route::delete('/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     });
 
@@ -156,10 +156,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/clients/{client}/upload-document', [ClientController::class, 'uploadDocument'])->name('clients.upload-document');
 
     // Contacts Routes
-    Route::get('/contacts/export', [ContactController::class, 'export'])->name('contacts.export');
-    Route::resource('contacts', ContactController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
-    Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
-    Route::post('/contacts/save-column-settings', [ContactController::class, 'saveColumnSettings'])->name('contacts.save-column-settings');
+        Route::get('/contacts/export', [ContactController::class, 'export'])->name('contacts.export');
+        Route::resource('contacts', ContactController::class)
+            ->only(['index', 'store', 'update', 'destroy', 'show']);
+        Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
+        Route::post('/contacts/save-column-settings', [ContactController::class, 'saveColumnSettings'])
+            ->name('contacts.save-column-settings');
 
     // Life Proposals Routes
     Route::get('/life-proposals/export', [LifeProposalController::class, 'export'])->name('life-proposals.export');
@@ -221,6 +223,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/claims', [ClaimController::class, 'store'])->name('claims.store');
     Route::put('/claims/{claim}', [ClaimController::class, 'update'])->name('claims.update');
     Route::delete('/claims/{claim}', [ClaimController::class, 'destroy'])->name('claims.destroy');
+
+
+    // Endorsement Routes
+    Route::get('/endorsements/export', [App\Http\Controllers\EndorsementController::class, 'export'])->name('endorsements.export');
+    Route::post('/endorsements/save-column-settings', [App\Http\Controllers\EndorsementController::class, 'saveColumnSettings'])->name('endorsements.save-column-settings');
+    Route::get('/endorsements/{endorsement}/edit', [App\Http\Controllers\EndorsementController::class, 'edit'])->name('endorsements.edit');
+    Route::get('/endorsements/{endorsement}', [App\Http\Controllers\EndorsementController::class, 'show'])->name('endorsements.show');
+    Route::get('/endorsements', [App\Http\Controllers\EndorsementController::class, 'index'])->name('endorsements.index');
+    Route::post('/endorsements', [App\Http\Controllers\EndorsementController::class, 'store'])->name('endorsements.store');
+    Route::put('/endorsements/{endorsement}', [App\Http\Controllers\EndorsementController::class, 'update'])->name('endorsements.update');
+    Route::delete('/endorsements/{endorsement}', [App\Http\Controllers\EndorsementController::class, 'destroy'])->name('endorsements.destroy');
+
 
     // Income Routes
     Route::get('/incomes/export', [IncomeController::class, 'export'])->name('incomes.export');
