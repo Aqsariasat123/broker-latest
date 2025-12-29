@@ -1328,10 +1328,10 @@
             <div class="detail-row" ${hideForBusiness}>
               <span class="detail-label">On Whatsapp</span>
               <div class="detail-value checkbox">
-                <input type="checkbox" ${client.wa ? 'checked' : ''} disabled>
+                <input type="checkbox" ${client.wa == "1" ? 'checked' : ''} disabled>
               </div>
             </div>
-          <div class="detail-row">
+          <div class="detail-row" style="${client.wa == "1" ? 'display:none;' : ''}" >
             <span class="detail-label">Alternate No</span>
             <div class="detail-value">${client.alternate_no || '-'}</div>
           </div>
@@ -1619,6 +1619,7 @@
       </div>
     `;
 
+    console.log(client);
     // Column 2: CONTACT DETAILS
     const col2 = `
       <div style="display:flex; flex-direction:column; gap:10px;">
@@ -1632,10 +1633,10 @@
             <div class="detail-row">
               <span class="detail-label">On Whatsapp</span>
               <div class="detail-value checkbox">
-                <input type="checkbox" name="wa" value="1" ${client.wa ? 'checked' : ''}>
+                <input type="checkbox" name="wa" value="1" ${client.wa == "1" ? 'checked' : ''}>
               </div>
             </div>
-            <div class="detail-row" id="alternate_no_row" style="${client.wa ? 'display:none;' : ''}">
+            <div class="detail-row" id="alternate_no_row" style="${client.wa == "1" ? 'display:none;' : ''}">
               <span class="detail-label">Alternate No</span>
               <input type="text" name="alternate_no" value="${client.alternate_no || ''}" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
@@ -2682,7 +2683,7 @@
 
       const waCheckboxEdit = document.getElementById('wa');
       if (waCheckboxEdit) {
-        waCheckboxEdit.checked = !!client.wa;
+        waCheckboxEdit.checked = (client.wa == "1")?true:false;
         const alternateNoRow = document.getElementById('alternate_no_row');
         if (alternateNoRow) {
           if (waCheckboxEdit.checked) {
@@ -2694,7 +2695,7 @@
       }
       const waBusinessCheckboxEdit = document.getElementById('wa_business');
       if (waBusinessCheckboxEdit) {
-        waBusinessCheckboxEdit.checked = !!client.wa;
+        waBusinessCheckboxEdit.checked = (client.wa == "1")?true:false;
         const alternateNoRowBusiness = document.getElementById('alternate_no_row_business');
         if (alternateNoRowBusiness) {
           if (waBusinessCheckboxEdit.checked) {
@@ -2868,7 +2869,7 @@
           // Also set business wa checkbox if it exists
           const waBusinessCheckbox = formContentDiv.querySelector('#wa_business');
           if (waBusinessCheckbox) {
-            waBusinessCheckbox.checked = !!client.wa;
+            waBusinessCheckbox.checked = (client.wa == "1")?true:false;
           }
 
           // Set existing image if present
