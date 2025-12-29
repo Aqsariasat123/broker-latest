@@ -24,9 +24,17 @@
       <div class="page-title-section">
         <h3>
           @if($policy)
-            {{ $policy->policy_no }} - 
+            {{ $policy->policy_code }} - 
+               <span style="color:#f3742a;">Vehicles</span>
           @endif
-          <span style="color:#f3742a;">Vehicles</span>
+         
+          @if($client)
+           
+             <span style="color:#f3742a;">{{ $client->client_name }} -  </span>
+            
+          @endif
+                         <span>Vehicles</span>
+
         </h3>
         <div class="records-found">Records Found - {{ $vehicles->total() }}</div>
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
@@ -85,24 +93,11 @@
                   <div class="status-indicator {{ $hasNoPolicy ? 'no-policy' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasNoPolicy ? '#555' : '#f3742a' }}; background-color:{{ $hasNoPolicy ? '#555' : 'transparent' }};"></div>
                 </div>
               </td>
-      <td class="action-cell">
-  <svg 
-    class="action-expand" 
-    width="22" height="22" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
-    style="cursor:pointer; vertical-align:middle;"
-    onclick="openEditVehicleModal({{ $vh->id }})"
-    title="Edit Vehicle"
-  >
-    <!-- Your SVG paths -->
-    <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M22 12L16 12M22 12L20 10M22 12L20 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M12 22L12 16M12 22L10 20M12 22L14 20" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M2 12L8 12M2 12L4 10M2 12L4 14" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</td>
+               <td class="action-cell">
+
+                      <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openEditVehicleModal({{ $vh->id }})"  width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+
+            </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'regn_no')
                   <td data-column="regn_no">
@@ -121,7 +116,7 @@
                 @elseif($col == 'value')
                   <td data-column="value">{{ $vh->value ? number_format($vh->value, 2) : '-' }}</td>
                 @elseif($col == 'policy_id')
-                  <td data-column="policy_id">{{ $vh->policy_id ?? '-' }}</td>
+                  <td data-column="policy_id">{{ $vh->policy->policy_code ?? '-' }}</td>
                 @elseif($col == 'engine')
                   <td data-column="engine">{{ $vh->engine ?? '-' }}</td>
                 @elseif($col == 'engine_type')
@@ -234,6 +229,8 @@
       </div>
       <form id="vehicleForm" method="POST" action="{{ route('vehicles.store') }}">
         @csrf
+         <input type="text" class="form-control"  value="{{ $policy->id ?? '' }}" name="policy_id" id="policy_id" hidden >
+
         <div id="vehicleFormMethod" style="display:none;"></div>
         <div class="modal-body">
           <div class="form-row">
@@ -261,6 +258,7 @@
             </div>
             <div class="form-group">
               <label for="year">Year</label>
+              
               <input type="text" class="form-control" name="year" id="year">
             </div>
           </div>
@@ -269,10 +267,7 @@
               <label for="value">Value</label>
               <input type="number" step="0.01" class="form-control" name="value" id="value">
             </div>
-            <div class="form-group">
-              <label for="policy_id">Policy ID</label>
-              <input type="text" class="form-control" name="policy_id" id="policy_id">
-            </div>
+          
             <div class="form-group">
               <label for="engine">Engine</label>
               <input type="text" class="form-control" name="engine" id="engine">

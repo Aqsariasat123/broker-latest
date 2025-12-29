@@ -28,9 +28,8 @@ class VehicleController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
         } else {
-            // Show all vehicles without a policy_id or all vehicles
-            $vehicles = Vehicle::whereNull('policy_id')
-                ->orderBy('created_at', 'desc')
+            $vehicles = Vehicle::with('policy.client')->
+            orderBy('created_at', 'desc')
                 ->paginate(10);
         }
         

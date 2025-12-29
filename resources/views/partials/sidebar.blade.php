@@ -236,7 +236,7 @@
             
             @if(auth()->check() && (auth()->user()->hasPermission('claims.view') || auth()->user()->isAdmin()))
             <li class="{{ request()->is('claims*') ? 'active' : '' }}" data-tooltip="Claims">
-                <a href="/claims">
+                <a href="/claims?pending=1">
                     <span class="ks-sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 8V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
