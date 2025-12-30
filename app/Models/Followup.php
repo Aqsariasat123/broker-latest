@@ -25,8 +25,14 @@ class Followup extends Model
 
     protected $casts = [
         'follow_up_date' => 'date',
+        'status' => 'string', // or enum in Laravel 10+
+        'channel' => 'string',
     ];
 
+    protected $attributes = [
+    'status' => 'Open',
+    'channel' => 'System',
+    ];
     /**
      * Get the contact that owns the followup.
      */

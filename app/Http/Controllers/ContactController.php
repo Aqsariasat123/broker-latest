@@ -113,6 +113,9 @@ class ContactController extends Controller
     public function show(Contact $contact)
     {
         if (request()->expectsJson()) {
+         $contact->load([
+            'followups'
+        ]);
             return response()->json($contact);
         }
         return view('contacts.show', compact('contact'));
@@ -121,6 +124,9 @@ class ContactController extends Controller
     public function edit(Contact $contact)
     {
         if (request()->expectsJson()) {
+              $contact->load([
+                    'followups'
+                ]);
             return response()->json($contact);
         }
         return view('contacts.edit', compact('contact'));

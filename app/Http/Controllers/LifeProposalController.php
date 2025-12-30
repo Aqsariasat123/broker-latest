@@ -10,199 +10,309 @@ use App\Models\Client;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Medical;
+use App\Models\Followup;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- Add this
 
 class LifeProposalController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        $query = LifeProposal::query();
-        $actionType = $request->input('action', 'view');
-        $contactid = $request->input('contact_id', null);
+        $query = LifeProposal::with([
+            'contact',
+            'insurer',
+            'policyPlan',
+            'frequency',
+            'agencies',
+            'stage',
+            'status',
+            'sourceOfPayment',
+            'medical',
+            'followups',
 
-        // Filter by status
+             ]);
+        
+        $actionType = $request->input('action', 'view');
+        $contactId = $request->input('contact_id', null);
+
+        // Filter by status (using foreign key relationship)
         if ($request->has('status') && $request->status) {
             if ($request->status == 'pending') {
-                $query->where('status', 'Pending');
+                $query->whereHas('status', fn($q) => $q->where('name', 'Pending'));
             } elseif ($request->status == 'processing') {
-                $query->where('status', 'Processing');
+                $query->whereHas('status', fn($q) => $q->where('name', 'Processing'));
             }
         }
-         if ($actionType === 'follow-up' ||   $request->boolean('follow_up') ) {
-                $query->whereNotNull('offer_date')
-                    ->where('offer_date', '<=', now()->addDays(7))
-                    ->where('is_submitted', false);
+
+        // Filter by follow-up: proposals with offer_date in the past or next 7 days, and not submitted
+        if ($actionType === 'follow-up' || $request->boolean('follow_up')) {
+            $query->whereNotNull('offer_date')
+                ->where('offer_date', '<=', now()->addDays(7))
+                ->where('is_submitted', false);
         }
 
-        // Filter for "To Follow Up" - proposals with offer_date in the past or within next 7 days, and not submitted
-        $followUp = $request->input('follow_up');
-        if ($followUp && ($followUp == 'true' || $followUp == '1')) {
-            $query->whereNotNull('offer_date')
-                  ->where('offer_date', '<=', now()->addDays(7))
-                  ->where('is_submitted', false);
-        }
-        
-        // Filter for Submitted proposals
-        $submitted = $request->input('submitted');
-        if ($submitted && ($submitted == 'true' || $submitted == '1')) {
+        // Filter for submitted proposals
+        if ($request->boolean('submitted')) {
             $query->where('is_submitted', true);
         }
-        
+
+        // Filter by contact_id if provided
+        if ($contactId) {
+            $query->where('contact_id', $contactId);
+        }
+
+        // Paginate
         $proposals = $query->orderBy('created_at', 'desc')->paginate(10);
-        
+
         // Calculate expiration status for each proposal
         $proposals->getCollection()->transform(function ($proposal) {
             $proposal->hasExpired = $proposal->hasExpired();
             $proposal->hasExpiring = $proposal->hasExpiring();
             return $proposal;
         });
-        
+
         // Get lookup data for dropdowns
         $lookupData = $this->getLookupData();
-        
-        return view('life-proposals.index', compact('proposals', 'lookupData','actionType', 'contactid'));
+
+
+        return view('life-proposals.index', compact('proposals', 'lookupData', 'actionType', 'contactId'));
     }
+
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'proposers_name' => 'required|string|max:255',
-            'salutation' => 'nullable|string|max:50',
-            'dob' => 'nullable|date',
-            'sex' => 'nullable|string|max:1',
-            'anb' => 'nullable|integer',
-            'insurer' => 'required|string|max:255',
-            'policy_plan' => 'required|string|max:255',
-            'sum_assured' => 'nullable|numeric',
-            'term' => 'required|integer|min:1',
-            'add_ons' => 'nullable|string|max:255',
-            'riders' => 'nullable|array',
-            'rider_premiums' => 'nullable|array',
-            'annual_premium' => 'nullable|numeric',
-            'base_premium' => 'nullable|numeric',
-            'admin_fee' => 'nullable|numeric',
-            'total_premium' => 'nullable|numeric',
-            'offer_date' => 'required|date',
-            'premium' => 'required|numeric',
-            'frequency' => 'required|string|max:50',
-            'method_of_payment' => 'nullable|string|max:255',
-            'stage' => 'required|string|max:255',
-            'date' => 'required|date',
-            'age' => 'required|integer|min:1|max:120',
-            'status' => 'required|string|max:50',
-            'source_of_payment' => 'required|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'source_name' => 'nullable|string|max:255',
-            'mcr' => 'nullable|string|max:255',
-            'doctor' => 'nullable|string|max:255',
-            'date_sent' => 'nullable|date',
-            'date_completed' => 'nullable|date',
-            'medical_examination_required' => 'sometimes|boolean',
-            'clinic' => 'nullable|string|max:255',
-            'date_referred' => 'nullable|date',
-            'exam_notes' => 'nullable|string',
-            'policy_no' => 'nullable|string|max:255',
-            'loading_premium' => 'nullable|numeric',
-            'start_date' => 'nullable|date',
-            'maturity_date' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'agency' => 'nullable|string|max:255',
-            'is_submitted' => 'sometimes|boolean',
-        ]);
+        try {
+            $validated = $request->validate([
+                'proposers_name' => 'required|string|max:255',
+                'contact_id' => 'required|exists:contacts,id',
+                'insurer_id' => 'required|exists:lookup_values,id',
+                'policy_plan_id' => 'required|exists:lookup_values,id',
+                 'salutation_id'=> 'required|exists:lookup_values,id',
+                'sum_assured' => 'nullable|numeric',
+                'term' => 'required|integer|min:1',
+                'add_ons' => 'nullable|string|max:255',
+                'offer_date' => 'required|date',
+                'premium' => 'required|numeric',
+                'frequency_id' => 'required|exists:lookup_values,id',
+                'proposal_stage_id' => 'required|exists:lookup_values,id',
+                'age' => 'required|integer|min:1|max:120',
+                'status_id' => 'required|exists:lookup_values,id',
+                'source_of_payment_id' => 'required|exists:lookup_values,id',
+                'mcr' => 'nullable|string|max:255',
+                'policy_no' => 'nullable|string|max:255',
+                'loading_premium' => 'nullable|numeric',
+                'start_date' => 'nullable|date',
+                'maturity_date' => 'nullable|date',
+                'method_of_payment' => 'nullable|string|max:255',
+                'agency' => 'nullable|string|max:255',
+                'medical_type_id' => 'required|exists:lookup_values,id',
+                'medical.status_id' => 'nullable|exists:lookup_values,id',
 
-        // Handle checkbox fields
-        $validated['is_submitted'] = $request->has('is_submitted') ? (bool)$request->is_submitted : false;
-        $validated['medical_examination_required'] = $request->has('medical_examination_required') ? (bool)$request->medical_examination_required : false;
+                'is_submitted' => 'sometimes|boolean',
+                'sex' => 'nullable|string|max:1',
+                'anb' => 'nullable|integer',
+                'riders' => 'nullable|array',
+                'rider_premiums' => 'nullable|array',
+                'annual_premium' => 'nullable|numeric',
+                'base_premium' => 'nullable|numeric',
+                'admin_fee' => 'nullable|numeric',
+                'total_premium' => 'nullable|numeric',
+                'medical_examination_required' => 'sometimes|boolean',
+                'source_name' => 'nullable|string|max:255',
+                'clinic' => 'nullable|string|max:255',
+                'exam_notes' => 'nullable|string',
+            ]);
 
-        // Handle riders arrays
-        if ($request->has('riders')) {
-            $validated['riders'] = $request->riders;
+            // Checkbox flags
+            $validated['is_submitted'] = $request->has('is_submitted') ? (bool)$request->is_submitted : false;
+            $validated['medical_examination_required'] = $request->has('medical_examination_required') ? (bool)$request->medical_examination_required : false;
+
+            DB::transaction(function () use ($validated, $request) {
+                // Generate PRID
+                $latestProposal = LifeProposal::orderBy('id', 'desc')->first();
+                $nextId = $latestProposal ? (int) str_replace('PR', '', $latestProposal->prid) + 1 : 1001;
+                $validated['prid'] = 'PR' . $nextId;
+
+                Log::info('Selected Columns for lookupData:', $validated);
+                $lifeProposal = LifeProposal::create($validated);
+
+                Followup::create([
+                    'follow_up_code'   => 'FU-' . now()->format('Ymd') . '-' . $lifeProposal->id,
+                    'life_proposal_id' => $lifeProposal->id,
+                    'contact_id'       => $request->contact_id ?? null,
+                    'client_id'        => $request->client_id ?? null,
+                    'user_id'          => Auth::id(),
+                    'follow_up_date'   => $request->date,
+                    'channel'          => 'System',
+                    'status'           => 'Open',
+                    'summary'          => 'Life proposal created',
+                    'next_action'      => 'Review proposal',
+                ]);
+
+                if ($validated['medical_examination_required']) {
+                    Medical::create([
+                        'life_proposal_id' => $lifeProposal->id,
+                        'medical_code'     => 'MED-' . now()->format('Ymd') . '-' . $lifeProposal->id,
+                        'medical_type_id'     => $request->medical_type_id,
+                        'clinic'         => $request->clinic,
+                        'ordered_on'       => $request->date_referred,
+                        'completed_on'       => $request->date_completed,
+                        'status_id'           => $request->input('medical.status_id'),
+                        'notes'            => $request->exam_notes,
+                    ]);
+                }
+            });
+
+            return redirect()->route('life-proposals.index')->with('success', 'Life Proposal created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors separately if needed
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            Log::error('Error creating Life Proposal: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('error', 'Something went wrong while creating the Life Proposal.')->withInput();
         }
-        if ($request->has('rider_premiums')) {
-            $validated['rider_premiums'] = $request->rider_premiums;
-        }
-
-        // Generate unique PRID
-        $latestProposal = LifeProposal::orderBy('id', 'desc')->first();
-        $nextId = $latestProposal ? (int)str_replace('PR', '', $latestProposal->prid) + 1 : 1001;
-        $validated['prid'] = 'PR' . $nextId;
-
-        LifeProposal::create($validated);
-
-        return redirect()->route('life-proposals.index')->with('success', 'Life Proposal created successfully.');
     }
+
 
     public function show(Request $request, LifeProposal $lifeProposal)
     {
         if ($request->expectsJson()) {
-            return response()->json($lifeProposal);
+             $lifeProposal->load([
+            'contact',
+            'insurer',
+            'policyPlan',
+            'frequency',
+            'stage',
+            'status',
+            'sourceOfPayment',
+            'medical',
+             'medical.clinic',
+            'followups',
+        ]);
+
+        return response()->json($lifeProposal);
         }
         return view('life-proposals.show', compact('lifeProposal'));
     }
 
+    
     public function update(Request $request, LifeProposal $lifeProposal)
     {
         $validated = $request->validate([
-            'proposers_name' => 'required|string|max:255',
-            'salutation' => 'nullable|string|max:50',
-            'dob' => 'nullable|date',
-            'sex' => 'nullable|string|max:1',
-            'anb' => 'nullable|integer',
-            'insurer' => 'required|string|max:255',
-            'policy_plan' => 'required|string|max:255',
-            'sum_assured' => 'nullable|numeric',
-            'term' => 'required|integer|min:1',
-            'add_ons' => 'nullable|string|max:255',
-            'riders' => 'nullable|array',
-            'rider_premiums' => 'nullable|array',
-            'annual_premium' => 'nullable|numeric',
-            'base_premium' => 'nullable|numeric',
-            'admin_fee' => 'nullable|numeric',
-            'total_premium' => 'nullable|numeric',
-            'offer_date' => 'required|date',
-            'premium' => 'required|numeric',
-            'frequency' => 'required|string|max:50',
-            'method_of_payment' => 'nullable|string|max:255',
-            'stage' => 'required|string|max:255',
-            'date' => 'required|date',
-            'age' => 'required|integer|min:1|max:120',
-            'status' => 'required|string|max:50',
-            'source_of_payment' => 'required|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'source_name' => 'nullable|string|max:255',
-            'mcr' => 'nullable|string|max:255',
-            'doctor' => 'nullable|string|max:255',
-            'date_sent' => 'nullable|date',
-            'date_completed' => 'nullable|date',
-            'medical_examination_required' => 'sometimes|boolean',
-            'clinic' => 'nullable|string|max:255',
-            'date_referred' => 'nullable|date',
-            'exam_notes' => 'nullable|string',
-            'policy_no' => 'nullable|string|max:255',
-            'loading_premium' => 'nullable|numeric',
-            'start_date' => 'nullable|date',
-            'maturity_date' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'agency' => 'nullable|string|max:255',
-            'class' => 'nullable|string|max:255',
-            'is_submitted' => 'sometimes|boolean',
+               'proposers_name' => 'required|string|max:255',
+                'contact_id' => 'required|exists:contacts,id',
+                'client_id' => 'nullable|exists:clients,id',
+
+                'insurer_id' => 'required|exists:lookup_values,id',
+                'policy_plan_id' => 'required|exists:lookup_values,id',
+                'salutation_id'=> 'required|exists:lookup_values,id',
+
+                'sum_assured' => 'nullable|numeric',
+                'term' => 'required|integer|min:1',
+                'add_ons' => 'nullable|string|max:255',
+
+                'offer_date' => 'required|date',
+                'premium' => 'required|numeric',
+                'frequency_id' => 'required|exists:lookup_values,id',
+                'proposal_stage_id' => 'required|exists:lookup_values,id',
+
+                'age' => 'required|integer|min:1|max:120',
+                'status_id' => 'required|exists:lookup_values,id',
+                'source_of_payment_id' => 'required|exists:lookup_values,id',
+
+                'mcr' => 'nullable|string|max:255',
+                'policy_no' => 'nullable|string|max:255',
+                'loading_premium' => 'nullable|numeric',
+                'start_date' => 'nullable|date',
+                'maturity_date' => 'nullable|date',
+                'method_of_payment' => 'nullable|string|max:255',
+                'agency' => 'nullable|string|max:255',
+
+                'medical_type_id' => 'required|exists:lookup_values,id',
+
+                'is_submitted' => 'sometimes|boolean',
+                'sex' => 'nullable|string|max:1',
+                'anb' => 'nullable|integer',
+
+                'riders' => 'nullable|array',
+                'rider_premiums' => 'nullable|array',
+
+                'annual_premium' => 'nullable|numeric',
+                'base_premium' => 'nullable|numeric',
+                'admin_fee' => 'nullable|numeric',
+                'total_premium' => 'nullable|numeric',
+
+                'medical_examination_required' => 'sometimes|boolean',
+                'source_name' => 'nullable|string|max:255',
+
+                'clinic' => 'nullable|string|max:255',
+                'exam_notes' => 'nullable|string',
         ]);
 
-        // Handle checkbox fields
-        $validated['is_submitted'] = $request->has('is_submitted') ? (bool)$request->is_submitted : false;
-        $validated['medical_examination_required'] = $request->has('medical_examination_required') ? (bool)$request->medical_examination_required : false;
+        // Ensure boolean flags
+        $validated['is_submitted'] = $request->boolean('is_submitted');
+        $validated['medical_examination_required'] = $request->boolean('medical_examination_required');
 
-        // Handle riders arrays
-        if ($request->has('riders')) {
-            $validated['riders'] = $request->riders;
-        }
-        if ($request->has('rider_premiums')) {
-            $validated['rider_premiums'] = $request->rider_premiums;
-        }
+        DB::transaction(function () use ($validated, $request, $lifeProposal) {
 
-        $lifeProposal->update($validated);
+            // -------------------------
+            // Update Life Proposal
+            // -------------------------
+            $lifeProposal->update($validated);
 
-        return redirect()->route('life-proposals.index')->with('success', 'Life Proposal updated successfully.');
+            // -------------------------
+            // Handle Medical Record
+            // -------------------------
+            if ($validated['medical_examination_required']) {
+                Medical::updateOrCreate(
+                    ['life_proposal_id' => $lifeProposal->id],
+                    [
+                        'medical_code' => $lifeProposal->medical->medical_code
+                            ?? 'MED-' . now()->format('Ymd') . '-' . $lifeProposal->id,
+                        'medical_type_id' => $request->medical_type_id,
+                        'clinic' => $request->clinic,
+                        'ordered_on'       => $request->date_referred,
+                        'completed_on'       => $request->date_completed,
+                        'status_id'           => $request->input('medical.status_id'),
+                        'notes' => $request->exam_notes,
+
+                    ]
+                );
+            } else {
+                // If medical no longer required, remove medical record
+                $lifeProposal->medical()?->delete();
+            }
+
+            // -------------------------
+            // Add Followup Entry
+            // -------------------------
+        
+            $followUp = $lifeProposal->followups()->first(); // or ->find($id) if you have ID
+            if ($followUp) {
+                $followUp->update([
+                    'follow_up_code' => $followUp->follow_up_code, // keep existing code
+                    'contact_id'     => $request->contact_id ?? null,
+                    'client_id'      => $request->client_id ?? null,
+                    'user_id'        => Auth::id(),
+                    'follow_up_date' => $request->date,
+                    'channel'        => 'System',
+                    'status'         => 'Open',
+                    'summary'        => 'Life proposal updated',
+                    'next_action'    => 'Review proposal',
+                ]);
+            }
+
+        });
+
+        return redirect()
+            ->route('life-proposals.index')
+            ->with('success', 'Life Proposal updated successfully.');
     }
+
 
     public function destroy(LifeProposal $lifeProposal)
     {
@@ -212,58 +322,80 @@ class LifeProposalController extends Controller
     }
 
     public function edit(LifeProposal $lifeProposal)
-{
-    return response()->json($lifeProposal);
-}
+    {
+        $lifeProposal->load([
+            'contact',
+            'insurer',
+            'policyPlan',
+            'frequency',
+            'stage',
+            'status',
+            'sourceOfPayment',
+            'medical',
+            'followups',
+        ]);
+
+        return response()->json($lifeProposal);
+    }
+
 
     public function export()
     {
-        $proposals = LifeProposal::all();
-        
+        $proposals = LifeProposal::with([
+            'insurer',
+            'policyPlan',
+            'frequency',
+            'stage',
+            'status',
+            'sourceOfPayment',
+            'class' // if you have a class relationship in LifeProposal
+        ])->get();
+
         $fileName = 'life_proposals_export_' . date('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ];
 
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'Action', 'Proposer\'s Name', 'Insurer', 'Policy Plan', 'Sum Assured', 'Term', 'Add Ons',
-            'Offer Date', 'Premium', 'Freq', 'Stage', 'Date', 'Age', 'Status', 'Source Of Payment',
-            'MCR', 'Doctor', 'Date Sent', 'Date Completed', 'Notes', 'Agency', 'PRID', 'Class'
-        ]);
+        return response()->streamDownload(function () use ($proposals) {
+            $handle = fopen('php://output', 'w');
 
-        foreach ($proposals as $proposal) {
+            // CSV Header
             fputcsv($handle, [
-                '⤢',
-                $proposal->proposers_name,
-                $proposal->insurer,
-                $proposal->policy_plan,
-                $proposal->sum_assured ? number_format($proposal->sum_assured, 2) : '##########',
-                $proposal->term,
-                $proposal->add_ons ?: '-',
-                $proposal->offer_date ? $proposal->offer_date->format('d-M-y') : '##########',
-                number_format($proposal->premium, 2),
-                $proposal->frequency,
-                $proposal->stage,
-                $proposal->date ? $proposal->date->format('d-M-y') : '##########',
-                $proposal->age,
-                $proposal->status,
-                $proposal->source_of_payment,
-                $proposal->mcr ?: '-',
-                $proposal->doctor ?: '-',
-                $proposal->date_sent ? $proposal->date_sent->format('d-M-y') : '##########',
-                $proposal->date_completed ? $proposal->date_completed->format('d-M-y') : '##########',
-                $proposal->notes ?: '-',
-                $proposal->agency ?: '-',
-                $proposal->prid,
-                $proposal->class
+                'Action', 'Proposer\'s Name', 'Insurer', 'Policy Plan', 'Sum Assured', 'Term', 'Add Ons',
+                'Offer Date', 'Premium', 'Frequency', 'Stage', 'Date', 'Age', 'Status', 'Source Of Payment',
+                'MCR', 'Doctor', 'Date Sent', 'Date Completed', 'Notes', 'Agency', 'PRID', 'Class'
             ]);
-        }
 
-        fclose($handle);
-        return response()->streamDownload(function() use ($handle) {
-            //
+            foreach ($proposals as $proposal) {
+                fputcsv($handle, [
+                    '⤢',
+                    $proposal->proposers_name,
+                    $proposal->insurer->name ?? '-',        // lookup relation
+                    $proposal->policyPlan->name ?? '-',     // lookup relation
+                    $proposal->sum_assured ? number_format($proposal->sum_assured, 2) : '##########',
+                    $proposal->term ?? '-',
+                    $proposal->add_ons ?: '-',
+                    $proposal->offer_date ? $proposal->offer_date->format('d-M-y') : '##########',
+                    $proposal->premium ? number_format($proposal->premium, 2) : '##########',
+                    $proposal->frequency->name ?? '-',      // lookup relation
+                    $proposal->stage->name ?? '-',          // lookup relation
+                    $proposal->date ? $proposal->date->format('d-M-y') : '##########',
+                    $proposal->age ?? '-',
+                    $proposal->status->name ?? '-',         // lookup relation
+                    $proposal->sourceOfPayment->name ?? '-',// lookup relation
+                    $proposal->mcr ?: '-',
+                    $proposal->doctor ?? '-',
+                    $proposal->date_sent ? $proposal->date_sent->format('d-M-y') : '##########',
+                    $proposal->date_completed ? $proposal->date_completed->format('d-M-y') : '##########',
+                    $proposal->notes ?: '-',
+                    $proposal->agency ?: '-',
+                    $proposal->prid,
+                    $proposal->class->name ?? '-',          // if class relationship exists
+                ]);
+            }
+
+            fclose($handle);
         }, $fileName, $headers);
     }
 
@@ -329,38 +461,164 @@ class LifeProposalController extends Controller
         // Redirect to policies index page with life proposal ID to pre-fill the form
         return redirect()->route('policies.index', ['life_proposal_id' => $lifeProposal->id]);
     }
+private function getLookupData()
+{
+    $getValues = function (string $categoryName, array $default = [], bool $useSeq = true) {
+        $category = LookupCategory::where('name', $categoryName)->first();
 
-    private function getLookupData()
-    {
-        $insurersCategory = LookupCategory::where('name', 'Insurers')->first();
-        $policyPlansCategory = LookupCategory::where('name', 'Policy Plans')->first();
-        $frequencyCategory = LookupCategory::where('name', 'Frequency')->first();
-        $stagesCategory = LookupCategory::where('name', 'Proposal Stage')->first();
-        $statusesCategory = LookupCategory::where('name', 'Proposal Status')->first();
-        $sourcesOfPaymentCategory = LookupCategory::where('name', 'Source Of Payment')->first();
-        $agenciesCategory = LookupCategory::where('name', 'APL Agency')->first();
-        $classesCategory = LookupCategory::where('name', 'Class')->first();
-        $sourceCategory = LookupCategory::where('name', 'Source')->first();
-        
-        return [
-            'insurers' => $insurersCategory ? $insurersCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'policy_plans' => $policyPlansCategory ? $policyPlansCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'frequencies' => $frequencyCategory ? $frequencyCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'stages' => $stagesCategory ? $stagesCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'statuses' => $statusesCategory ? $statusesCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'sources_of_payment' => $sourcesOfPaymentCategory ? $sourcesOfPaymentCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'agencies' => $agenciesCategory ? $agenciesCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'classes' => $classesCategory ? $classesCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'sources' => $sourceCategory ? $sourceCategory->values()->where('active', true)->pluck('name')->toArray() : [],
-            'salutations' => ['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Prof'],
-            'sex_options' => ['M', 'F'],
-            'riders' => ['ADB', 'AcDB', 'TPD', 'TPDWoP', 'FIBT', 'FIBD', 'CIB'],
-            'add_ons' => ['Critical Illness', 'Accidental Death', 'Waiver of Premium', 'Hospital Cash', 'Total Permanent Disability'],
-            'doctors' => ['Dr. Smith', 'Dr. Johnson', 'Dr. Williams', 'Dr. Brown', 'Dr. Jones'],
-            'clinics' => ['Jivan', 'Wellkin', 'Apollo Bramwell', 'City Clinic', 'MedPoint'],
-            'contacts' => Contact::select('id', 'contact_name', 'contact_id', 'salutation', 'dob')->orderBy('contact_name')->get(),
-            'clients' => Client::select('id', 'client_name', 'clid', 'salutation', 'dob_dor as dob')->orderBy('client_name')->get(),
-            'method_of_payment_options' => ['Salary Deduction', 'Bank Transfer', 'Cash', 'Cheque', 'Credit Card', 'Debit Card']
-        ];
-    }
+        if (!$category) {
+            return $default;
+        }
+
+        $query = $category->values()->where('active', true);
+
+        if ($useSeq) {
+            $query->orderBy('seq');
+        }
+
+        return $query->get(['id', 'name'])->toArray();
+    };
+
+    return [
+
+        /* ================= CONTACT LOOKUPS ================= */
+        'contact_types' => $getValues('Contact Type'),
+        'sources' => $getValues('Source'),
+        'agents' => $getValues('Agent'),
+        'agencies' => $getValues('APL Agency'),
+        'salutations' => $getValues('Salutation'),
+        'contact_statuses' => $getValues('Contact Status', [
+            ['id' => 1, 'name' => 'Not Contacted'],
+            ['id' => 2, 'name' => 'In Discussion'],
+            ['id' => 3, 'name' => 'Proposal Made'],
+            ['id' => 4, 'name' => 'Keep In View'],
+            ['id' => 5, 'name' => 'Archived'],
+            ['id' => 6, 'name' => 'RNR'],
+            ['id' => 7, 'name' => 'Differed'],
+        ]),
+        'ranks' => $getValues('Rank', [
+            ['id' => 1, 'name' => 'VIP'],
+            ['id' => 2, 'name' => 'High'],
+            ['id' => 3, 'name' => 'Medium'],
+            ['id' => 4, 'name' => 'Low'],
+            ['id' => 5, 'name' => 'Warm'],
+        ]),
+        'districts' => $getValues('District'),
+        'occupations' => $getValues('Occupation'),
+        'islands' => $getValues('Island'),
+        'countries' => $getValues('Issuing Country'),
+        'income_sources' => $getValues('Income Source'),
+        'statuses' => $getValues('Proposal Status'),
+
+        /* ================= POLICY LOOKUPS ================= */
+        'clients' => Client::orderBy('client_name')->get(['id', 'client_name', 'clid'])->toArray(),
+        'insurers' => $getValues('Insurers', [], false),
+        'policy_classes' => $getValues('Class', [], false),
+        'policy_plans' => $getValues('Policy Plans', [], false),
+        'policy_statuses' => $getValues('Policy Status', [
+            ['id' => null, 'name' => 'In Force'],
+            ['id' => null, 'name' => 'DFR'],
+            ['id' => null, 'name' => 'Expired'],
+            ['id' => null, 'name' => 'Cancelled'],
+        ], false),
+        'business_types' => $getValues('Business Type', [
+            ['id' => null, 'name' => 'Direct'],
+            ['id' => null, 'name' => 'Transfer'],
+        ], false),
+        'medical_statuses' => $getValues('Medical Status', [
+            ['id' => 1, 'name' => 'Pending'],
+            ['id' => 2, 'name' => 'Scheduled'],
+            ['id' => 3, 'name' => 'Completed'],
+            ['id' => 4, 'name' => 'Reports Received'],
+            ['id' => 5, 'name' => 'Approved'],
+            ['id' => 6, 'name' => 'Deferred'],
+            ['id' => 7, 'name' => 'Cancelled'],
+        ], false),
+
+        'term_units' => $getValues('Term Units', [
+            ['id' => null, 'name' => 'Year'],
+            ['id' => null, 'name' => 'Month'],
+            ['id' => null, 'name' => 'Days'],
+        ], false),
+        'frequencies' => $getValues('Frequency', [
+            ['id' => null, 'name' => 'Annually'],
+            ['id' => null, 'name' => 'Monthly'],
+            ['id' => null, 'name' => 'Quarterly'],
+            ['id' => null, 'name' => 'One Off'],
+            ['id' => null, 'name' => 'Single'],
+        ], false),
+        'pay_plans' => $getValues('Payment Plan', [
+            ['id' => null, 'name' => 'Full'],
+            ['id' => null, 'name' => 'Instalments'],
+            ['id' => null, 'name' => 'Regular'],
+        ], false),
+        'document_types' => $getValues('Document Type', [
+            ['id' => null, 'name' => 'Policy Document'],
+            ['id' => null, 'name' => 'Certificate'],
+            ['id' => null, 'name' => 'Claim Document'],
+            ['id' => null, 'name' => 'Other Document'],
+        ], false),
+           'stages' => $getValues('Proposal Stage', [
+            ['id' => 1, 'name' => 'Not Contacted'],
+            ['id' => 2, 'name' => 'RNR'],
+            ['id' => 3, 'name' => 'In Discussion'],
+            ['id' => 4, 'name' => 'Offer Made'],
+            ['id' => 5, 'name' => 'Proposal Filled'],
+        ]),
+
+        'channels' => $getValues('Channel', [], false),
+        'sources_of_payment' => $getValues('Source Of Payment'),
+        'agencies' => $getValues('APL Agency'),
+        'classes' => $getValues('Class'),
+        'sources' => $getValues('Source'),
+
+        /* ================= STATIC OPTIONS FROM DB ================= */
+        'riders' => $getValues('Riders', [
+            ['id' => 1, 'name' => 'ADB'],
+            ['id' => 2, 'name' => 'AcDB'],
+            ['id' => 3, 'name' => 'TPD'],
+            ['id' => 4, 'name' => 'TPDWoP'],
+            ['id' => 5, 'name' => 'FIBT'],
+            ['id' => 6, 'name' => 'CIB'] ] ),
+        'add_ons' => $getValues('Add Ons', []),
+        'doctors' => $getValues('Doctors', []),
+        'clinics' => $getValues('Clinics', [
+             ['id' => 1, 'name' => 'Jivan'],
+            ['id' => 2, 'name' => 'Wellkin'],
+            ['id' => 3, 'name' => 'Apollo Bramwell'],
+            ['id' => 4, 'name' => 'City Clinic'],
+            ['id' => 5, 'name' => 'MedPoint']]
+    ),
+         'sex_options' => $getValues('Sex', [
+            ['id' => 1, 'name' => 'M'],
+            ['id' => 2, 'name' => 'F'],
+        ]),
+        'method_of_payment_options' => $getValues('Method Of Payment', [  
+            ['id' => 1, 'name' => 'Salary Deduction'],
+            ['id' => 2, 'name' => 'Bank Transfer'],
+            ['id' => 3, 'name' => 'Cash'],
+            ['id' => 4, 'name' => 'Cheque'],
+            ['id' => 5, 'name' => 'Credit Card'],
+           ['id' => 6, 'name' => 'Debit Card'],]),
+         'medical_types' => $getValues('Medical Type', [
+            ['id' => 1, 'name' => 'Initial Medical'],
+            ['id' => 2, 'name' => 'Full Medical'],
+            ['id' => 3, 'name' => 'Non-Medical'],
+            ['id' => 4, 'name' => 'Tele Medical'],
+            ['id' => 5, 'name' => 'Specialist Medical'],
+            ['id' => 6, 'name' => 'Medical Recheck'],
+            ]),
+        /* ================= CONTACTS & CLIENTS ================= */
+        'contacts' => Contact::select('id', 'contact_name', 'contact_id', 'salutation', 'dob')
+            ->orderBy('contact_name')
+            ->get(),
+        'clients' => Client::select('id', 'client_name', 'clid', 'salutation', 'dob_dor as dob')
+            ->orderBy('client_name')
+            ->get(),
+          
+    ];
+}
+
+
+
 }

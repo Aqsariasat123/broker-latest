@@ -13,7 +13,9 @@ class Medical extends Model
     protected $fillable = [
         'life_proposal_id',
         'medical_code',
-        'medical_type',
+        'status_id',
+        'medical_type_id',
+        'clinic',
         'provider',
         'ordered_on',
         'completed_on',
@@ -33,5 +35,15 @@ class Medical extends Model
     public function lifeProposal(): BelongsTo
     {
         return $this->belongsTo(LifeProposal::class);
+    }
+
+    public function medicalType()
+    {
+        return $this->belongsTo(LookupValue::class, 'medical_type_id');
+    }
+
+       public function clinic()
+    {
+        return $this->belongsTo(LookupValue::class, 'clinic');
     }
 }

@@ -11,19 +11,38 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('medicals', function (Blueprint $table) {
+            Schema::create('medicals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('life_proposal_id')->constrained()->cascadeOnDelete();
+
+            $table->foreignId('life_proposal_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->string('medical_code')->unique();
-            $table->string('medical_type');
-            $table->string('provider')->nullable();
+
+            $table->foreignId('medical_type_id')
+                ->nullable()
+                ->constrained('lookup_values')
+                ->nullOnDelete();
+
+            $table->string('clinic')->nullable();
+
             $table->date('ordered_on')->nullable();
             $table->date('completed_on')->nullable();
-            $table->string('status')->default('pending');
+
+            $table->foreignId('status_id')
+                ->nullable()
+                ->constrained('lookup_values')
+                ->nullOnDelete();
+
             $table->string('results_path')->nullable();
             $table->text('notes')->nullable();
+
             $table->timestamps();
+
+            $table->index(['life_proposal_id', 'status_id']);
         });
+
     }
 
     /**

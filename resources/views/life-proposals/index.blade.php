@@ -57,7 +57,19 @@
                 <button class="btn btn-close" onclick="window.history.back()">Close</button>
             </div>
         </div>
+      @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul style="margin:0; padding-left: 18px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+      @endif
 
+      @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+      @endif
         @if(session('success'))
           <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin:15px 20px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
             {{ session('success') }}
@@ -130,7 +142,7 @@
                       {{ $proposal->prid }}
                       </td>
                     @elseif($col == 'insurer')
-                      <td data-column="insurer">{{ $proposal->insurer }}</td>
+                      <td data-column="insurer">{{ $proposal->insurer->name }}</td>
                     @elseif($col == 'policy_plan')
                       <td data-column="policy_plan">{{ $proposal->policy_plan }}</td>
                     @elseif($col == 'sum_assured')
@@ -144,17 +156,17 @@
                     @elseif($col == 'premium')
                       <td data-column="premium">{{ number_format($proposal->premium,2) }}</td>
                     @elseif($col == 'frequency')
-                      <td data-column="frequency">{{ $proposal->frequency }}</td>
+                      <td data-column="frequency">{{ $proposal->frequency->name }}</td>
                     @elseif($col == 'stage')
-                      <td data-column="stage">{{ $proposal->stage }}</td>
+                      <td data-column="stage">{{ $proposal->stage->name  }}</td>
                     @elseif($col == 'date')
                       <td data-column="date">{{ $proposal->date ? $proposal->date->format('d-M-y') : '##########' }}</td>
                     @elseif($col == 'age')
                       <td data-column="age">{{ $proposal->age }}</td>
                     @elseif($col == 'status')
-                      <td data-column="status"><span class="badge-status" style="background:{{ $proposal->status == 'Approved' ? '#28a745' : ($proposal->status=='Pending' ? '#ffc107' : ($proposal->status=='Declined' ? '#dc3545' : '#6c757d')) }}">{{ $proposal->status }}</span></td>
+                      <td data-column="status"><span class="badge-status" style="background:{{ $proposal->status->name == 'Approved' ? '#28a745' : ($proposal->status->name=='Pending' ? '#ffc107' : ($proposal->status->name=='Declined' ? '#dc3545' : '#6c757d')) }}">{{ $proposal->status->name }}</span></td>
                     @elseif($col == 'source_of_payment')
-                      <td data-column="source_of_payment">{{ $proposal->source_of_payment }}</td>
+                      <td data-column="source_of_payment">{{ $proposal->sourceOfPayment->name }}</td>
                     @elseif($col == 'mcr')
                       <td data-column="mcr">{{ $proposal->mcr ?? '-' }}</td>
                     @elseif($col == 'doctor')
@@ -166,7 +178,7 @@
                     @elseif($col == 'notes')
                       <td data-column="notes">{{ $proposal->notes ?? '-' }}</td>
                     @elseif($col == 'agency')
-                      <td data-column="agency">{{ $proposal->agency ?? '-' }}</td>
+                      <td data-column="agency">{{ $proposal->agencies->name ?? '-' }}</td>
                     @elseif($col == 'class')
                       <td data-column="class">{{ $proposal->class }}</td>
                     @elseif($col == 'is_submitted')
@@ -290,10 +302,10 @@
                 <input type="text" id="proposers_name" name="proposers_name" class="form-control" required>
               </div>
               <div class="form-group">
-                <label for="salutation">Salutation</label>
-                <select id="salutation" name="salutation" class="form-control">
+                <label for="salutation_id">Salutation</label>
+                <select id="salutation_id" name="salutation_id" class="form-control">
                   <option value="">Select</option>
-                  @foreach($lookupData['salutations'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['salutations'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group">
@@ -301,17 +313,17 @@
                 <input id="dob" name="dob" type="date" class="form-control">
               </div>
               <div class="form-group">
-                <label for="insurer">Insurer *</label>
-                <select id="insurer" name="insurer" class="form-control" required>
+                <label for="insurer_id">Insurer *</label>
+                <select id="insurer_id" name="insurer_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['insurers'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['insurers'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
                  <div class="form-group grow">
-                <label for="policy_plan">Policy Plan *</label>
-                <select id="policy_plan" name="policy_plan" class="form-control" required>
+                <label for="policy_plan_id">Policy Plan *</label>
+                <select id="policy_plan_id" name="policy_plan_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group">
@@ -330,7 +342,7 @@
                  <label for="sex">Sex</label>
                 <select id="sex" name="sex" class="form-control">
                   <option value="">Select</option>
-                  @foreach($lookupData['sex_options'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['sex_options'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group small-grow">
@@ -349,10 +361,10 @@
               @foreach($lookupData['riders'] as $rider)
                 <div class="rider-item">
                   <div class="rider-lable-checkbox">
-                     <label for="rider_{{ $rider }}" style="margin:0; font-weight:normal;">{{ $rider }}</label>
-                  <input type="checkbox" class="rider-checkbox" id="rider_{{ $rider }}" name="riders[]" value="{{ $rider }}" data-rider="{{ $rider }}">
+                     <label for="rider_{{ $rider['id'] }}" style="margin:0; font-weight:normal;">{{ $rider['name'] }}</label>
+                  <input type="checkbox" class="rider-checkbox" id="rider_{{ $rider['id'] }}" name="riders[]" value="{{ $rider['id'] }}" data-rider="{{ $rider['id'] }}">
                  </div>
-                  <input type="number" step="0.01" class="form-control rider-premium" id="rider_premium_{{ $rider }}" name="rider_premiums[{{ $rider }}]" style="width:80px; padding:4px; background: transparent !important; margin-top: 8px;" placeholder="0.00" disabled>
+                  <input type="number" step="0.01" class="form-control rider-premium" id="rider_premium_{{ $rider['id'] }}" name="rider_premiums[{{ $rider['id'] }}]" style="width:80px; padding:4px; background: transparent !important; margin-top: 8px;" placeholder="0.00" disabled>
                 </div>
               @endforeach
             </div>
@@ -376,35 +388,37 @@
                 <input id="offer_date" name="offer_date" type="date" class="form-control" required>
               </div>
               <div class="form-group grow">
-                <label for="stage">Proposal Stage *</label>
-                <select id="stage" name="stage" class="form-control" required>
+                <label for="proposal_stage_id">Proposal Stage *</label>
+                <select id="proposal_stage_id" name="proposal_stage_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['stages'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['stages'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
                 <label for="agency">Agency</label>
                 <select id="agency" name="agency" class="form-control">
                   <option value="">Select</option>
-                  @foreach($lookupData['agencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['agencies'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
-                <label for="source">Source</label>
-                <select id="source" name="source" class="form-control">
+                <label for="source_name">Source</label>
+                <select id="source_name" name="source_name" class="form-control">
                   <option value="">Select</option>
-                  @foreach($lookupData['sources'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['sources'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
+
               </div>
+
+              
                 <div class="form-group grow">
-                <label for="client_id">Source Name</label>
-                <select id="client_id" class="form-control field-required">
-                  <option value="">Select Client</option>
-                  @foreach($lookupData['clients'] as $client)
-                    <option value="{{ $client->id }}">{{ $client->client_name }}</option>
+                <label for="contact_id">Contact Name</label>
+                <select id="contact_id"  name="contact_id"  class="form-control field-required">
+                  <option value="">Select Contact</option>
+                  @foreach($lookupData['contacts'] as $contact)
+                    <option value="{{ $contact->id }}">{{ $contact->contact_name }}</option>
                   @endforeach
                 </select>
-                <input type="hidden" id="source_name" name="source_name">
               </div>
             </div>
            
@@ -412,57 +426,57 @@
             <div class="form-row proposer-fields-row">
               <div class="form-group grow">
                 <label for="frequency">Frequency Of Payment *</label>
-                <select id="frequency" name="frequency" class="form-control" required>
+                <select id="frequency_id" name="frequency_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['frequencies'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['frequencies'] as $s) <option value="{{ $s['id'] }}">{{  $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
                 <label for="method_of_payment">Method Of Payment</label>
                 <select id="method_of_payment" name="method_of_payment" class="form-control">
                   <option value="">Select</option>
-                  @foreach($lookupData['method_of_payment_options'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['method_of_payment_options'] as $s) <option value="{{  $s['id'] }}">{{  $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
-                <label for="source_of_payment">Source Of Payment *</label>
-                <select id="source_of_payment" name="source_of_payment" class="form-control" required>
+                <label for="source_of_payment_id">Source Of Payment *</label>
+                <select id="source_of_payment_id" name="source_of_payment_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['sources_of_payment'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['sources_of_payment'] as $s) <option value="{{ $s['id'] }}">{{  $s['name'] }}</option> @endforeach
                 </select>
               </div>
                 <div class="form-group grow ">
                  <div style="display: flex; gap: 15px; align-items: end;">
-    <div style="flex: 1;">
-      <label for="base_premium" style="font-size: 11px; font-weight: bold; color: #2d2d2d; margin-bottom: 4px; display: block;">
-        Base Premium
-      </label>
-      <input 
-        id="base_premium" 
-        name="base_premium" 
-        type="number" 
-        step="0.01" 
-        class="form-control" 
-        oninput="calculateTotalPremium()"
-        style="width: 100%; background: transparent !important;"
-      >
-    </div>
+            <div style="flex: 1;">
+              <label for="base_premium" style="font-size: 11px; font-weight: bold; color: #2d2d2d; margin-bottom: 4px; display: block;">
+                Base Premium
+              </label>
+              <input 
+                id="base_premium" 
+                name="base_premium" 
+                type="number" 
+                step="0.01" 
+                class="form-control" 
+                oninput="calculateTotalPremium()"
+                style="width: 100%; background: transparent !important;"
+              >
+            </div>
 
-    <div style="flex: 1;">
-      <label for="admin_fee" style="font-size: 11px; font-weight: bold; color: #2d2d2d; margin-bottom: 4px; display: block;">
-        Admin Fee
-      </label>
-      <input 
-        id="admin_fee" 
-        name="admin_fee" 
-        type="number" 
-        step="0.01" 
-        class="form-control" 
-        oninput="calculateTotalPremium()"
-        style="width: 100%; background: transparent !important;"
-      >
-    </div>
-  </div>
+            <div style="flex: 1;">
+              <label for="admin_fee" style="font-size: 11px; font-weight: bold; color: #2d2d2d; margin-bottom: 4px; display: block;">
+                Admin Fee
+              </label>
+              <input 
+                id="admin_fee" 
+                name="admin_fee" 
+                type="number" 
+                step="0.01" 
+                class="form-control" 
+                oninput="calculateTotalPremium()"
+                style="width: 100%; background: transparent !important;"
+              >
+            </div>
+          </div>
                 </div>
                    <div class="form-group grow">
                 <label for="total_premium">Total Premium</label>
@@ -489,7 +503,21 @@
                   <label for="clinic">Clinic</label>
                   <select id="clinic" name="clinic" class="form-control field-required">
                     <option value="">Select</option>
-                    @foreach($lookupData['clinics'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                    @foreach($lookupData['clinics'] as $s) <option value="{{ $s['id'] }}">{{ $s['name']  }}</option> @endforeach
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="medical_type_id">Medical Type</label>
+                  <select id="medical_type_id" name="medical_type_id" class="form-control field-required">
+                    <option value="">Select</option>
+                    @foreach($lookupData['medical_types'] as $s) <option value="{{ $s['id'] }}">{{ $s['name']  }}</option> @endforeach
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="medical_status_id">Medical Status </label>
+                  <select id="medical_status_id" name="medical[status_id]"  class="form-control field-required">
+                    <option value="">Select</option>
+                    @foreach($lookupData['medical_statuses'] as $s) <option value="{{ $s['id'] }}">{{ $s['name']  }}</option> @endforeach
                   </select>
                 </div>
                 <div class="form-group">
@@ -518,10 +546,10 @@
                 <input id="date" name="date" type="date" class="form-control" required>
               </div>
               <div class="form-group grow">
-                <label for="status">Proposal Status *</label>
-                <select id="status" name="status" class="form-control" required>
+                <label for="status_id">Proposal Status *</label>
+                <select id="status_id" name="status_id" class="form-control" required>
                   <option value="">Select</option>
-                  @foreach($lookupData['statuses'] as $s) <option value="{{ $s }}">{{ $s }}</option> @endforeach
+                  @foreach($lookupData['statuses'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
@@ -543,15 +571,7 @@
             </div>
           </div>
 
-          <!-- Documents Section -->
-          <div class="form-section">
-            <div class="form-section-title">Documents</div>
-            <div class="form-row">
-              <div class="form-group full-width" style="display:flex; justify-content:flex-end;">
-                <button type="button" class="btn" style="background:#000; color:#fff; padding:6px 16px;">Upload</button>
-              </div>
-            </div>
-          </div>
+        
 
           <!-- Hidden Fields -->
           <input type="hidden" id="prid" name="prid">
@@ -562,7 +582,7 @@
       </form>
     </div>
   </div>
-                    </div>
+  </div>
 @include('partials.column-selection-modal', [
   'selectedColumns' => $selectedColumns,
   'columnDefinitions' => $columnDefinitions,

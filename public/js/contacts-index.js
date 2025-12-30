@@ -394,8 +394,8 @@ function formatDateForInput(dateString) {
 function populateContactDetails(contact, type = 'view') {
   const content = document.getElementById('contactDetailsContent');
   const scheduleContent = document.getElementById('contactScheduleContent');
-  const documentsContent = document.getElementById('documentsContent');
-  if (!content || !scheduleContent || !documentsContent) return;
+  const followupcontent = document.getElementById('followupcontent');
+  if (!content || !scheduleContent || !followupcontent) return;
 
 
   // Get contact data
@@ -636,6 +636,51 @@ function populateContactDetails(contact, type = 'view') {
 `;
 
   content.innerHTML = col1 + col2 + col3 + col4;
+  const followups = contact.followups || [];
+  if (followups.length === 0) {
+    followupcontent.innerHTML = '<p>No follow-ups available.</p>';
+    return;
+  }
+
+  // Create table
+  const table = document.createElement('table');
+  table.className = 'followup-table';
+  table.style.width = '100%';
+  table.style.borderCollapse = 'collapse';
+
+  // Table header
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th style="border:1px solid #ccc; padding:4px;">Code</th>
+      <th style="border:1px solid #ccc; padding:4px;">Follow-up Date</th>
+      <th style="border:1px solid #ccc; padding:4px;">Channel</th>
+      <th style="border:1px solid #ccc; padding:4px;">Status</th>
+      <th style="border:1px solid #ccc; padding:4px;">Summary</th>
+      <th style="border:1px solid #ccc; padding:4px;">Next Action</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  // Table body
+  const tbody = document.createElement('tbody');
+  followups.forEach(fu => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="border:1px solid #ccc; padding:4px;">${fu.follow_up_code}</td>
+      <td style="border:1px solid #ccc; padding:4px;">${fu.follow_up_date ? fu.follow_up_date.substring(0, 10) : ''}</td>
+      <td style="border:1px solid #ccc; padding:4px;">${fu.channel || ''}</td>
+      <td style="border:1px solid #ccc; padding:4px;">${fu.status || ''}</td>
+      <td style="border:1px solid #ccc; padding:4px;">${fu.summary || ''}</td>
+      <td style="border:1px solid #ccc; padding:4px;">${fu.next_action || ''}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  // Render inside followupcontent
+  followupcontent.innerHTML = '';
+  followupcontent.appendChild(table);
 
   const editBtn = document.getElementById('editContactFromPageBtn');
   const cancelBtn = document.getElementById('contactContactPageBtn');

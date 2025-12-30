@@ -1,5 +1,4 @@
 <?php
-// app/Models/LifeProposal.php
 
 namespace App\Models;
 
@@ -12,27 +11,28 @@ class LifeProposal extends Model
 
     protected $fillable = [
         'proposers_name',
-        'insurer',
-        'policy_plan',
+        'contact_id',
+        'insurer_id',
+        'policy_plan_id',
+        'salutation_id',
         'sum_assured',
         'term',
         'add_ons',
         'offer_date',
         'premium',
-        'frequency',
-        'stage',
-        'date',
+        'frequency_id',
+        'proposal_stage_id',
         'age',
-        'status',
-        'source_of_payment',
+        'status_id',
+        'source_of_payment_id',
         'mcr',
-        'doctor',
-        'date_sent',
-        'date_completed',
-        'notes',
+        'policy_no',
+        'loading_premium',
+        'start_date',
+        'maturity_date',
+        'method_of_payment',
         'agency',
         'prid',
-        // 'class',
         'is_submitted',
         'sex',
         'anb',
@@ -43,14 +43,6 @@ class LifeProposal extends Model
         'admin_fee',
         'total_premium',
         'medical_examination_required',
-        'clinic',
-        'date_referred',
-        'exam_notes',
-        'policy_no',
-        'loading_premium',
-        'start_date',
-        'maturity_date',
-        'method_of_payment',
         'source_name'
     ];
 
@@ -62,24 +54,83 @@ class LifeProposal extends Model
         'admin_fee' => 'decimal:2',
         'total_premium' => 'decimal:2',
         'loading_premium' => 'decimal:2',
+
         'offer_date' => 'date',
-        'date' => 'date',
-        'date_sent' => 'date',
-        'date_completed' => 'date',
-        'date_referred' => 'date',
         'start_date' => 'date',
         'maturity_date' => 'date',
+
         'is_submitted' => 'boolean',
         'medical_examination_required' => 'boolean',
+
         'riders' => 'array',
-        'rider_premiums' => 'array'
+        'rider_premiums' => 'array',
     ];
+
+    /* ------------------------- */
+    /* Relationships */
+    /* ------------------------- */
+
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+  
+    public function insurer()
+    {
+        return $this->belongsTo(LookupValue::class, 'insurer_id');
+    }
+
+    public function policyPlan()
+    {
+        return $this->belongsTo(LookupValue::class, 'policy_plan_id');
+    }
+
+    public function frequency()
+    {
+        return $this->belongsTo(LookupValue::class, 'frequency_id');
+    }
+
+   public function agencies()
+    {
+        return $this->belongsTo(LookupValue::class, 'agency');
+    }
+
+    public function stage()
+    {
+        return $this->belongsTo(LookupValue::class, 'proposal_stage_id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(LookupValue::class, 'status_id');
+    }
+
+    public function sourceOfPayment()
+    {
+        return $this->belongsTo(LookupValue::class, 'source_of_payment_id');
+    }
+
+    public function medical()
+    {
+        return $this->hasOne(Medical::class);
+    }
+
+    public function followups()
+    {
+        return $this->hasOne(Followup::class);
+    }
+
+    /* ------------------------- */
+    /* Business Logic */
+    /* ------------------------- */
 
     public function hasExpired()
     {
         if (!$this->offer_date || $this->is_submitted) {
             return false;
         }
+
         return $this->offer_date < now()->startOfDay();
     }
 
@@ -88,33 +139,9 @@ class LifeProposal extends Model
         if (!$this->offer_date || $this->is_submitted || $this->hasExpired()) {
             return false;
         }
-        $today = now()->startOfDay();
-        $offerDate = \Carbon\Carbon::parse($this->offer_date)->startOfDay();
-        $daysUntilOffer = $today->diffInDays($offerDate, false);
-        return $daysUntilOffer >= 0 && $daysUntilOffer <= 7;
-    }
 
-    /**
-     * Get the contact that owns the life proposal.
-     */
-    public function contact()
-    {
-        return $this->belongsTo(Contact::class);
-    }
+        $days = now()->startOfDay()->diffInDays($this->offer_date, false);
 
-    /**
-     * Get the medical record for the life proposal.
-     */
-    public function medical()
-    {
-        return $this->hasOne(Medical::class);
-    }
-
-    /**
-     * Get the followups for the life proposal.
-     */
-    public function followups()
-    {
-        return $this->hasMany(Followup::class);
+        return $days >= 0 && $days <= 7;
     }
 }

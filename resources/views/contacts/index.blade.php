@@ -385,9 +385,9 @@
         <div id="followupsContentWrapper" style="display:none; background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
           <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ddd;">
             <h4 style="margin:0; font-size:12px; font-weight:600; color:#333;">Follow Ups</h4>
-            <button class="btn" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px;">Add Follow Up</button>
+            <!-- <button class="btn" style="background:#f3742a; color:#fff; border:none; padding:4px 12px; border-radius:2px; cursor:pointer; font-size:12px;">Add Follow Up</button> -->
           </div>
-          <div id="documentsContent" style="display:flex; gap:10px; flex-wrap:wrap; padding:10px;">
+          <div id="followupcontent" style="display:flex; gap:10px; flex-wrap:wrap; padding:10px;">
             <!-- Documents will be loaded via JavaScript -->
           </div>
         </div>
