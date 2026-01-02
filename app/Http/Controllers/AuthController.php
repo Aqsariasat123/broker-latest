@@ -137,8 +137,38 @@ class AuthController extends Controller
             'follow_ups_today' => Task::whereDate('due_date', $today)
                 ->where('task_status', '!=', 'Completed')
                 ->count(),
-            'proposals_pending' => LifeProposal::where('status', 'Pending')->count(),
-            'proposals_processing' => LifeProposal::where('status', 'Processing')->count(),
+          'proposals_pending' => LifeProposal::with([
+                'contact',
+                'insurer',
+                'policyPlan',
+                'frequency',
+                'agencies',
+                'stage',
+                'status',
+                'sourceOfPayment',
+                'medical',
+                'followups',
+            ])
+            ->whereHas('status', function($query) {
+                $query->where('name', 'Pending');
+            })
+            ->count(),
+   'proposals_processing' => LifeProposal::with([
+                'contact',
+                'insurer',
+                'policyPlan',
+                'frequency',
+                'agencies',
+                'stage',
+                'status',
+                'sourceOfPayment',
+                'medical',
+                'followups',
+            ])
+            ->whereHas('status', function($query) {
+                $query->where('name', 'Processing');
+            })
+            ->count(),
             'life_policies' => $this->countLifePolicies(),
             'birthdays_today' => Client::whereMonth('dob_dor', now()->month)
                 ->whereDay('dob_dor', now()->day)
