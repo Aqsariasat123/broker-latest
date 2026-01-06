@@ -27,21 +27,36 @@ class StatementController extends Controller
                 ->where('active', 1)
                 ->orderBy('seq')
                 ->get();    
-            $insurerFilter = $request->get('insurer');
+            // $insurerFilter = $request->get('soruces');
          
+            $incomeCategories = LookupValue::whereHas('lookupCategory', function($q){
+                        $q->where('name', 'Income Category');
+                    })->where('active', 1)->orderBy('seq')->get();
+
             // Build query
-             $statements = CommissionStatement::with([
+            $query = CommissionStatement::with([
                 'income',
-                'commissions',
-                'commissionNote.schedule.policy.insurer'
-            ])
-            ->when($insurerFilter, function($q) use ($insurerFilter, $insurers) {
+                'commissions.commissionNote.schedule.policy' => function($q) {
+                    $q->with(['insurer', 'policyClass']);
+                },
+            ]);
+
+            $insurerFilter = $request->get('insurer');
+            $pageType = $request->get('page');
+
+            if ($insurerFilter) {
                 $insurer = $insurers->firstWhere('name', $insurerFilter);
+
                 if ($insurer) {
-                    $q->whereHas('commissionNote.schedule.policy', fn($query) => $query->where('insurer_id', $insurer->id));
+                    $query->whereHas(
+                        'commissions.commissionNote.schedule.policy.insurer',
+                        fn ($q) => $q->where('insurer_id', $insurer->id)
+                    );
                 }
-            })
-            ->orderBy('created_at', 'desc')
+            }
+    
+
+           $statements= $query->orderBy('created_at', 'desc')
             ->paginate(10);
 
 
@@ -50,28 +65,26 @@ class StatementController extends Controller
             // Selected columns via TableConfigHelper
             $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('statements');
 
-            Log::info('Selected statements: ' . $soruces->toJson());
+            Log::info('Selected statements: ' . $statements->toJson());
 
             return view('statements.index', compact(
-                'statements', 'insurers', 'modesOfPayment', 'insurerFilter', 'selectedColumns','soruces'
+                'statements', 'insurers', 'modesOfPayment', 'insurerFilter', 'selectedColumns','soruces' ,'pageType' , 'incomeCategories'
             ));
         }
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'year' => 'nullable|string|max:10',
-            'insurer_id' => 'nullable|exists:lookup_values,id',
-            'business_category' => 'nullable|string|max:255',
-            'date_received' => 'nullable|date',
-            'amount_received' => 'nullable|numeric',
-            'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
+            'period_start' => 'required|date',
+            'period_end' => 'required|date',
+            'net_comission' => 'required|numeric',
+            'tax_withheld' => 'nullable|numeric',
             'remarks' => 'nullable|string|max:255',
         ]);
 
         // Generate unique Statement No
         $latest = CommissionStatement::orderBy('id', 'desc')->first();
-        $nextId = $latest ? (int)str_replace('ST', '', $latest->statement_no) + 1 : 1001;
-        $validated['statement_no'] = 'ST' . $nextId;
+        $nextId = $latest ? (int)str_replace('CST', '', $latest->com_stat_id) + 1 : 1001;
+        $validated['com_stat_id'] = 'CST' . $nextId;
 
         $statement = CommissionStatement::create($validated);
         if ($request->ajax()) {
@@ -87,25 +100,38 @@ class StatementController extends Controller
 
     public function show(Request $request, CommissionStatement $statement)
     {
-        if ($request->expectsJson()) {
-                 return response()->json($statement->load([
-            'income',
-            'commissions.modeOfPayment',
-            'commissionNote.schedule.policy.insurer'
-        ]));
-        }
+      $statement=  $statement->load([
+                'income',
+                'commissions.modeOfPayment',
+                'commissions.commissionNote.schedule.policy.insurer',
+                'commissions.commissionNote.schedule.policy.policyClass',
+     ]);
+                 Log::info('statement: ' . $statement->toJson());
+
+    if (request()->expectsJson()) {
+        return response()->json(
+           $statement
+        );
+    }
+
         return view('statements.show', compact('statement'));
     }
 
 public function edit(CommissionStatement $statement)
 {
+
+   $statement=  $statement->load([
+                'income',
+                'commissions.modeOfPayment',
+                'commissions.commissionNote.schedule.policy.insurer',
+                'commissions.commissionNote.schedule.policy.policyClass',
+     ]);
     if (request()->expectsJson()) {
-        return response()->json($statement->load([
-            'income',
-            'commissions.modeOfPayment',
-            'commissionNote.schedule.policy.insurer'
-        ]));
+        return response()->json(
+           $statement
+        );
     }
+            Log::info('Selected edit: ' . $statement->toJson());
 
     return view('statements.edit', compact('statement'));
 }
@@ -114,12 +140,10 @@ public function edit(CommissionStatement $statement)
     public function update(Request $request, CommissionStatement $statement)
     {
         $validated = $request->validate([
-            'year' => 'nullable|string|max:10',
-            'insurer_id' => 'nullable|exists:lookup_values,id',
-            'business_category' => 'nullable|string|max:255',
-            'date_received' => 'nullable|date',
-            'amount_received' => 'nullable|numeric',
-            'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
+            'period_start' => 'required|date',
+            'period_end' => 'required|date',
+            'net_comission' => 'required|numeric',
+            'tax_withheld' => 'nullable|numeric',
             'remarks' => 'nullable|string|max:255',
         ]);
 

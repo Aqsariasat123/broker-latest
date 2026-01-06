@@ -21,7 +21,7 @@ class IncomeController extends Controller
         $incomes = Income::with(['incomeSource', 'modeOfPayment', 'incomeCategory'])->orderBy('created_at', 'desc')->paginate(10);
       
             $comisionlist = CommissionStatement::with(
-                'commissions.commissionNote.schedule.policy.insurer'
+                'commissions'
             )->get();
         // Lookup values for selects - use Insurers instead of Income Source
         $incomeSources = LookupValue::whereHas('lookupCategory', function($q){

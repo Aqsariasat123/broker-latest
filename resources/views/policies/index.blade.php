@@ -32,7 +32,20 @@
       </ul>
     </div>
   @endif
-  
+    <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0; font-size:18px; font-weight:600;">
+              @if($filter == "expiring")
+                Policies  Expiring
+              @elseif($filter == "birthday_today")
+                Birthdays Today
+              @else
+                Policies
+              @endif
+              </h3>
+
+      </div>
+  </div>
   <!-- Main Policies Table View -->
   <div class="clients-table-view" id="clientsTableView">
   <div class="container-table">
@@ -40,20 +53,23 @@
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
-        <h3>Policies</h3>
         <div class="records-found">Records Found - {{ $policies->total() }}</div>
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
-        <div class="filter-group">
-            @if(request()->get('dfr') == 'true')
-              <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
-            @else
-              <button class="btn btn-follow-up" id="dfrOnlyBtn">Due For Renewal</button>
-            @endif
-        </div>
+             @if($filter != "expiring")
+                <div class="filter-group">
+                  @if(request()->get('dfr') == 'true')
+                    <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
+                  @else
+                    <button class="btn btn-follow-up" id="dfrOnlyBtn">Due For Renewal</button>
+                  @endif
+                </div>
+             @endif
         </div>
       </div>
       <div class="action-buttons">
+     @if($filter != "expiring")
         <button type="button" class="btn btn-add" id="addPolicyBtn">Add</button>
+      @endif
       </div>
     </div>
 
@@ -664,7 +680,15 @@
             </div>
             <div class="form-group">
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Value</label>
-              <input type="number" step="0.01" name="value" id="vehicle_value" class="form-control" style="padding:6px; font-size:12px;">
+              <input type="number" step="1" name="vehicle_value" id="vehicle_value" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+              <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Seats</label>
+              <input type="number" step="1" name="vehicle_seats" id="vehicle_seats" class="form-control" style="padding:6px; font-size:12px;">
+            </div>
+              <div class="form-group">
+              <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Color</label>
+              <input type="text"  name="vehicle_color" id="vehicle_color" class="form-control" style="padding:6px; font-size:12px;">
             </div>
             <div class="form-group">
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Usage</label>
@@ -850,8 +874,7 @@ window.appConfig = {
     lookupData: @json($lookupData ?? []),
     selectedColumns: @json($selectedColumns ?? []),
     mandatoryColumns: @json($mandatoryColumns ?? []),
-    // Add any other data you need
-    currentPolicyId: null,
+    currentPolicyId: @json($policyId ?? ''),
     currentPolicyData: null
 };
 </script>

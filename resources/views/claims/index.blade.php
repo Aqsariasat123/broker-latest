@@ -37,7 +37,7 @@
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
         <div class="records-found">Records Found - {{ $claims->total() }}</div>
-        <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+        <div style="display:flex; align-items:center; gap:15px;">
           <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
             <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;">
               <span style="font-size:13px;">Filter</span>

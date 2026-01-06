@@ -62,7 +62,11 @@
           @if(isset($policy) && $policy)
           <button class="btn btn-add" id="addVehicleBtn">Add</button>
           @endif
-        <a href="{{ $policy ? route('policies.show', $policy->id) : route('policies.index') }}" class="btn" style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">Back</a>
+          <a href="{{ route('policies.index', ['policy_id' => $policyId]) }}"
+            class="btn"
+            style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">
+              Back
+</a>
       </div>
     </div>
 
@@ -99,7 +103,7 @@
             <tr>
             <td class="bell-cell {{ $hasNoPolicy ? 'no-policy' : '' }}">
                 <div style="display:flex; align-items:center; justify-content:center;">
-                  <div class="status-indicator {{ $hasNoPolicy ? 'no-policy' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasNoPolicy ? '#555' : '#f3742a' }}; background-color:{{ $hasNoPolicy ? '#555' : 'transparent' }};"></div>
+                  <div class="status-indicator {{ $hasNoPolicy ? 'no-policy' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasNoPolicy ? '#777' : '#777' }}; background-color:{{ $hasNoPolicy ? '#888' : 'transparent' }};"></div>
                 </div>
               </td>
                <td class="action-cell">
@@ -142,6 +146,10 @@
                   <td data-column="to">{{ $vh->to ? \Carbon\Carbon::parse($vh->to)->format('d-M-y') : '-' }}</td>
                 @elseif($col == 'notes')
                   <td data-column="notes">{{ $vh->notes ?? '-' }}</td>
+                 @elseif($col == 'vehicle_seats')
+                  <td data-column="vehicle_seats">{{ $vh->vehicle_seats ?? '-' }}</td>
+                   @elseif($col == 'vehicle_color')
+                  <td data-column="vehicle_color">{{ $vh->vehicle_color ?? '-' }}</td>
                 @elseif($col == 'vehicle_id')
                   <td data-column="vehicle_id">{{ $vh->vehicle_id ?? '-' }}</td>
                 @endif
@@ -311,6 +319,14 @@
             </div>
           </div>
           <div class="form-row">
+             <div class="form-group">
+              <label for="vehicle_seats">Seats</label>
+              <input type="number" step="1"  class="form-control" name="vehicle_seats" id="vehicle_seats">
+            </div>
+             <div class="form-group">
+              <label for="vehicle_color">Color</label>
+              <input type="text" class="form-control" name="vehicle_color" id="vehicle_color">
+            </div>
             <div class="form-group" style="flex:1 1 100%;">
               <label for="notes">Notes</label>
               <textarea class="form-control" name="notes" id="notes" rows="2"></textarea>

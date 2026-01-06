@@ -95,7 +95,7 @@
     .nav-tab:hover { background:#444; }
     .nav-tab.active { background:#2d2d2d; border-bottom:3px solid #4CAF50; }
     .client-page-actions { display:flex; gap:8px; }
-    .client-page-body { padding-top:20px; background:#f5f5f5; min-height:calc(100vh - 60px); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+    .client-page-body {  background:#f5f5f5; min-height:calc(100vh - 60px); overflow-y:auto; -webkit-overflow-scrolling:touch; }
     .client-page-content { background:transparent; padding:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
     .detail-section { background:#fff; margin-bottom:0; border-radius:0; overflow:hidden; margin-right:10px; }
     .detail-section:last-child { margin-right:0; }

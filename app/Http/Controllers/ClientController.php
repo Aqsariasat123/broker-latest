@@ -16,6 +16,8 @@ class ClientController extends Controller
 {
     public function index(Request $request)
     {
+        $filter= null;
+
         $query = Client::query();
         
         // Filter for To Follow Up - show only clients with expired or expiring policies
@@ -34,11 +36,7 @@ class ClientController extends Controller
             });
         }
         
-        // Filter for IDs Expired
-        if ($request->has('filter') && $request->filter == 'ids_expired') {
-            $query->whereNotNull('dob_dor')
-                  ->whereDate('dob_dor', '<', now()->subYears(10));
-        }
+    
         
         // Filter for Instalments Overdue
         if ($request->has('filter') && $request->filter == 'overdue') {
@@ -47,13 +45,22 @@ class ClientController extends Controller
                   ->where('status', '!=', 'paid');
             });
         }
+         if ($request->has('filter') && $request->filter == 'ids_expired') {
+               $query->where('status','Expired');
+        }
         
         // Filter for Birthdays Today
         if ($request->has('filter') && $request->filter == 'birthday_today') {
             $query->whereMonth('dob_dor', now()->month)
                   ->whereDay('dob_dor', now()->day);
         }
-        
+
+
+        if($request->has('filter')){
+
+          $filter = $request->filter;
+
+        }
         // Use paginate instead of get
         $clients = $query->with(['policies','agencies','agents','districts','salutations','sources','occupations','income_sources','islands','countries'])->orderBy('created_at', 'desc')->paginate(10);
 
@@ -81,7 +88,7 @@ class ClientController extends Controller
         // Get lookup data for dropdowns
         $lookupData =  LookUpHelper::getLookupData();
         
-        return view('clients.index', compact('clients', 'lookupData'));
+        return view('clients.index', compact('clients', 'lookupData','filter'));
     }
 
     public function store(Request $request)

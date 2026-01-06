@@ -127,8 +127,7 @@ class AuthController extends Controller
             'instalments_overdue' => PaymentPlan::where('due_date', '<', $today)
                 ->where('status', '!=', 'paid')
                 ->count(),
-            'ids_expired' => Client::whereNotNull('dob_dor')
-                ->whereDate('dob_dor', '<', $today->copy()->subYears(10))
+            'ids_expired' => Client::where('status','Expired')
                 ->count(),
             'general_policies' => Policy::count(),
             'gen_com_outstanding' => PaymentPlan::where('status', '!=', 'paid')

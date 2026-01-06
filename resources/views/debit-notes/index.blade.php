@@ -15,7 +15,11 @@
       <div style="display:flex; justify-content:space-between; align-items:center;">
             <div class="page-title-section">
               <h3 style="margin:0; font-size:18px; font-weight:600;">
-                  Debit Notes
+                  @if($filter == 'overdue')
+                     Premium Overdue
+                  @else
+                    Debit Notes
+                  @endif
               </h3>
            </div>
       </div>
@@ -76,8 +80,12 @@
           @foreach($debitNotes as $note)
             <tr>
               <td class="action-cell">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openDebitNoteDetails({{ $note->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">  
-
+                <a href="{{ route('policies.index', ['policy_id' => $note->paymentPlan->schedule->policy->id ]) }}">
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" 
+                 width="22" height="22"  
+                style="cursor:pointer; vertical-align:middle;" alt="Expand">  
+             </a>
+<!---onclick="openDebitNoteDetails({{ $note->id }})"-->
                
               </td>
               @foreach($selectedColumns as $col)

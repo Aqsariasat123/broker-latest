@@ -24,11 +24,17 @@
   <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
           <h3 style="margin:0; font-size:18px; font-weight:600;">
-            Clients
+          @if($filter == "ids_expired")
+             Expired IDs
+          @elseif($filter == "birthday_today")
+             Birthdays Today
+          @else
+             Clients
             <span id="followUpLabel" style="display:{{ request()->get('follow_up') == 'true' && !request()->get('client_id') ? 'inline' : 'none' }}; color:#f3742a; font-size:16px; font-weight:500;"> - To Follow Up</span>
             <span class="client-name" id="clientPageName" style="color:#f3742a; font-size:16px; font-weight:500;"></span>
+          @endif
           </h3>
-       
+
       </div>
     </div>
    
@@ -40,22 +46,27 @@
       <div class="page-title-section">
         <div class="records-found">Records Found - {{ $clients->total() }}</div>
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
-          <div class="filter-group">
-            <label class="toggle-switch">
-              <input type="checkbox" id="filterToggle" {{ request()->get('follow_up') == 'true' ? 'checked' : '' }}>
-              <span class="toggle-slider"></span>
-            </label>
-            <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
-          </div>
-          @if(request()->get('follow_up') == 'true')
-            <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
-          @else
-            <button class="btn btn-follow-up" id="followUpBtn">To Follow Up</button>
+          @if($filter != "ids_expired" &&  $filter != "birthday_today"  )
+            <div class="filter-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="filterToggle" {{ request()->get('follow_up') == 'true' ? 'checked' : '' }}>
+                <span class="toggle-slider"></span>
+              </label>
+              <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
+            </div>
+            @if(request()->get('follow_up') == 'true')
+              <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
+            @else
+              <button class="btn btn-follow-up" id="followUpBtn">To Follow Up</button>
+            @endif
           @endif
         </div>
       </div>
       <div class="action-buttons">
-        <button class="btn btn-add" id="addClientBtn">Add</button>
+          @if($filter != "ids_expired"  &&  $filter != "birthday_today" )
+            <button class="btn btn-add" id="addClientBtn">Add</button>
+          @endif
+
           <button class="btn btn-close" onclick="window.history.back()">Close</button>
       </div>
     </div>
@@ -160,7 +171,7 @@
                   <td data-column="mobile_no">{{ $client->mobile_no }}</td>
                 @elseif($col == 'wa')
                   <td data-column="wa" class="checkbox-cell">
-                    <input type="checkbox" {{ $client->wa ? 'checked' : '' }} disabled>
+                    <input type="checkbox" {{( $client->wa=='1' ||  $client->wa==1 )? 'checked' : '' }} disabled>
                   </td>
                 @elseif($col == 'district')
                   <td data-column="district">{{ $client->districts?->name ?? '-' }}</td>
@@ -368,6 +379,8 @@
                     <option value="Inactive">Inactive</option>
                     <option value="Suspended">Suspended</option>
                     <option value="Pending">Pending</option>
+                     <option value="Pending">Expired</option>
+
                   @endif
                 </select>
               </div>
@@ -384,6 +397,8 @@
                     <option value="Inactive">Inactive</option>
                     <option value="Suspended">Suspended</option>
                     <option value="Pending">Pending</option>
+                    <option value="Pending">Expired</option>
+
                   @endif
                 </select>
               </div>

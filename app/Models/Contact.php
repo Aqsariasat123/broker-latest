@@ -128,6 +128,12 @@ class Contact extends Model
     {
         return $this->belongsTo(LookupValue::class, 'rank', 'id');
     }
+    public function statusRelation()
+    {
+        return $this->belongsTo(LookupValue::class, 'status', 'id');
+    }
+
+    
     /**
      * Assigned agency
      */

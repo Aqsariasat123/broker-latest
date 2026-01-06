@@ -32,11 +32,7 @@ class ClaimController extends Controller
         
         // Filter for pending claims (status is 'Processing' or empty)
         if ($request->has('pending') && ($request->pending == 'true' || $request->pending == '1')) {
-            $query->where(function($q) {
-                $q->where('status', 'Processing')
-                  ->orWhereNull('status')
-                  ->orWhere('status', '');
-            });
+            $query->where('status', 'Processing');
         }
         
         $claims = $query->with(['policy' => function($q) {

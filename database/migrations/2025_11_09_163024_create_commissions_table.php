@@ -19,7 +19,6 @@ class CreateCommissionsTable extends Migration
             $table->foreignId('payment_status_id')->nullable()->constrained('lookup_values')->nullOnDelete();
             $table->decimal('amount_received', 15, 2)->nullable();
             $table->date('date_received')->nullable();
-            $table->string('statement_no')->nullable();
             $table->foreignId('mode_of_payment_id')->nullable()->constrained('lookup_values')->nullOnDelete();
             $table->decimal('variance', 15, 2)->nullable();
             $table->string('variance_reason')->nullable();

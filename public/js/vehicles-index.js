@@ -9,6 +9,7 @@ let currentVehicleId = app.currentVehicleId || null;
 const selectedColumns = app.selectedColumns || [];
 const vehiclesStoreRoute = app.routes?.store || '/vehicles';
 const csrfToken = app.csrfToken || '';
+const MANDATORY_FIELDS = ['regn_no', 'make', 'model'];
 
 // Helper functions
 function formatDate(dateStr) {
@@ -282,5 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('printBtn')?.addEventListener('click', printTable);
 });
+document.getElementById('columnBtn2')?.addEventListener('click', () => openColumnModal());
 
 
+function openColumnModal() {
+  document.getElementById('tableResponsive').classList.add('no-scroll');
+  document.querySelectorAll('.column-checkbox').forEach(cb => {
+    cb.checked = MANDATORY_FIELDS.includes(cb.value) || selectedColumns.includes(cb.value);
+  });
+  document.body.style.overflow = 'hidden';
+  document.getElementById('columnModal').classList.add('show');
+  setTimeout(initDragAndDrop, 100);
+}

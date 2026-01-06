@@ -62,6 +62,9 @@ class VehicleController extends Controller
             'cc' => 'nullable|string|max:255',
             'engine_no' => 'nullable|string|max:255',
             'chassis_no' => 'nullable|string|max:255',
+            'vehicle_color' => 'nullable|string|max:255',
+            'vehicle_seats' => 'nullable|string|max:255',
+
             'from' => 'nullable|date',
             'to' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -124,6 +127,9 @@ class VehicleController extends Controller
             'cc' => 'nullable|string|max:255',
             'engine_no' => 'nullable|string|max:255',
             'chassis_no' => 'nullable|string|max:255',
+                'vehicle_color' => 'nullable|string|max:255',
+            'vehicle_seats' => 'nullable|string|max:255',
+
             'from' => 'nullable|date',
             'to' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -162,7 +168,9 @@ class VehicleController extends Controller
 
         $columns = [
             'Regn No', 'Make', 'Model', 'Type', 'Useage', 'Year', 'Value', 'Policy ID', 'Engine',
-            'Engine Type', 'CC', 'Engine No', 'Chassis No', 'From', 'To', 'Notes', 'VehicleID'
+            'Engine Type', 'CC', 'Engine No', 'Chassis No', 'From', 'To', 'Notes', 'VehicleID','Vehicle Color',
+            'Vehicle Seats'
+
         ];
 
         $callback = function() use ($vehicles, $columns) {
@@ -188,6 +196,8 @@ class VehicleController extends Controller
                     $vh->to,
                     $vh->notes,
                     $vh->vehicle_id,
+                    $vh->vehicle_seats,
+                    $vh->vehicle_color,
                 ]);
             }
             fclose($handle);

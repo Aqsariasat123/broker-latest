@@ -23,7 +23,13 @@
       <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden; margin-bottom:15px;">
         <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0; padding:15px 20px;">
           <div class="page-title-section">
-            <h3>Contacts{{ request()->has('follow_up') && request()->follow_up ? ' - To Follow Up' : '' }}</h3>
+                 <h3>
+                    @if($statusfilter == 'open')
+                        Open Leads
+                    @else 
+                  Contacts{{ request()->has('follow_up') && request()->follow_up ? ' - To Follow Up' : '' }}
+                    @endif
+            </h3>
           </div>
         </div>
       </div>
@@ -89,13 +95,13 @@
               </thead>
               <tbody>
                 @foreach($contacts as $contact)
-                  <tr class="{{ $contact->status === 'Archived' ? 'archived-row' : '' }}">
+                <tr class="{{ optional($contact->statusRelation)->name === 'Archived' ? 'archived-row' : '' }}">
                     <td class="bell-cell {{ $contact->hasExpired ? 'expired' : ($contact->hasExpiring ? 'expiring' : '') }}">
                       <div style="display:flex; align-items:center; justify-content:center;">
                         @php
                           $isExpired = $contact->hasExpired;
                           $isExpiring = $contact->hasExpiring;
-                          $hasFollowUp = $contact->next_follow_up && $contact->status !== 'Archived';
+                          $hasFollowUp = $contact->next_follow_up && optional($contact->statusRelation)->name !== 'Archived';
                           
                           // Determine color based on status
                           if ($isExpired) {
@@ -170,13 +176,13 @@
                         {{-- Status with color badge --}}
                         @case('status')
                             @php
-                                $statusColor = match($contact->status) {
+                                $statusColor = match(optional($contact->statusRelation)->name) {
                                     'Archived' => '#343a40',
                                     'Proposal Made' => '#28a745',
                                     'In Discussion' => '#ffc107',
                                     default => '#6c757d'
                                 };
-                                $value = "<span class='badge-status' style='background:{$statusColor}'>{$contact->status}</span>";
+                                $value = "<span class='badge-status' style='background:{$statusColor}'>{$contact->statusRelation->name}</span>";
                             @endphp
                             @break
 

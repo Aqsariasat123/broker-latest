@@ -96,7 +96,8 @@ class TableConfigHelper
                 'session_key' => 'vehicle_columns',
                 'default_columns' => [
                     'regn_no','make','model','type','useage','year','value','policy_id','engine',
-                    'engine_type','cc','engine_no','chassis_no','from','to','notes','vehicle_id'
+                    'engine_type','cc','engine_no','chassis_no','from','to','notes','vehicle_id',
+                    'vehicle_color','vehicle_seats'
                 ],
                 'mandatory_columns' => ['regn_no', 'make', 'model'],
                 'column_definitions' => [
@@ -117,6 +118,8 @@ class TableConfigHelper
                     'to' => 'To',
                     'notes' => 'Notes',
                     'vehicle_id' => 'Vehicle ID',
+                     'vehicle_color' => 'Vehicle Color',
+                    'vehicle_seats' => 'Vehicle Seats',
                 ],
             ],
             'nominees' => [

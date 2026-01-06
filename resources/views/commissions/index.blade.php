@@ -18,7 +18,18 @@
               @if($policy)
                 {{ $policy->policy_code }} - 
               @endif
-          Commissions
+                @php
+                      $hasPaidStatus = request()->filled('paid_status');
+                     $hasinsurer =  request()->filled('insurer');
+                  @endphp
+          Commissions   @if($hasPaidStatus)
+               - 
+             <span style="color:#f3742a;">Out Standing  </span>
+              @endif
+               @if($hasinsurer)
+               - 
+             <span style="color:#f3742a;">{{request()->get('insurer')}}  </span>
+              @endif
               </h3>
            </div>
       </div>
@@ -43,30 +54,39 @@
   <div class="filter-group" style="display:flex; align-items:center; gap:12px;">
 
     <!-- Custom Toggle Switch -->
-    <label class="switch">
-      <input type="checkbox" id="insurerFilterToggle" {{ request()->has('insurer') ? 'checked' : '' }}>
-      <span class="slider round"></span>
-    </label>
+   <label class="switch">
+    <input type="checkbox"
+           id="insurerFilterToggle"
+           {{ ( request()->filled('insurer') || request()->filled('paid_status') ) ? 'checked' : '' }}>
+    <span class="slider round"></span>
+        </label>
 
-    <span style="font-size:13px; font-weight:normal;">Filter</span>
+        <span style="font-size:13px; font-weight:normal;">Filter</span>
 
-    <!-- Show All Button (green when no filter) -->
-    @php $hasInsurer = request()->has('insurer'); @endphp
-    <button class="btn filter-btn {{ !$hasInsurer ? 'active-all' : '' }}" 
-            type="button" 
-            onclick="filterByInsurer()">
-      Show All
-    </button>
+        @php
+            $hasPaidStatus = request()->filled('paid_status');
+        @endphp
 
-    <!-- Insurer Buttons -->
-    @foreach(['SACOS', 'Alliance', 'Hsavy', 'MUA'] as $insurerBtn)
-      @php $isActive = request()->get('insurer') === $insurerBtn; @endphp
-      <button class="btn filter-btn {{ $isActive ? 'active-insurer' : '' }}" 
-              type="button"
-              onclick="filterByInsurer('{{ $insurerBtn }}')">
-        {{ $insurerBtn }}
-      </button>
-    @endforeach
+        <!-- Show Unpaid Button -->
+        <button class="btn filter-btn {{ $hasPaidStatus ? 'active-insurer' : '' }}"
+                type="button"
+                onclick="filterByPaidStatus('Unpaid')">
+            Show Unpaid
+        </button>
+
+        <!-- Insurer Buttons -->
+        @foreach($insurers as $insurerBtn)
+            @php
+                $isActive = request()->get('insurer') === $insurerBtn->name;
+            @endphp
+
+            <button class="btn filter-btn {{ $isActive ? 'active-insurer' : '' }}"
+                    type="button"
+                    onclick="filterByInsurer('{{ $insurerBtn->name }}')">
+                {{ $insurerBtn->name }}
+            </button>
+        @endforeach
+
 
 
   </div>
@@ -132,7 +152,7 @@ input:checked + .slider:before {
 
 /* Selected Insurer - Blue */
 .filter-btn.active-insurer {
-  background: #007bff !important;
+  background: #2e7d32 !important;
 }
 
 /* HOVER STATES - This is the fix! */
@@ -149,12 +169,16 @@ input:checked + .slider:before {
 
 /* Hover on selected insurer when active (blue → darker blue) */
 .filter-btn.active-insurer:hover {
-  background: #0056b3 !important; /* Darker blue */
+  background: #2e7d32 !important; /* Darker blue */
 }
 </style>
 </div>
       </div>
-      
+         @if(request()->filled('insurer')  && request()->filled('paid_status') )
+          <div class="action-buttons">
+            <button class="btn btn-add" id="addPreviewStatement">Preview Statement </button>
+          </div>
+      @endif
       @if($policy)
           <div class="action-buttons">
             <button class="btn btn-add" id="addCommissionBtn">Add</button>
@@ -175,6 +199,12 @@ input:checked + .slider:before {
       <table id="commissionsTable">
         <thead>
           <tr>
+            <th style="text-align:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
+                <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff"/>
+              </svg>
+            </th>
             <th>Action</th>
             @foreach($selectedColumns as $col)
               @if(isset($columnDefinitions[$col]))
@@ -185,10 +215,18 @@ input:checked + .slider:before {
         </thead>
         <tbody>
           @foreach($commissions as $com)
+              @php
+                $hasPaid = ($com->paymentStatus->name =="Paid")?true :false;
+              @endphp
             <tr>
+                <td class="bell-cell {{ $hasPaid ? 'no-policy' : '' }}">
+                <div style="display:flex; align-items:center; justify-content:center;">
+                  <div class="status-indicator {{ $hasPaid ? 'no-policy' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasPaid ? '#777' : '#777' }}; background-color:{{ $hasPaid ? '#fd0202ff' : 'transparent' }};"></div>
+                </div>
+              </td>
               <td class="action-cell">
               
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openCommissionDetails({{ $com->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openCommissionModal('edit',{{ $com->id }} )" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
               </td>
               @foreach($selectedColumns as $col)
@@ -227,7 +265,7 @@ input:checked + .slider:before {
                 @elseif($col == 'variance')
                   <td data-column="variance">{{ $com->variance ? number_format($com->variance, 2) : '-' }}</td>
                 @elseif($col == 'reason')
-                  <td data-column="reason">{{ $com->reason ?? '-' }}</td>
+                  <td data-column="reason">{{ $com->variance_reason ?? '-' }}</td>
                 @elseif($col == 'date_due')
                   <td data-column="date_due">{{ $com->date_due ? $com->date_due->format('d-M-y') : '-' }}</td>
                 @elseif($col == 'cnid')
@@ -330,20 +368,33 @@ input:checked + .slider:before {
         <div id="commissionFormMethod" style="display:none;"></div>
         <div class="modal-body">
           <div class="form-row">
-          <div class="form-group">
-              <label for="client_name">Com Note no</label>
-              <input type="text" class="form-control" name="com_note_no" id="com_note_no" readonly>
-            </div>
-            <div class="form-group">
+            
+                <div class="form-group">
 
-              <label for="policy_id">Policy Number</label>
-              <select class="form-control" name="policy_id" id="policy_id">
+              <label for="commission_note_id">Commision Note</label>
+              <select class="form-control" name="commission_note_id" id="commission_note_id">
                 <option value="">Select</option>
-                @foreach($policies as $policy)
-                  <option value="{{ $policy->id }}">{{ $policy->policy_code }}</option>
+                   @foreach($commissionNote as $note)
+                  <option value="{{ $note->id }}">
+                    {{ $note->com_note_id }}
+                  </option>
                 @endforeach
               </select>
             </div>
+             <div class="form-group">
+
+              <label for="commission_statement_id"> Statement</label>
+              <select class="form-control" name="commission_statement_id" id="commission_statement_id">
+                <option value="">Select</option>
+                   @foreach($commissionstatements as $cstatment)
+                  <option value="{{ $cstatment->id }}">
+                    {{ $cstatment->com_stat_id }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+            
+          
             <div class="form-group">
               <label for="basic_premium">Basic Premium</label>
               <input type="number" step="0.01" class="form-control" name="basic_premium" id="basic_premium">
@@ -379,7 +430,7 @@ input:checked + .slider:before {
           
           <div class="form-group">
               <label for="amount_received">Amount Recieved</label>
-              <input type="number" step="0.01" class="form-control" name="amount_received" id="amount_received">
+              <input type="number" step="1" class="form-control" name="amount_received" id="amount_received">
             </div>
             <div class="form-group">
               <label for="date_received">Date Recieved</label>
@@ -394,16 +445,20 @@ input:checked + .slider:before {
                 @endforeach
               </select>
             </div>
-            <div class="form-group">
-              <label for="statement_no">Statement No</label>
-              <input type="text" class="form-control" name="statement_no" id="statement_no">
+              
+            
+             <div class="form-row" >
+            <div class="form-group" style="flex:1 1 100%;">
+              <label for="variance" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Variance </label>
+              <input class="form-control" name="variance" id="variance"type="number" step="1" >
             </div>
-         
           </div>
+          </div>
+        
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
-              <label for="comission_notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Comission  Notes</label>
-              <textarea class="form-control" name="comission_notes" id="comission_notes" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+              <label for="variance_reason" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Variance  Notes</label>
+              <textarea class="form-control" name="variance_reason" id="variance_reason" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
             </div>
           </div>
         </div>
@@ -482,7 +537,8 @@ input:checked + .slider:before {
   const selectedColumns = @json($selectedColumns ?? []);
   const commissionsStoreRoute = '{{ route("commissions.store") }}';
   const commissionsIndexRoute = '{{ route("commissions.index") }}';
-  const commissionsUpdateRouteTemplate = '{{ route("commissions.update", ":id") }}';
+  const commissionsUpdateRouteTemplate =
+        "{{ route('commissions.update', ['commission' => '__ID__']) }}";
   const csrfToken = '{{ csrf_token() }}';
 </script>
 

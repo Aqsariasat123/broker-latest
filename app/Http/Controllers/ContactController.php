@@ -12,6 +12,8 @@ class ContactController extends Controller
 {
     public function index(Request $request)
     {
+
+        $statusfilter = null;
         $query = Contact::query();
         
         // Filter for Archived contacts
@@ -22,6 +24,7 @@ class ContactController extends Controller
         // Filter for Open leads
         if ($request->has('status') && $request->status == 'open') {
             $query->where('status', '!=', 'Archived');
+            $statusfilter = $request->status ;
         }
         
         // Filter for "To Follow Up" - contacts with next_follow_up in the past or within next 7 days
@@ -37,7 +40,7 @@ class ContactController extends Controller
         }
         
         // Use paginate instead of get
-        $contacts = $query->with(['contact_types', 'source_value', 'agent_user', 'agency_user'])->orderBy('created_at', 'desc')->paginate(10);
+        $contacts = $query->with(['contact_types', 'source_value', 'agent_user', 'agency_user','statusRelation'])->orderBy('created_at', 'desc')->paginate(10);
 
         // Calculate expiration status for each contact
         $contacts->getCollection()->transform(function ($contact) {
@@ -63,7 +66,7 @@ class ContactController extends Controller
 
         Log::info('Selected contacts: ', $contacts->toArray());
         
-        return view('contacts.index', compact('contacts', 'lookupData', 'allEmployers', 'allOccupations', 'users'));
+        return view('contacts.index', compact('contacts', 'lookupData', 'allEmployers', 'allOccupations', 'users','statusfilter'));
     }
 
     public function store(Request $request)

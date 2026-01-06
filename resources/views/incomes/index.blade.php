@@ -202,16 +202,15 @@
         <div class="modal-body" style="padding:20px;">
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1;">
-              <label for="income_source_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Income Source</label>
-              <select class="form-control" name="income_source_id" id="income_source_id" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-                <option value="">Select</option>
-                @foreach($comisionlist as $comision)
-                    @foreach($comision->commissions as $commission)
-                        <option value="{{ $commission->id }}">
-                          {{ $commission->commissionNote->schedule->policy->insurer->name }}
+              <label for="statement_no" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Select Statement</label>
+              <select class="form-control" name="statement_no" id="statement_no" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">Select Statement</option>
+                 @foreach($comisionlist as $comision)
+                    <option value="{{ $comision->id }}">
+                          {{ $comision->com_stat_id }}
                         </option>
-                    @endforeach
                 @endforeach
+               
               </select>
             </div>
             <div class="form-group" style="flex:1;">
@@ -235,6 +234,10 @@
                 @endif
               </select>
             </div>
+
+           
+
+            
             <div class="form-group" style="flex:1;">
               <label for="description" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Description</label>
               <input type="text" class="form-control" name="description" id="description" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
@@ -250,10 +253,18 @@
             </div>
           </div>
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-            <div class="form-group" style="flex:1;">
-              <label for="statement_no" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Statement No.</label>
-              <input type="text" class="form-control" name="statement_no" id="statement_no" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+             <div class="form-group" style="flex:1;">
+              <label for="income_source_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Income Source</label>
+              <select class="form-control" name="income_source_id" id="income_source_id" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">Select Source</option>
+                @if(isset($incomeSources))
+                  @foreach($incomeSources as $cat)
+                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                  @endforeach
+                @endif
+              </select>
             </div>
+            
           </div>
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">

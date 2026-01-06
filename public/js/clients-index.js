@@ -1360,7 +1360,7 @@ function populateClientDetailsModal(client) {
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">District</span>
-            <div class="detail-value">${client.districts.name || '-'}</div>
+            <div class="detail-value">${client.districts?.name || '-'}</div>
           </div>
             <div class="detail-row" ${hideForBusiness}>
               <span class="detail-label">Address</span>
@@ -1368,11 +1368,11 @@ function populateClientDetailsModal(client) {
           </div>
             <div class="detail-row" ${hideForBusiness}>
               <span class="detail-label">Island</span>
-            <div class="detail-value">${client.islands.name || '-'}</div>
+            <div class="detail-value">${client.islands?.name || '-'}</div>
           </div>
             <div class="detail-row" ${hideForBusiness}>
             <span class="detail-label">Country</span>
-            <div class="detail-value">${client.countries.name || '-'}</div>
+            <div class="detail-value">${client.countries?.name || '-'}</div>
           </div>
             <div class="detail-row" ${hideForBusiness}>
             <span class="detail-label">P.O. Box No</span>
@@ -1439,7 +1439,7 @@ function populateClientDetailsModal(client) {
           <div class="detail-section-body">
             <div style="display:flex; gap:10px; align-items:flex-start;">
               <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                <div class="detail-row" style="margin-bottom:0;"><span class="detail-label">Salutation</span><div class="detail-value">${client.salutations.name || '-'}</div></div>
+                <div class="detail-row" style="margin-bottom:0;"><span class="detail-label">Salutation</span><div class="detail-value">${client.salutations?.name || '-'}</div></div>
                 <div class="detail-row" style="margin-bottom:0;"><span class="detail-label">First Name</span><div class="detail-value">${client.first_name || '-'}</div></div>
                 <div class="detail-row" style="margin-bottom:0;"><span class="detail-label">Other Names</span><div class="detail-value">${client.other_names || '-'}</div></div>
                 <div class="detail-row" style="margin-bottom:0;"><span class="detail-label">Surname</span><div class="detail-value">${client.surname || '-'}</div></div>
@@ -1458,8 +1458,8 @@ function populateClientDetailsModal(client) {
         <div class="detail-section">
           <div class="detail-section-header">INDIVIDUAL INCOME DETAILS</div>
           <div class="detail-section-body">
-            <div class="detail-row"><span class="detail-label">Occupation</span><div class="detail-value">${client.occupations.name || '-'}</div></div>
-            <div class="detail-row"><span class="detail-label">Income Source</span><div class="detail-value">${client.income_sources.name || '-'}</div></div>
+            <div class="detail-row"><span class="detail-label">Occupation</span><div class="detail-value">${client.occupations?.name || '-'}</div></div>
+            <div class="detail-row"><span class="detail-label">Income Source</span><div class="detail-value">${client.income_sources?.name || '-'}</div></div>
             <div class="detail-row"><span class="detail-label">Employer</span><div class="detail-value">${client.employer || '-'}</div></div>
             <div class="detail-row"><span class="detail-label">Monthly Income</span><div class="detail-value">${client.monthly_income || '-'}</div></div>
           </div>
@@ -1560,7 +1560,7 @@ function populateClientEditForm(client, formContainer) {
     ).join('');
   };
   const clientTypes = lookupData?.client_types || ['Individual', 'Business', 'Company', 'Organization'];
-  const clientStatuses = lookupData?.client_statuses || ['Active', 'Inactive', 'Suspended', 'Pending'];
+  const clientStatuses = lookupData?.client_statuses || ['Active', 'Inactive', 'Suspended', 'Pending', 'Expired'];
   const districts = lookupData?.districts || [];
   const islands = lookupData?.islands || [];
   const countries = lookupData?.countries || [];

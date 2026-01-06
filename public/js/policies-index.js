@@ -1892,6 +1892,12 @@ function handleRenewalDocumentUpload() {
 
 // Handle renewal form submission
 document.addEventListener('DOMContentLoaded', function () {
+
+  if(window.appConfig.currentPolicyId!=''){
+    currentPolicyId = window.appConfig.currentPolicyId;
+    openPolicyDetails(currentPolicyId);
+
+  }
   const renewalForm = document.getElementById('renewalScheduleForm');
   if (renewalForm) {
     renewalForm.addEventListener('submit', async function (e) {

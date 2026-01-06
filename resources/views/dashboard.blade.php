@@ -44,7 +44,7 @@
     </a>
 
     <!-- Instalments Overdue -->
-    <a href="{{ route('payment-plans.index') }}?filter=overdue" class="card-link">
+    <a href="{{ route('debit-notes.index') }}?filter=overdue" class="card-link">
       <div class="card icon-pink">
         <span class="icon">💰</span>
         <span class="value">{{ $stats['instalments_overdue'] ?? 0 }}</span>

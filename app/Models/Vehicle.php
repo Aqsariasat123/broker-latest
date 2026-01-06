@@ -12,7 +12,7 @@ class Vehicle extends Model
 
     protected $fillable = [
         'vehicle_id', 'regn_no', 'make', 'model', 'type', 'useage', 'year', 'value', 'policy_id',
-        'engine', 'engine_type', 'cc', 'engine_no', 'chassis_no', 'from', 'to', 'notes'
+        'engine', 'engine_type', 'cc', 'engine_no', 'chassis_no', 'from', 'to', 'notes','vehicle_seats','vehicle_color'
     ];
 
     protected $dates = ['from', 'to'];

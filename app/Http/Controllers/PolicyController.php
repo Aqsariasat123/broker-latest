@@ -28,6 +28,10 @@ class PolicyController extends Controller
 {
     public function index(Request $request)
     {
+
+
+        $filter = null;
+
         $query = Policy::query();
         
         // Filter by client_id if provided
@@ -55,6 +59,8 @@ class PolicyController extends Controller
                 $query->whereDate('end_date', '>=', $today)
                       ->whereDate('end_date', '<=', $thirtyDaysFromNow);
             }
+
+            $filter = $request->filter ;
         }
         // Filter for Due for Renewal
         if ($request->has('dfr') && $request->dfr == 'true') {
@@ -153,6 +159,12 @@ class PolicyController extends Controller
         $perPage = $request->get('record_lines', 10);
         $perPage = max(1, min(100, (int)$perPage)); // Limit between 1 and 100
 
+        $policyId = null;
+
+        if ($request->has('policy_id') && $request->policy_id) {
+          $policyId=  $request->policy_id;
+        }
+        
         $policies = $query->with([
                 'client',
                 'insurer',
@@ -182,7 +194,7 @@ class PolicyController extends Controller
             $client = Client::find($request->client_id);
         }
         
-        return view('policies.index', compact('policies', 'lookupData', 'lifeProposal', 'client'));
+        return view('policies.index', compact('policies', 'lookupData', 'lifeProposal', 'client','policyId','filter'));
     }
 
     public function create(Request $request)

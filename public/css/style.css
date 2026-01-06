@@ -177,7 +177,11 @@ body {
 
 /* add small space at end of dashboard content */
 .dashboard {
-  padding: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+
   height: 100vh;
   overflow: hidden;
   /* display: flex; */

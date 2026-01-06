@@ -9,7 +9,193 @@
   $columnDefinitions = $config['column_definitions'] ?? [];
   $mandatoryColumns = $config['mandatory_columns'] ?? [];
 @endphp
+<style>
+  .statement-container {
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+  }
 
+  .statement-header {
+    color: #000;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .header-buttons button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .btn-edit { background: #ff6200; color: white; }
+  .btn-close { background: #e0e0e0; color: #333; }
+
+  .summary-title {
+    background: #000;
+    color: white;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .summary-bar {
+    color: #000;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .summary-label {
+    font-weight: normal;
+  }
+
+  .summary-input {
+    background: white;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 120px;
+  }
+
+  .summary-value {
+      color: #333;
+    padding: 6px 0;
+    font-size: 14px;
+    min-width: 100px;
+  }
+
+  .details-title {
+    background: white;
+    color: #000;
+    padding: 15px 20px 10px;
+    font-weight: bold;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .details-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+
+  .details-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .details-table tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+
+  .variance-reason-cell {
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: bold;
+    border: 2px solid #4caf50;
+  }
+  /* HOVER STATES - This is the fix! */
+
+</style>
+<style>
+/* Custom Toggle Switch - Green when ON */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  margin-right: 8px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Filter Buttons Base Style */
+.filter-btn {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: normal;
+  transition: background-color 0.2s ease;
+}
+
+/* Show All Active - Green */
+.filter-btn.active-all {
+  background: #28a745 !important;
+}
+
+/* Selected Insurer - Blue */
+.filter-btn.active-insurer {
+  background: #2e7d32 !important;
+}
+
+/* HOVER STATES - This is the fix! */
+
+/* Hover on inactive buttons (black → dark gray) */
+.filter-btn:hover:not(.active-all):not(.active-insurer) {
+  background: #333;
+}
+
+
+/* Hover on selected insurer when active (blue → darker blue) */
+.filter-btn.active-insurer:hover {
+  background: #2e7d32 !important; /* Darker blue */
+}
+</style>
 <div class="dashboard">
   <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; padding:15px 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -33,10 +219,24 @@
         
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
           <div class="filter-group">
-            @foreach($soruces as $insurerBtn)
-              <button class="btn btn-column" onclick="filterByInsurer('{{ $insurerBtn->name }}')" style="margin-left:5px;{{ isset($insurerFilter) && $insurerFilter==$insurerBtn->name ? 'background:#007bff;color:#fff;' : '' }}">{{ $insurerBtn->name }}</button>
+             <label class="switch">
+          <input type="checkbox"
+                id="insurerFilterToggle"
+                {{ ( request()->filled('insurer') ) ? 'checked' : '' }}>
+          <span class="slider round"></span>
+              </label>
+
+        <span style="font-size:13px; font-weight:normal;">Filter</span>
+
+            @foreach($insurers as $soruceBtn)
+                  @php $isActive = request()->get('insurer') ===  $soruceBtn->name; @endphp
+
+              <button class="btn filter-btn {{ $isActive ? 'active-insurer' : '' }}" 
+               onclick="filterByInsurer('{{ $soruceBtn->name }}')"  >
+              {{ $soruceBtn->name }}  
+            </button>
             @endforeach
-            <button class="btn btn-back" onclick="window.location.href='{{ route('statements.index') }}'">All</button>
+      
           </div>
         </div>
       </div>
@@ -45,6 +245,12 @@
         <button class="btn btn-add" id="addStatementBtn">Add</button>
       </div>
       @endif
+  @if(isset($pageType) && $pageType =='commission')
+      <div class="action-buttons">
+        <button class="btn btn-add" id="addStatementBtn">Add</button>
+      </div>
+      @endif
+      
         <div class="action-buttons">
               <button class="btn btn-close" onclick="window.history.back()">Close</button>
             </div>
@@ -83,24 +289,31 @@
                       {{ $st->com_stat_id  }}
                   </td>
                 @elseif($col == 'year')
-                  <td data-column="year">{{ $st->year ?? '-' }}</td>
+                @php $commission = $st->commissions->first(); @endphp
+
+                  <td data-column="year">{{ $commission?->date_received ? \Carbon\Carbon::parse($commission->date_received)->format('Y') : '-' }}</td>
                 @elseif($col == 'insurer')
-                    <td data-column="insurer">
-                      {{ $st->commissionNote && $st->commissionNote->schedule && $st->commissionNote->schedule->policy && $st->commissionNote->schedule->policy->insurer
-                            ? $st->commissionNote->schedule->policy->insurer->name
-                            : '-' }}
-                    </td>
+                @php
+    $commission = $st->commissions->first();
+    $insurerName = $commission?->commissionNote?->schedule?->policy?->insurer?->name ?? '-';
+@endphp
+                   <td data-column="insurer">
+    {{ $insurerName }}
+</td>
                 @elseif($col == 'business_category')
-                  <td data-column="business_category">{{ $st->business_category ?? '-' }}</td>
+                @php
+                  $commission = $st->commissions->first();
+    $businessCategory = $commission?->commissionNote?->schedule?->policy?->policyClass?->name
+                @endphp
+                  <td data-column="business_category">{{ $businessCategory ?? '-' }}</td>
                 @elseif($col == 'date_received')
                   <td data-column="date_received">
                     {{ optional($st->commissions->first())->date_received ? \Carbon\Carbon::parse($st->commissions->first()->date_received)->format('d-M-y') : '-' }}
                 </td>
                 @elseif($col == 'amount_received')
                     <td data-column="amount_received">
-                        {{ $st->commissions->first()->amount_received 
-                            ? number_format($st->commissions->first()->amount_received, 2) 
-                            : '-' }}
+                           {{ number_format(optional($st->commissions->first())->amount_received ?? 0, 2) ?: '-' }}
+
                     </td>
 
                 @elseif($col == 'mode_of_payment')
@@ -208,43 +421,25 @@
         @csrf
         <div id="statementFormMethod" style="display:none;"></div>
         <div class="modal-body">
+      
           <div class="form-row">
             <div class="form-group">
-              <label for="year">Year</label>
-              <input type="text" class="form-control" name="year" id="year">
+              <label for="period_start">Period Start</label>
+              <input type="date" class="form-control" name="period_start" id="period_start">
             </div>
             <div class="form-group">
-              <label for="insurer_id">Insurer</label>
-              <select class="form-control" name="insurer_id" id="insurer_id">
-                <option value="">Select</option>
-                @foreach($insurers as $ins)
-                  <option value="{{ $ins->id }}">{{ $ins->name }}</option>
-                @endforeach
-              </select>
+              <label for="period_end">Period End</label>
+              <input type="date" class="form-control" name="period_end" id="period_end">
             </div>
-            <div class="form-group">
-              <label for="business_category">Business Category</label>
-              <input type="text" class="form-control" name="business_category" id="business_category">
+              <div class="form-group">
+              <label for="net_comission">Net  Comission</label>
+              <input type="number" class="form-control" name="net_comission" id="net_comission">
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="date_received">Date Received</label>
-              <input type="date" class="form-control" name="date_received" id="date_received">
+              <div class="form-group">
+              <label for="tax_withheld">Tax withheld</label>
+              <input type="number" class="form-control" name="tax_withheld" id="tax_withheld">
             </div>
-            <div class="form-group">
-              <label for="amount_received">Amount Received</label>
-              <input type="number" step="0.01" class="form-control" name="amount_received" id="amount_received">
-            </div>
-            <div class="form-group">
-              <label for="mode_of_payment_id">Mode Of Payment (Life)</label>
-              <select class="form-control" name="mode_of_payment_id" id="mode_of_payment_id">
-                <option value="">Select</option>
-                @foreach($modesOfPayment as $mode)
-                  <option value="{{ $mode->id }}">{{ $mode->name }}</option>
-                @endforeach
-              </select>
-            </div>
+         
           </div>
           <div class="form-row">
             <div class="form-group" style="flex:1 1 100%;">
@@ -313,113 +508,6 @@
   </div>
 
 </div>
-<style>
-  .statement-container {
-    font-family: Arial, Helvetica, sans-serif;
-    overflow: hidden;
-  }
-
-  .statement-header {
-    color: #000;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-  }
-
-  .header-buttons button {
-    padding: 8px 18px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-left: 8px;
-  }
-
-  .btn-edit { background: #ff6200; color: white; }
-  .btn-close { background: #e0e0e0; color: #333; }
-
-  .summary-title {
-    background: #000;
-    color: white;
-    padding: 10px 20px;
-    font-weight: bold;
-    font-size: 16px;
-  }
-
-  .summary-bar {
-    color: #000;
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .summary-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-  }
-
-  .summary-label {
-    font-weight: normal;
-  }
-
-  .summary-input {
-    background: white;
-    color: #333;
-    border: 1px solid #ccc;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    min-width: 120px;
-  }
-
-  .summary-value {
-      color: #333;
-    padding: 6px 0;
-    font-size: 14px;
-    min-width: 100px;
-  }
-
-  .details-title {
-    background: white;
-    color: #000;
-    padding: 15px 20px 10px;
-    font-weight: bold;
-    font-size: 18px;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .details-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-
-  .details-table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .details-table tr:nth-child(even) {
-    background: #f9f9f9;
-  }
-
-  .variance-reason-cell {
-    background: #e8f5e9;
-    color: #2e7d32;
-    font-weight: bold;
-    border: 2px solid #4caf50;
-  }
-</style>
 
 
 <script>

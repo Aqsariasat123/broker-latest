@@ -27,8 +27,12 @@ class UserController extends Controller
         }
 
         // Filter by role
-        if ($request->has('role') && $request->role) {
-            $query->where('role', $request->role);
+       if ($request->filled('role')) {
+            $roleId = Role::where('name', $request->role)->value('id');
+
+            if ($roleId) {
+                $query->where('role_id', $roleId);
+            }
         }
 
         // Filter by status

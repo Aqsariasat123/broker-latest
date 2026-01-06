@@ -13,13 +13,22 @@ class DebitNoteController extends Controller
 {
     public function index(Request $request)
     {
+        $filter = null;
+
         $query = DebitNote::with(['paymentPlan.schedule.policy.client']);
 
         // Filter by status
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
+        if ($request->has('filter')) {
+            if ($request->filter == 'overdue') {
+               $query->where('status', $request->filter);
 
+            }
+
+            $filter = $request->filter ;
+        }
         // Filter by payment plan
         if ($request->has('payment_plan_id') && $request->payment_plan_id) {
             $query->where('payment_plan_id', $request->payment_plan_id);
@@ -53,7 +62,7 @@ class DebitNoteController extends Controller
         $config = \App\Helpers\TableConfigHelper::getConfig('debit-notes');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('debit-notes');
 
-        return view('debit-notes.index', compact('debitNotes', 'paymentPlans', 'selectedColumns'));
+        return view('debit-notes.index', compact('debitNotes', 'paymentPlans', 'selectedColumns','filter'));
     }
 
     public function create(Request $request)

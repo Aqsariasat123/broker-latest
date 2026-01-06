@@ -29,6 +29,9 @@ class CreateVehiclesTable extends Migration
             $table->string('slta_certificate_path')->nullable();
             $table->string('proof_of_purchase_path')->nullable();
             $table->string('value_certificate_path')->nullable();
+             $table->string('vehicle_seats')->nullable();
+            $table->string('vehicle_color')->nullable();
+
             $table->text('notes')->nullable();
             $table->timestamps();
         });

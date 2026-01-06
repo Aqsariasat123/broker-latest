@@ -174,12 +174,22 @@ async function openStatementDetails(id) {
 //     </div>
 //   `;
 // }
+function closeStatementModal() {
+  document.getElementById('statementModal').classList.remove('show');
+  currentVehicleId = null;
+}
 function populateStatementDetails(statement) {
   console.log('Statement details:', statement); // For debugging
   const el = document.getElementById('statementDetailsContent');
 
   // Get first commission (if exists)
-  const firstCommission = statement.commissions.length > 0 ? statement.commissions[0] : null;
+const firstCommission = statement.commissions?.[0] ?? null;
+
+const insurerName =
+  firstCommission?.commission_note?.schedule?.policy?.insurer?.name ?? '-';
+
+const policyClass =
+  firstCommission?.commission_note?.schedule?.policy?.policy_class?.name ?? '-';
 
   el.innerHTML = `
     <div class="statement-container">
@@ -190,7 +200,7 @@ function populateStatementDetails(statement) {
       <div class="summary-bar">
         <div class="summary-item">
           <span class="summary-label">Insurer</span>
-          <input type="text" class="summary-input" value="${statement.commission_note.schedule.policy.insurer.name}" readonly>
+          <input type="text" class="summary-input" value="${insurerName}" readonly>
         </div>
 
         <div class="summary-item">
@@ -225,7 +235,7 @@ function populateStatementDetails(statement) {
 
         <div class="summary-item">
           <span class="summary-label">Chq No</span>
-          <input type="text" class="summary-input" value="${firstCommission ? firstCommission.statement_no : '-'}" readonly>
+          <input type="text" class="summary-input" value="${firstCommission ? firstCommission.commission_code : '-'}" readonly>
         </div>
       </div>
 
@@ -252,9 +262,9 @@ function populateStatementDetails(statement) {
       .map(
         (c) => `
             <tr>
-              <td>${statement.commission_note.com_note_id}</td>
-              <td>${statement.commission_note.schedule.policy.policy_no}</td>
-              <td>${statement.commission_note.schedule.policy.insured_item || '-'}</td>
+              <td>${statement.commission_note?.com_note_id ?? '--' }</td>
+              <td>${statement?.commission_note?.schedule?.policy?.policy_no ?? '---'}</td>
+              <td>${statement.commission_note?.schedule?.policy?.insured_item || '-'}</td>
               <td>${Number(c.basic_premium).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${c.rate}%</td>
               <td>${Number(c.amount_due).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -287,45 +297,61 @@ async function openEditStatement(id) {
 }
 
 function openStatementForm(mode, s = null) {
-  currentStatementId = s?.id || null;
+    currentStatementId = s?.id || null;
 
-  document.getElementById('statementPageTitle').textContent =
-    mode === 'add' ? 'Add Statement' : 'Edit Statement';
+    const modal = document.getElementById('statementModal');
+    const form = document.getElementById('statementForm');
+    const method = document.getElementById('statementFormMethod');
 
-  document.getElementById('statementPageName').textContent =
-    s?.statement_no || '';
+    document.getElementById('statementModalTitle').textContent =
+        mode === 'add' ? 'Add Statement' : 'Edit Statement';
 
-  // Clone modal form body
-  const modalBody = document.querySelector('#statementModal .modal-body');
-  const target = document.querySelector('#statementPageForm > div[style*="padding"]');
-  target.innerHTML = modalBody.innerHTML;
+    method.innerHTML = '';
 
-  const form = document.getElementById('statementPageForm');
-  const method = document.getElementById('statementPageFormMethod');
-  method.innerHTML = '';
+    if (mode === 'edit' && s) {
+        form.action = `/statements/${currentStatementId}`;
+        method.innerHTML = `<input type="hidden" name="_method" value="PUT">`;
+        document.getElementById('statementDeleteBtn').style.display = 'inline-block';
 
-  if (mode === 'edit') {
-    form.action = `/statements/${currentStatementId}`;
-    method.innerHTML = `<input type="hidden" name="_method" value="PUT">`;
-    document.getElementById('statementDeleteBtn').style.display = 'inline-block';
+        [
+            'year',
+            'insurer_id',
+            'business_category',
+            'date_received',
+            'amount_received',
+            'mode_of_payment_id',
+            'remarks'
+        ].forEach(f => {
+            const el = document.getElementById(f);
+            if (el) el.value = s[f] ?? '';
+        });
 
-    ['year', 'insurer_id', 'business_category', 'date_received', 'amount_received', 'mode_of_payment_id', 'remarks']
-      .forEach(f => {
-        const el = form.querySelector(`#${f}`);
-        if (el) el.value = s[f] ?? '';
-      });
+    } else {
+        form.reset();
+        form.action = statementsStoreRoute;
+        document.getElementById('statementDeleteBtn').style.display = 'none';
+         const insurerFromUrl = getInsurerFromUrl();
+    if (insurerFromUrl) {
+        const insurerSelect = document.getElementById('insurer_id');
 
-  } else {
-    form.action = statementsStoreRoute;
-    document.getElementById('statementDeleteBtn').style.display = 'none';
-    form.reset();
-  }
+        if (insurerSelect) {
+            [...insurerSelect.options].forEach(option => {
+                if (option.text.trim().toLowerCase() === insurerFromUrl.toLowerCase()) {
+                    option.selected = true;
+                }
+            });
+        }
+    }
+    }
 
-  showPageView();
-  document.getElementById('statementDetailsPageContent').style.display = 'none';
-  document.getElementById('statementFormPageContent').style.display = 'block';
+    // ✅ SHOW MODAL
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
 }
-
+function getInsurerFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('insurer')?.trim() || null;
+}
 /* ============================================================
    CLOSE PAGE
 ============================================================ */
@@ -350,6 +376,40 @@ function deleteStatement() {
   f.submit();
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('insurerFilterToggle');
+    if (!toggle) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const currentInsurer = params.get('insurer');
+
+    const hasFilter = !!currentInsurer;
+
+    // Sync toggle
+    toggle.checked = hasFilter;
+
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active-all', 'active-insurer');
+
+        const btnText = btn.textContent.trim();
+
+         if (btnText === currentInsurer) {
+            btn.classList.add('active-insurer');
+        }
+    });
+    toggle.addEventListener('change', function () {
+        if (!this.checked) {
+            // Clear all query params
+            const url = new URL(window.location.href);
+            url.search = '';
+
+            // Reload page with clean URL
+            window.location.href = url.toString();
+        }
+    });
+});
+
 /* ============================================================
    EVENTS
 ============================================================ */
@@ -358,12 +418,12 @@ document.getElementById('addStatementBtn')
 
 // document.getElementById('editStatementFromPageBtn')
 //   ?.addEventListener('click', () => currentStatementId && openEditStatement(currentStatementId));
-function filterByInsurer(insurer = null) {
+function filterByInsurer(insurers = null) {
 
   const url = new URL(window.location);
 
-  if (insurer) {
-    url.searchParams.set('insurer', insurer);
+  if (insurers) {
+    url.searchParams.set('insurer', insurers);
   } else {
     url.searchParams.delete('insurer');
   }

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 use App\Models\Policy;
+use App\Models\DebitNote;
 
 use App\Models\Commission;
 use App\Models\LookupValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\CommissionNote;
+use App\Models\CommissionStatement;
 
 class CommissionController extends Controller
 {
@@ -14,6 +17,8 @@ class CommissionController extends Controller
     {
         $policy = null;
         $policyId = $request->get('policy_id');
+        $commissionNote = CommissionNote::with('schedule')->orderBy('created_at', 'desc')->get();
+        $commissionstatements = CommissionStatement::orderBy('created_at', 'desc')->get();
 
         // Lookup values
         $insurers = LookupValue::whereHas('lookupCategory', fn ($q) =>
@@ -60,6 +65,20 @@ class CommissionController extends Controller
                     );
                 }
             }
+
+            $statusFilter = $request->get('paid_status');
+            if ($statusFilter) {
+                $paymentStatusess = $paymentStatuses->firstWhere('name', $statusFilter);
+
+                if ($paymentStatusess) {
+                    $query->where('payment_status_id', $paymentStatusess->id);
+                    
+               } else {
+                    // 🔒 Force empty result if status does not exist
+                    $query->whereRaw('1 = 0');
+                }
+            }
+
     
         $commissions = $query
             ->orderByDesc('created_at')
@@ -79,6 +98,8 @@ class CommissionController extends Controller
                 'modesOfPayment',
                 'insurerFilter',
                 'selectedColumns',
+                'commissionNote',
+                'commissionstatements'
                 
             )
         );
@@ -88,27 +109,28 @@ class CommissionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'policy_number' => 'nullable|string|max:255',
-            'client_name' => 'nullable|string|max:255',
+             'commission_note_id'=> 'required|exists:commission_notes,id',
+             'commission_statement_id'=> 'required|exists:commission_statements,id',
             'insurer_id' => 'nullable|exists:lookup_values,id',
             'grouping' => 'nullable|string|max:255',
             'basic_premium' => 'nullable|numeric',
             'rate' => 'nullable|numeric',
             'amount_due' => 'nullable|numeric',
             'payment_status_id' => 'nullable|exists:lookup_values,id',
-            'amount_rcvd' => 'nullable|numeric',
-            'date_rcvd' => 'nullable|date',
-            'state_no' => 'nullable|string|max:255',
+            'amount_received' => 'nullable|numeric',
+            'date_received' => 'nullable|date',
+            'statement_no' => 'nullable|string|max:255',
             'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
             'variance' => 'nullable|numeric',
-            'reason' => 'nullable|string|max:255',
+            'variance_reason' => 'nullable|string|max:255',
             'date_due' => 'nullable|date',
         ]);
 
-        // Generate unique CNID
+        // // Generate unique CNID
         $latest = Commission::orderBy('id', 'desc')->first();
-        $nextId = $latest ? (int)str_replace('CN', '', $latest->cnid) + 1 : 1001;
-        $validated['cnid'] = 'CN' . $nextId;
+        $nextId = $latest ? (int)str_replace('CN', '', $latest->commission_code) + 1 : 1001;
+        $validated['commission_code'] = 'CN' . $nextId;
+        $validated['grouping'] = 'Commision note and statement';
 
         $commission = Commission::create($validated);
 
@@ -153,8 +175,8 @@ class CommissionController extends Controller
     public function update(Request $request, Commission $commission)
     {
         $validated = $request->validate([
-            'policy_number' => 'nullable|string|max:255',
-            'client_name' => 'nullable|string|max:255',
+            'commission_note_id'=> 'required|exists:commission_notes,id',
+             'commission_statement_id'=> 'required|exists:commission_statements,id',
             'insurer_id' => 'nullable|exists:lookup_values,id',
             'grouping' => 'nullable|string|max:255',
             'basic_premium' => 'nullable|numeric',
@@ -166,7 +188,7 @@ class CommissionController extends Controller
             'statement_no' => 'nullable|string|max:255',
             'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
             'variance' => 'nullable|numeric',
-            'reason' => 'nullable|string|max:255',
+            'variance_reason' => 'nullable|string|max:255',
             'date_due' => 'nullable|date',
         ]);
 

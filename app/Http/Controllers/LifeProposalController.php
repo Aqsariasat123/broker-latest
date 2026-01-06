@@ -17,67 +17,86 @@ use Illuminate\Support\Facades\Log; // <-- Add this
 
 class LifeProposalController extends Controller
 {
-   public function index(Request $request)
-    {
-        $query = LifeProposal::with([
-            'contact',
-            'insurer',
-            'policyPlan',
-            'frequency',
-            'agencies',
-            'stage',
-            'status',
-            'sourceOfPayment',
-            'medical',
-            'followups',
+  public function index(Request $request)
+{
+    $query = LifeProposal::with([
+        'contact',
+        'insurer',
+        'policyPlan',
+        'frequency',
+        'agencies',
+        'stage',
+        'status',
+        'sourceOfPayment',
+        'medical',
+        'followups',
+    ]);
 
-             ]);
-        
-        $actionType = $request->input('action', 'view');
-        $contactId = $request->input('contact_id', null);
+    $actionType = $request->input('action', 'view');
+    $contactId  = $request->input('contact_id');
 
-        // Filter by status (using foreign key relationship)
-        if ($request->has('status') && $request->status) {
-            if ($request->status == 'pending') {
-                $query->whereHas('status', fn($q) => $q->where('name', 'Pending'));
-            } elseif ($request->status == 'processing') {
-                $query->whereHas('status', fn($q) => $q->where('name', 'Processing'));
-            }
-        }
+    $hasFollowUpFilter = false;
 
-        // Filter by follow-up: proposals with offer_date in the past or next 7 days, and not submitted
-        if ($actionType === 'follow-up' || $request->boolean('follow_up')) {
-            $query->whereNotNull('offer_date')
-                ->where('offer_date', '<=', now()->addDays(7))
-                ->where('is_submitted', false);
-        }
+    /* ===============================
+     | FOLLOW-UP FILTER (TABLE)
+     |===============================*/
+    if ($request->boolean('follow_up')) {
+        $hasFollowUpFilter = true;
 
-        // Filter for submitted proposals
-        if ($request->boolean('submitted')) {
-            $query->where('is_submitted', true);
-        }
-
-        // Filter by contact_id if provided
-        if ($contactId) {
-            $query->where('contact_id', $contactId);
-        }
-
-        // Paginate
-        $proposals = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        // Calculate expiration status for each proposal
-        $proposals->getCollection()->transform(function ($proposal) {
-            $proposal->hasExpired = $proposal->hasExpired();
-            $proposal->hasExpiring = $proposal->hasExpiring();
-            return $proposal;
+        $query->whereHas('followups', function ($q) {
+            $q->where('status', 'Open'); // optional
         });
-
-        // Get lookup data for dropdowns
-        $lookupData = $this->getLookupData();
-
-
-        return view('life-proposals.index', compact('proposals', 'lookupData', 'actionType', 'contactId'));
     }
+
+    /* ===============================
+     | EXISTING FILTERS
+     |===============================*/
+    if ($request->filled('status')) {
+        if ($request->status === 'pending') {
+            $query->whereHas('status', fn ($q) => $q->where('name', 'Pending'));
+        } elseif ($request->status === 'processing') {
+            $query->whereHas('status', fn ($q) => $q->where('name', 'Processing'));
+        }
+    }
+
+    if ($request->boolean('submitted')) {
+        $query->where('is_submitted', true);
+    }
+
+    if ($contactId) {
+        $query->where('contact_id', $contactId);
+    }
+
+    /* ===============================
+     | PAGINATION
+     |===============================*/
+    $proposals = $query
+        ->orderByDesc('created_at')
+        ->paginate(10);
+
+    /* ===============================
+     | FORCE EMPTY RESULT
+     |===============================*/
+    if ($hasFollowUpFilter && $proposals->isEmpty()) {
+        $proposals = LifeProposal::whereRaw('1 = 0')->paginate(10);
+    }
+
+    /* ===============================
+     | FLAGS
+     |===============================*/
+    $proposals->getCollection()->transform(function ($proposal) {
+        $proposal->hasExpired  = $proposal->hasExpired();
+        $proposal->hasExpiring = $proposal->hasExpiring();
+        return $proposal;
+    });
+
+    $lookupData = $this->getLookupData();
+
+    return view(
+        'life-proposals.index',
+        compact('proposals', 'lookupData', 'actionType', 'contactId')
+    );
+}
 
 
     public function store(Request $request)
