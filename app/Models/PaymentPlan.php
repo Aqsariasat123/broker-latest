@@ -45,5 +45,10 @@ class PaymentPlan extends Model
     {
         return $query->whereBetween('due_date', [now()->startOfDay(), now()->addDays($days)]);
     }
+       public function lookuFrequency(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'frequency');
+    }
 }
+
 

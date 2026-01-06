@@ -60,27 +60,22 @@ class Policy extends Model
     ];
 
 
-   public static function generatePolicyNo(): string
+    public static function generatePolicyNo(): string
     {
-        $latest = self::orderBy('id', 'desc')->first();
-        if (!$latest) {
-            return 'POL000001';
-        }
+        do {
+            $last = self::orderBy('id', 'desc')->first();
+            $lastNumber = 0;
 
-        // Extract number from latest policy number
-        $number = 1;
-        if (preg_match('/POL(\d+)/', $latest->policy_no, $matches)) {
-            $number = (int)$matches[1] + 1;
-        } else {
-            // If format doesn't match, try to extract any number
-            $extracted = (int)filter_var($latest->policy_no, FILTER_SANITIZE_NUMBER_INT);
-            if ($extracted > 0) {
-                $number = $extracted + 1;
+            if ($last && preg_match('/POL(\d+)/', $last->policy_code, $matches)) {
+                $lastNumber = (int) $matches[1];
             }
-        }
-        
-        return 'POL' . str_pad($number, 6, '0', STR_PAD_LEFT);
+
+            $policyNo = 'POL' . str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+        } while (self::where('policy_code', $policyNo)->exists());
+
+        return $policyNo;
     }
+
 
     public function client(): BelongsTo
     {

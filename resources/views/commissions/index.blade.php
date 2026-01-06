@@ -216,7 +216,7 @@ input:checked + .slider:before {
         <tbody>
           @foreach($commissions as $com)
               @php
-                $hasPaid = ($com->paymentStatus->name =="Paid")?true :false;
+                $hasPaid = ($com->paymentStatus?->name =="Paid")?true :false;
               @endphp
             <tr>
                 <td class="bell-cell {{ $hasPaid ? 'no-policy' : '' }}">

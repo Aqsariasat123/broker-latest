@@ -1,50 +1,105 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log; // <-- Add this
 
 use App\Models\Vehicle;
 use App\Models\Policy;
 use Illuminate\Http\Request;
+use App\Models\LookupValue;
 
 class VehicleController extends Controller
 {
-    public function index(Request $request)
-    {
-        $policyId = $request->get('policy_id');
-        $clientId = $request->get('client_id');
-        $policy = null;
-        
-        if ($policyId) {
-            $policy = Policy::with('client')->findOrFail($policyId);
-            $vehicles = Vehicle::where('policy_id', $policyId)
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-        } elseif ($clientId) {
-            // Filter vehicles by client_id through policy relationship
-            $vehicles = Vehicle::whereHas('policy', function($q) use ($clientId) {
-                $q->where('client_id', $clientId);
-            })
-            ->with('policy.client')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        } else {
-            $vehicles = Vehicle::with('policy.client')->
-            orderBy('created_at', 'desc')
-                ->paginate(10);
+
+        public function index(Request $request)
+        {
+            $policyId = $request->get('policy_id');
+            $clientId = $request->get('client_id');
+
+            $policy = null;
+            $client = null;
+
+            /* ===================== LOOKUPS ===================== */
+
+            $vehicleTypes = LookupValue::whereHas('lookupCategory', fn ($q) =>
+                    $q->where('name', 'Vehicle Type')
+                )
+                ->where('active', 1)
+                ->orderBy('seq')
+                ->get();
+
+            $vehicleCategories = LookupValue::whereHas('lookupCategory', fn ($q) =>
+                    $q->where('name', 'Vehicle Category')
+                )
+                ->where('active', 1)
+                ->orderBy('seq')
+                ->get();
+
+            $vehiclemakes = LookupValue::whereHas('lookupCategory', fn ($q) =>
+                    $q->where('name', 'Vehicle Make')
+                )
+                ->where('active', 1)
+                ->orderBy('seq')
+                ->get();
+
+            $colors = LookupValue::whereHas('lookupCategory', fn ($q) =>
+                    $q->where('name', 'Color')
+                )
+                ->where('active', 1)
+                ->orderBy('seq')
+                ->get();
+
+            $engineTypes = LookupValue::whereHas('lookupCategory', fn ($q) =>
+                    $q->where('name', 'Engine Type')
+                )
+                ->where('active', 1)
+                ->orderBy('seq')
+                ->get();
+
+            /* ===================== BASE QUERY ===================== */
+            // Relations are already eager-loaded via Vehicle::$with
+            $vehiclesQuery = Vehicle::query()
+                ->orderByDesc('created_at');
+
+            /* ===================== FILTERS ===================== */
+
+            if ($policyId) {
+                $policy = Policy::with('client')->findOrFail($policyId);
+                $vehiclesQuery->where('policy_id', $policyId);
+            }
+
+            if ($clientId) {
+                $client = \App\Models\Client::find($clientId);
+
+                $vehiclesQuery->whereHas('policy', function ($q) use ($clientId) {
+                    $q->where('client_id', $clientId);
+                });
+            }
+
+            /* ===================== PAGINATION ===================== */
+
+            $vehicles = $vehiclesQuery->paginate(10);
+
+            /* ===================== TABLE CONFIG ===================== */
+
+            $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('vehicles');
+
+            \Log::info('vehicles Map:', $vehicles->toArray());
+
+            return view('vehicles.index', compact(
+                'vehicles',
+                'selectedColumns',
+                'policy',
+                'policyId',
+                'client',
+                'clientId',
+                'vehicleCategories',
+                'vehicleTypes',
+                'vehiclemakes',
+                'colors',
+                'engineTypes'
+            ));
         }
-        
-        // Use TableConfigHelper for selected columns
-        $config = \App\Helpers\TableConfigHelper::getConfig('vehicles');
-        $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('vehicles');
-        
-        // Get client information if filtering by client_id
-        $client = null;
-        if ($clientId) {
-            $client = \App\Models\Client::find($clientId);
-        }
-        
-        return view('vehicles.index', compact('vehicles', 'selectedColumns', 'policy', 'policyId', 'client', 'clientId'));
-    }
 
     public function store(Request $request)
     {
@@ -57,14 +112,12 @@ class VehicleController extends Controller
             'year' => 'nullable|string|max:10',
             'value' => 'nullable|numeric',
             'policy_id' => 'nullable|string|max:255',
-            'engine' => 'nullable|string|max:255',
             'engine_type' => 'nullable|string|max:255',
             'cc' => 'nullable|string|max:255',
             'engine_no' => 'nullable|string|max:255',
             'chassis_no' => 'nullable|string|max:255',
             'vehicle_color' => 'nullable|string|max:255',
             'vehicle_seats' => 'nullable|string|max:255',
-
             'from' => 'nullable|date',
             'to' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -85,10 +138,10 @@ class VehicleController extends Controller
             ]);
         }
 
-        // if (isset($validated['policy_id']) && $validated['policy_id']) {
-        //     return redirect()->route('vehicles.index', ['policy_id' => $validated['policy_id']])
-        //         ->with('success', 'Vehicle created successfully.');
-        // }
+        if (isset($validated['policy_id']) && $validated['policy_id']) {
+            return redirect()->route('vehicles.index', ['policy_id' => $validated['policy_id']])
+                ->with('success', 'Vehicle created successfully.');
+        }
 
         // Redirect to vehicles index without policy_id to show unlinked vehicles
         return redirect()->route('vehicles.index')

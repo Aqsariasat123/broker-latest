@@ -23,7 +23,7 @@ class DebitNoteController extends Controller
         }
         if ($request->has('filter')) {
             if ($request->filter == 'overdue') {
-               $query->where('status', $request->filter);
+               $query->where('status','Unpaid');
 
             }
 

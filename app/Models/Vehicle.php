@@ -11,17 +11,70 @@ class Vehicle extends Model
     use HasFactory;
 
     protected $fillable = [
-        'vehicle_id', 'regn_no', 'make', 'model', 'type', 'useage', 'year', 'value', 'policy_id',
-        'engine', 'engine_type', 'cc', 'engine_no', 'chassis_no', 'from', 'to', 'notes','vehicle_seats','vehicle_color'
+        'vehicle_id',
+        'regn_no',
+        'make',
+        'model',
+        'type',
+        'useage',
+        'year',
+        'value',
+        'policy_id',
+        'engine_type',
+        'cc',
+        'engine_no',
+        'chassis_no',
+        'from',
+        'to',
+        'notes',
+        'vehicle_seats',
+        'vehicle_color'
     ];
 
-    protected $dates = ['from', 'to'];
+    protected $with = [
+        'makeLookup',
+        'typeLookup',
+        'useageLookup',
+        'vehicleColorLookup',
+        'engineTypeLookup',
+        'policy.client'
+    ];
 
-    /**
-     * Get the policy that owns the vehicle.
-     */
+    protected $casts = [
+        'from'  => 'date',
+        'to'    => 'date',
+        'value' => 'decimal:2',
+    ];
+
+    /* ===================== RELATIONSHIPS ===================== */
+
     public function policy(): BelongsTo
     {
         return $this->belongsTo(Policy::class);
+    }
+
+    public function makeLookup(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'make');
+    }
+
+    public function typeLookup(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'type');
+    }
+
+    public function useageLookup(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'useage');
+    }
+
+    public function vehicleColorLookup(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'vehicle_color');
+    }
+
+    public function engineTypeLookup(): BelongsTo
+    {
+        return $this->belongsTo(LookupValue::class, 'engine_type');
     }
 }

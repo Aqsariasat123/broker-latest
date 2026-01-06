@@ -36,5 +36,6 @@ class Payment extends Model
     {
         return $this->belongsTo(\App\Models\LookupValue::class, 'mode_of_payment_id');
     }
+    
 }
 

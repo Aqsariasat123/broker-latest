@@ -76,13 +76,13 @@
           @foreach($paymentPlans as $plan)
             <tr>
               <td class="action-cell">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentPlanDetails({{ $plan->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentPlanModal('edit',{{ $plan->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
               </td>
               @foreach($selectedColumns as $col)
                 @if($col == 'installment_label')
                   <td data-column="installment_label">
-                    <a href="javascript:void(0)" onclick="openPaymentPlanDetails({{ $plan->id }})" style="color:#007bff; text-decoration:underline;">{{ $plan->installment_label ?? 'Instalment #' . $plan->id }}</a>
+                {{ $plan->installment_label ?? 'Instalment #' . $plan->id }}               
                   </td>
                 @elseif($col == 'policy_no')
                   <td data-column="policy_no">{{ $plan->schedule->policy->policy_no ?? '-' }}</td>
@@ -93,7 +93,7 @@
                 @elseif($col == 'amount')
                   <td data-column="amount">{{ $plan->amount ? number_format($plan->amount, 2) : '-' }}</td>
                 @elseif($col == 'frequency')
-                  <td data-column="frequency">{{ $plan->frequency ?? '-' }}</td>
+                  <td data-column="frequency">{{ $plan->lookuFrequency->name ?? '-' }}</td>
                 @elseif($col == 'status')
                   <td data-column="status">
                     <span class="badge-status badge-{{ $plan->status }}" style="font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; background:{{ $plan->status == 'pending' ? '#ffc107' : ($plan->status == 'active' ? '#17a2b8' : ($plan->status == 'paid' ? '#28a745' : ($plan->status == 'overdue' ? '#dc3545' : '#6c757d'))) }};">
@@ -230,7 +230,7 @@
                 <option value="">Select Frequency</option>
                 @if(isset($frequencies))
                   @foreach($frequencies as $freq)
-                    <option value="{{ $freq->name }}">{{ $freq->name }}</option>
+                    <option value="{{ $freq->id }}">{{ $freq->name }}</option>
                   @endforeach
                 @endif
               </select>

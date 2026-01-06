@@ -1245,7 +1245,7 @@ class PolicyController extends Controller
                     'installment_label' => $noOfInstalments == 1 ? 'Full Payment' : ('Instalment ' . $i . ' of ' . $noOfInstalments),
                     'due_date' => $dueDate->copy(),
                     'amount' => $amountPerInstalment,
-                    'frequency' => $frequencyName,
+                    'frequency' => $frequencyId,
                     'status' => 'pending',
                 ]);
                  DebitNote::create([
@@ -1427,7 +1427,7 @@ class PolicyController extends Controller
                         : "Instalment {$i} of {$noOfInstalments}",
                     'due_date' => $dueDate->copy(),
                     'amount'   => $amountPerInstalment,
-                    'frequency'=> $frequencyName,
+                    'frequency'=> $frequencyId,
                     'status'   => 'pending',
                 ]);
 

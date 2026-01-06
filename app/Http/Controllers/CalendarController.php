@@ -54,7 +54,7 @@ class CalendarController extends Controller
                     $events[$dateKey] = [];
                 }
                 $events[$dateKey][] = [
-                    'text' => $task->name ?: $task->description,
+                    'text' => $task->item ?: $task->description,
                     'type' => 'task',
                     'id' => $task->id,
                     'category' => 'task',

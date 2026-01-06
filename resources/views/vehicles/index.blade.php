@@ -111,50 +111,89 @@
                       <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openEditVehicleModal({{ $vh->id }})"  width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
             </td>
-              @foreach($selectedColumns as $col)
-                @if($col == 'regn_no')
-                  <td data-column="regn_no">
-                      {{ $vh->regn_no }}
-                  </td>
-                @elseif($col == 'make')
-                  <td data-column="make">{{ $vh->make ?? '-' }}</td>
-                @elseif($col == 'model')
-                  <td data-column="model">{{ $vh->model ?? '-' }}</td>
-                @elseif($col == 'type')
-                  <td data-column="type">{{ $vh->type ?? '-' }}</td>
-                @elseif($col == 'useage')
-                  <td data-column="useage">{{ $vh->useage ?? '-' }}</td>
-                @elseif($col == 'year')
-                  <td data-column="year">{{ $vh->year ?? '-' }}</td>
-                @elseif($col == 'value')
-                  <td data-column="value">{{ $vh->value ? number_format($vh->value, 2) : '-' }}</td>
-                @elseif($col == 'policy_id')
-                  <td data-column="policy_id">{{ $vh->policy->policy_code ?? '-' }}</td>
-                @elseif($col == 'engine')
-                  <td data-column="engine">{{ $vh->engine ?? '-' }}</td>
-                @elseif($col == 'engine_type')
-                  <td data-column="engine_type">{{ $vh->engine_type ?? '-' }}</td>
-                @elseif($col == 'cc')
-                  <td data-column="cc">{{ $vh->cc ?? '-' }}</td>
-                @elseif($col == 'engine_no')
-                  <td data-column="engine_no">{{ $vh->engine_no ?? '-' }}</td>
-                @elseif($col == 'chassis_no')
-                  <td data-column="chassis_no">{{ $vh->chassis_no ?? '-' }}</td>
-                @elseif($col == 'from')
-                  <td data-column="from">{{ $vh->from ? \Carbon\Carbon::parse($vh->from)->format('d-M-y') : '-' }}</td>
-                @elseif($col == 'to')
-                  <td data-column="to">{{ $vh->to ? \Carbon\Carbon::parse($vh->to)->format('d-M-y') : '-' }}</td>
-                @elseif($col == 'notes')
-                  <td data-column="notes">{{ $vh->notes ?? '-' }}</td>
-                 @elseif($col == 'vehicle_seats')
-                  <td data-column="vehicle_seats">{{ $vh->vehicle_seats ?? '-' }}</td>
-                   @elseif($col == 'vehicle_color')
-                  <td data-column="vehicle_color">{{ $vh->vehicle_color ?? '-' }}</td>
-                @elseif($col == 'vehicle_id')
-                  <td data-column="vehicle_id">{{ $vh->vehicle_id ?? '-' }}</td>
-                @endif
-              @endforeach
-            </tr>
+            @foreach ($selectedColumns as $col)
+                @switch($col)
+
+                    @case('regn_no')
+                        <td>{{ $vh->regn_no ?? '-' }}</td>
+                        @break
+
+                    @case('make')
+                        <td>{{ $vh->makeLookup?->name ?? '-' }}</td>
+                        @break
+
+                    @case('model')
+                        <td>{{ $vh->model ?? '-' }}</td>
+                        @break
+
+                    @case('type')
+                        <td>{{ $vh->typeLookup?->name ?? '-' }}</td>
+                        @break
+
+                    @case('useage')
+                        <td>{{ $vh->useageLookup?->name ?? '-' }}</td>
+                        @break
+
+                    @case('year')
+                        <td>{{ $vh->year ?? '-' }}</td>
+                        @break
+
+                    @case('value')
+                        <td>{{ !empty($vh->value) ? number_format($vh->value, 2) : '-' }}</td>
+                        @break
+
+                    @case('policy_id')
+                        <td>{{ $vh->policy?->policy_code ?? '-' }}</td>
+                        @break
+
+                    @case('engine_type')
+                        <td>{{ $vh->engineTypeLookup?->name ?? '-' }}</td>
+                        @break
+
+                    @case('cc')
+                        <td>{{ $vh->cc ?? '-' }}</td>
+                        @break
+
+                    @case('engine_no')
+                        <td>{{ $vh->engine_no ?? '-' }}</td>
+                        @break
+
+                    @case('chassis_no')
+                        <td>{{ $vh->chassis_no ?? '-' }}</td>
+                        @break
+
+                    @case('from')
+                        <td>{{ $vh->from?->format('d-M-y') ?? '-' }}</td>
+                        @break
+
+                    @case('to')
+                        <td>{{ $vh->to?->format('d-M-y') ?? '-' }}</td>
+                        @break
+
+                    @case('notes')
+                        <td>{{ $vh->notes ?? '-' }}</td>
+                        @break
+
+                    @case('vehicle_seats')
+                        <td>{{ $vh->vehicle_seats ?: '-' }}</td>
+                        @break
+
+                    @case('vehicle_color')
+                        <td>{{ $vh->vehicleColorLookup?->name ?? '-' }}</td>
+                        @break
+
+                    @case('vehicle_id')
+                        <td>{{ $vh->vehicle_id ?? '-' }}</td>
+                        @break
+
+                    @default
+                        <td>-</td>
+
+                @endswitch
+            @endforeach
+
+
+              </tr>
           @endforeach
         </tbody>
       </table>
@@ -252,12 +291,15 @@
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group">
-              <label for="regn_no">Regn No00 *</label>
+              <label for="regn_no">Regn No *</label>
               <input type="text" class="form-control" name="regn_no" id="regn_no" required>
             </div>
             <div class="form-group">
               <label for="make">Make</label>
-              <input type="text" class="form-control" name="make" id="make">
+              <select id="make" name="make" class="form-control" required>
+                  <option value="">Select </option>
+                  @foreach($vehiclemakes as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+               </select>
             </div>
             <div class="form-group">
               <label for="model">Model</label>
@@ -267,11 +309,17 @@
           <div class="form-row">
             <div class="form-group">
               <label for="type">Type</label>
-              <input type="text" class="form-control" name="type" id="type">
+              <select id="type" name="type" class="form-control" required>
+                  <option value="">Select </option>
+                  @foreach($vehicleTypes as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+               </select>
             </div>
             <div class="form-group">
-              <label for="useage">Usage</label>
-              <input type="text" class="form-control" name="useage" id="useage">
+              <label for="useage">Category</label>
+              <select id="useage" name="useage" class="form-control" required>
+                  <option value="">Select </option>
+                  @foreach($vehicleCategories as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+               </select>
             </div>
             <div class="form-group">
               <label for="year">Year</label>
@@ -285,47 +333,52 @@
               <input type="number" step="0.01" class="form-control" name="value" id="value">
             </div>
           
-            <div class="form-group">
-              <label for="engine">Engine</label>
-              <input type="text" class="form-control" name="engine" id="engine">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
+           <div class="form-group">
               <label for="engine_type">Engine Type</label>
-              <input type="text" class="form-control" name="engine_type" id="engine_type">
+              <select id="engine_type" name="engine_type" class="form-control" required>
+                  <option value="">Select </option>
+                  @foreach($engineTypes as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+             </select>
             </div>
             <div class="form-group">
               <label for="cc">CC</label>
               <input type="text" class="form-control" name="cc" id="cc">
             </div>
+          </div>
+          <div class="form-row">
+            
             <div class="form-group">
               <label for="engine_no">Engine No</label>
               <input type="text" class="form-control" name="engine_no" id="engine_no">
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
+               <div class="form-group">
               <label for="chassis_no">Chassis No</label>
               <input type="text" class="form-control" name="chassis_no" id="chassis_no">
             </div>
+          
+         
             <div class="form-group">
               <label for="from">From</label>
               <input type="date" class="form-control" name="from" id="from">
             </div>
-            <div class="form-group">
+        
+          </div>
+
+          <div class="form-row">
+                <div class="form-group">
               <label for="to">To</label>
               <input type="date" class="form-control" name="to" id="to">
             </div>
-          </div>
-          <div class="form-row">
              <div class="form-group">
               <label for="vehicle_seats">Seats</label>
               <input type="number" step="1"  class="form-control" name="vehicle_seats" id="vehicle_seats">
             </div>
              <div class="form-group">
               <label for="vehicle_color">Color</label>
-              <input type="text" class="form-control" name="vehicle_color" id="vehicle_color">
+                <select id="vehicle_color" name="vehicle_color" class="form-control" required>
+                  <option value="">Select </option>
+                  @foreach($colors as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
+               </select>
             </div>
             <div class="form-group" style="flex:1 1 100%;">
               <label for="notes">Notes</label>

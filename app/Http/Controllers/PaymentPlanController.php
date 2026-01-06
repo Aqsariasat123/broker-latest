@@ -12,7 +12,7 @@ class PaymentPlanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PaymentPlan::with(['schedule.policy.client']);
+        $query = PaymentPlan::with(['schedule.policy.client','lookuFrequency']);
 
         // Filter by status
         if ($request->has('status') && $request->status) {
