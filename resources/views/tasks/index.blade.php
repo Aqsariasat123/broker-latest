@@ -85,14 +85,13 @@
               <tbody>
                @foreach($tasks as $task)
 <tr class="{{ $task->isOverdue() ? 'overdue' : '' }}">
-    <td class="bell-cell {{ $task->isOverdue() ? 'expired' : ($task->isExpiringSoon() ? 'expiring' : '') }}">
+    <td class="bell-cell {{ $task->isOverdue() ? 'expired' :'' }}">
         <div style="display:flex; align-items:center; justify-content:center;">
             @php
                 $isExpired = $task->isOverdue();
-                $isExpiring = $task->isExpiringSoon();
             @endphp
             <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}"
-                 style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : ($isExpiring ? '#f3742a' : 'black') }}; 
+                 style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#ccc' }}; 
                         background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};">
             </div>
         </div>
