@@ -71,7 +71,7 @@
         <button class="btn filter-btn {{ $hasPaidStatus ? 'active-insurer' : '' }}"
                 type="button"
                 onclick="filterByPaidStatus('Unpaid')">
-            Show Unpaid
+          {{ $hasPaidStatus ? 'All' : 'Show Unpaid' }}
         </button>
 
         <!-- Insurer Buttons -->

@@ -23,11 +23,6 @@ class StatementController extends Controller
                 ->orderBy('seq')
                 ->get();
 
-           $soruces = LookupValue::whereHas('lookupCategory', fn($q) => $q->where('name', 'Insurer'))
-                ->where('active', 1)
-                ->orderBy('seq')
-                ->get();    
-            // $insurerFilter = $request->get('soruces');
          
             $incomeCategories = LookupValue::whereHas('lookupCategory', function($q){
                         $q->where('name', 'Income Category');
@@ -68,7 +63,7 @@ class StatementController extends Controller
             Log::info('Selected statements: ' . $statements->toJson());
 
             return view('statements.index', compact(
-                'statements', 'insurers', 'modesOfPayment', 'insurerFilter', 'selectedColumns','soruces' ,'pageType' , 'incomeCategories'
+                'statements', 'insurers', 'modesOfPayment', 'insurerFilter', 'selectedColumns','pageType' , 'incomeCategories'
             ));
         }
     public function store(Request $request)

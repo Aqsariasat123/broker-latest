@@ -181,33 +181,33 @@ async function openCommissionPage(mode) {
   }
 }
 document.addEventListener('DOMContentLoaded', function () {
-    const addBtn = document.getElementById('addCommissionBtn');
+  const addBtn = document.getElementById('addCommissionBtn');
 
-    if (addBtn) {
-        addBtn.addEventListener('click', function () {
-            openCommissionModal('add');
-        });
-    }
+  if (addBtn) {
+    addBtn.addEventListener('click', function () {
+      openCommissionModal('add');
+    });
+  }
 });
 document.getElementById('addPreviewStatement')?.addEventListener('click', function () {
-    const params = new URLSearchParams(window.location.search);
-    const insurer = params.get('insurer') || '';
+  const params = new URLSearchParams(window.location.search);
+  const insurer = params.get('insurer') || '';
 
-    const target = new URL('/statements', window.location.origin);
-    target.searchParams.set('insurer', insurer);
-    target.searchParams.set('page', 'commission');
+  const target = new URL('/statements', window.location.origin);
+  target.searchParams.set('insurer', insurer);
+  target.searchParams.set('page', 'commission');
 
-    window.location.href = target.toString();
+  window.location.href = target.toString();
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const addBtn = document.getElementById('addCommissionBtn');
+  const addBtn = document.getElementById('addCommissionBtn');
 
-    if (addBtn) {
-        addBtn.addEventListener('click', function () {
-            openCommissionModal('add');
-        });
-    }
+  if (addBtn) {
+    addBtn.addEventListener('click', function () {
+      openCommissionModal('add');
+    });
+  }
 });
 // Add Commission Button
 document.getElementById('columnBtn2').addEventListener('click', () => openColumnModal());
@@ -319,66 +319,76 @@ if (editBtn) {
 //   window.location.href = `${commissionsIndexRoute}?insurer=${insurer}`;
 // }
 function filterByInsurer(insurer = null) {
-    const url = new URL(window.location.href);
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
 
-    if (insurer) {
-        url.searchParams.set('insurer', insurer);
-    } else {
-        url.searchParams.delete('insurer');
-    }
+  const currentInsurer = params.get('insurer');
 
-    window.location.href = url.toString();
+  // If same insurer clicked again → reset
+  if (!insurer || currentInsurer === insurer) {
+    params.delete('insurer');
+  } else {
+    params.set('insurer', insurer);
+  }
+
+  window.location.href = url.toString();
 }
+
 
 function filterByPaidStatus(paid_status = null) {
-    const url = new URL(window.location.href);
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
 
-    if (paid_status) {
-        url.searchParams.set('paid_status', paid_status);
-    } else {
-        url.searchParams.delete('paid_status');
-    }
+  const currentStatus = params.get('paid_status');
 
-    window.location.href = url.toString();
+  // If same filter clicked again OR "All"
+  if (!paid_status || currentStatus === paid_status) {
+    params.delete('paid_status');
+  } else {
+    params.set('paid_status', paid_status);
+  }
+
+  window.location.href = url.toString();
 }
+
 
 // Update UI on page load
 document.addEventListener('DOMContentLoaded', function () {
-    const toggle = document.getElementById('insurerFilterToggle');
-    if (!toggle) return;
+  const toggle = document.getElementById('insurerFilterToggle');
+  if (!toggle) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const currentInsurer = params.get('insurer');
-    const currentPaidStatus = params.get('paid_status');
+  const params = new URLSearchParams(window.location.search);
+  const currentInsurer = params.get('insurer');
+  const currentPaidStatus = params.get('paid_status');
 
-    const hasFilter = !!currentInsurer || !!currentPaidStatus;
+  const hasFilter = !!currentInsurer || !!currentPaidStatus;
 
-    // Sync toggle
-    toggle.checked = hasFilter;
+  // Sync toggle
+  toggle.checked = hasFilter;
 
-    // Update button states
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active-all', 'active-insurer');
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active-all', 'active-insurer');
 
-        const btnText = btn.textContent.trim();
+    const btnText = btn.textContent.trim();
 
-        if (btnText === 'Show Unpaid' && currentPaidStatus === 'Unpaid') {
-            btn.classList.add('active-insurer');
-        } 
-        else if (btnText === currentInsurer) {
-            btn.classList.add('active-insurer');
-        }
-    });
-    toggle.addEventListener('change', function () {
-        if (!this.checked) {
-            // Clear all query params
-            const url = new URL(window.location.href);
-            url.search = '';
+    if (btnText === 'All' && currentPaidStatus === 'Unpaid') {
+      btn.classList.add('active-insurer');
+    }
+    else if (btnText === currentInsurer) {
+      btn.classList.add('active-insurer');
+    }
+  });
+  toggle.addEventListener('change', function () {
+    if (!this.checked) {
+      // Clear all query params
+      const url = new URL(window.location.href);
+      url.search = '';
 
-            // Reload page with clean URL
-            window.location.href = url.toString();
-        }
-    });
+      // Reload page with clean URL
+      window.location.href = url.toString();
+    }
+  });
 });
 
 // Column modal functions
@@ -521,7 +531,7 @@ function openCommissionModal(mode, commissionId = null) {
           document.getElementById('payment_status_id').value = c.payment_status_id || '';
           document.getElementById('amount_received').value = c.amount_received || '';
           document.getElementById('date_received').value = c.date_received ? c.date_received.split('T')[0] : '';
-          document.getElementById('date_due').value = c.date_due ? c.date_received.split('T')[0] : '';
+          document.getElementById('date_due').value = c.date_due ? c.date_due.split('T')[0] : '';
           document.getElementById('mode_of_payment_id').value = c.mode_of_payment_id || '';
           document.getElementById('variance').value = c.variance || '';
           document.getElementById('variance_reason').value = c.variance_reason || '';
@@ -594,7 +604,7 @@ document.getElementById('commissionForm').addEventListener('submit', function (e
 // const originalOpenCommissionDetails = window.openCommissionDetails;
 // window.openCommissionDetails = function (id) {
 // };
-  // openCommissionModal('edit', id);
+// openCommissionModal('edit', id);
 
 // Only declare if not already declared (to avoid duplicate declaration errors)
 if (typeof draggedElement === 'undefined') {

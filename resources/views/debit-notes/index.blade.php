@@ -80,11 +80,17 @@
           @foreach($debitNotes as $note)
             <tr>
               <td class="action-cell">
-                <a href="{{ route('policies.index', ['policy_id' => $note->paymentPlan->schedule->policy->id ]) }}">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" 
-                 width="22" height="22"  
-                style="cursor:pointer; vertical-align:middle;" alt="Expand">  
-             </a>
+              <a href="{{ route('policies.index', ['policy_id' => $note->paymentPlan->schedule->policy->id ]) }}"
+          class="debit-note-link"
+          data-note-id="{{ $note->id }}">
+            <img src="{{ asset('asset/arrow-expand.svg') }}"
+                class="action-expand"
+                width="22"
+                height="22"
+                style="cursor:pointer; vertical-align:middle;"
+                alt="Expand">
+        </a>
+
 <!---onclick="openDebitNoteDetails({{ $note->id }})"-->
                
               </td>
