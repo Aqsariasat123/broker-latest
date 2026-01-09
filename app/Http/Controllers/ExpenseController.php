@@ -59,7 +59,7 @@ class ExpenseController extends Controller
             'amount_paid' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:255',
             'category_id' => 'required|exists:lookup_values,id',
-            'mode_of_payment' => 'required|string|max:100',
+            'mode_of_payment_id' => 'required|exists:lookup_values,id',
             'receipt_no' => 'nullable|string|max:255',
             'expense_notes' => 'nullable|string',
             'receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120'
