@@ -11,20 +11,19 @@ class Income extends Model
     use HasFactory;
 
     protected $fillable = [
-        'income_id', 'income_code', 'commission_statement_id', 'income_source_id', 'date_rcvd', 'date_received', 'amount_received', 'description',
+        'income_id', 'income_code', 'commission_statement_id', 'income_source_id', 'date_received', 'amount_received', 'description',
         'category_id', 'mode_of_payment_id', 'statement_no', 'income_notes', 'notes'
     ];
 
     protected $casts = [
-        'date_rcvd' => 'date',
         'date_received' => 'date',
         'amount_received' => 'decimal:2'
     ];
-    
-    // Accessor to handle both column names
+
+    // Accessor for date
     public function getDateAttribute()
     {
-        return $this->date_rcvd ?? $this->date_received ?? null;
+        return $this->date_received ?? null;
     }
 
     public function incomeSource()

@@ -53,7 +53,7 @@ class IncomeController extends Controller
 
         $validated = $request->validate([
             'income_source_id' => 'nullable|exists:lookup_values,id',
-            'date_rcvd' => 'nullable|date',
+            'date_received' => 'nullable|date',
             'amount_received' => 'nullable|numeric',
             'description' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:lookup_values,id',
@@ -156,7 +156,7 @@ class IncomeController extends Controller
 
         $validated = $request->validate([
             'income_source_id' => 'nullable|exists:lookup_values,id',
-            'date_rcvd' => 'nullable|date',
+            'date_received' => 'nullable|date',
             'amount_received' => 'nullable|numeric',
             'description' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:lookup_values,id',
@@ -233,7 +233,7 @@ class IncomeController extends Controller
             fputcsv($handle, [
                 $inc->income_id,
                 $inc->incomeSource ? $inc->incomeSource->name : '',
-                $inc->date_rcvd,
+                $inc->date_received,
                 $inc->amount_received,
                 $inc->description,
                 $inc->incomeCategory ? $inc->incomeCategory->name : '',

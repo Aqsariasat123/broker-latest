@@ -484,8 +484,13 @@ function saveColumnSettings() {
 /* ============================================================
    DRAG AND DROP FUNCTIONS
 ============================================================ */
-let draggedElement = null;
-let dragOverElement = null;
+// Use var and check if already declared to avoid conflicts with partials-table-scripts
+if (typeof draggedElement === 'undefined') {
+  var draggedElement = null;
+}
+if (typeof dragOverElement === 'undefined') {
+  var dragOverElement = null;
+}
 
 function initDragAndDrop() {
   const columnSelection = document.getElementById('columnSelection');
