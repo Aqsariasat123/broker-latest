@@ -416,6 +416,162 @@ document.addEventListener('DOMContentLoaded', function () {
 document.getElementById('addStatementBtn')
   ?.addEventListener('click', openAddForm);
 
+// Column Button
+document.getElementById('columnBtn')
+  ?.addEventListener('click', openColumnModal);
+
+/* ============================================================
+   COLUMN MODAL FUNCTIONS
+============================================================ */
+function initializeColumnCheckboxes() {
+  const checkboxes = document.querySelectorAll('.column-checkbox');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = selectedColumns.includes(checkbox.value);
+  });
+}
+
+function openColumnModal() {
+  initializeColumnCheckboxes();
+  document.body.style.overflow = 'hidden';
+  document.getElementById('columnModal').classList.add('show');
+  setTimeout(initDragAndDrop, 100);
+}
+
+function closeColumnModal() {
+  document.getElementById('columnModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function saveColumnSettings() {
+  const mandatoryFields = typeof mandatoryColumns !== 'undefined' ? mandatoryColumns : [];
+
+  const items = Array.from(document.querySelectorAll('#columnSelection .column-item, #columnSelection .column-item-vertical'));
+  const order = items.map(item => item.dataset.column);
+  const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n=>n.value);
+
+  mandatoryFields.forEach(field => {
+    if (!checked.includes(field)) {
+      checked.push(field);
+    }
+  });
+
+  const orderedChecked = order.filter(col => checked.includes(col));
+
+  const form = document.getElementById('columnForm');
+  const existing = form.querySelectorAll('input[name="columns[]"]');
+  existing.forEach(e=>e.remove());
+
+  orderedChecked.forEach(c => {
+    const i = document.createElement('input');
+    i.type='hidden';
+    i.name='columns[]';
+    i.value=c;
+    form.appendChild(i);
+  });
+
+  form.submit();
+}
+
+/* ============================================================
+   DRAG AND DROP FUNCTIONS
+============================================================ */
+let draggedElement = null;
+let dragOverElement = null;
+
+function initDragAndDrop() {
+  const columnSelection = document.getElementById('columnSelection');
+  if (!columnSelection) return;
+  const columnItems = columnSelection.querySelectorAll('.column-item, .column-item-vertical');
+  columnItems.forEach(item => {
+    if (item.dataset.dragInitialized === 'true') return;
+    item.dataset.dragInitialized = 'true';
+    item.setAttribute('draggable', 'true');
+
+    const checkbox = item.querySelector('.column-checkbox');
+    if (checkbox) {
+      checkbox.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+      checkbox.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    const label = item.querySelector('label');
+    if (label) {
+      label.addEventListener('mousedown', function(e) {
+        if (e.target === label) e.preventDefault();
+      });
+    }
+
+    item.addEventListener('dragstart', function(e) {
+      draggedElement = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.outerHTML);
+      e.dataTransfer.setData('text/plain', this.querySelector('.column-checkbox').value);
+    });
+
+    item.addEventListener('dragend', function(e) {
+      this.classList.remove('dragging');
+      columnItems.forEach(i => i.classList.remove('drag-over'));
+      if (dragOverElement) {
+        dragOverElement.classList.remove('drag-over');
+        dragOverElement = null;
+      }
+      draggedElement = null;
+    });
+
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+
+      if (draggedElement && this !== draggedElement) {
+        if (dragOverElement && dragOverElement !== this) {
+          dragOverElement.classList.remove('drag-over');
+        }
+        this.classList.add('drag-over');
+        dragOverElement = this;
+
+        const rect = this.getBoundingClientRect();
+        const midpoint = rect.top + (rect.height / 2);
+        const next = e.clientY > midpoint;
+
+        if (next) {
+          if (this.nextSibling && this.nextSibling !== draggedElement) {
+            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+          } else if (!this.nextSibling) {
+            this.parentNode.appendChild(draggedElement);
+          }
+        } else {
+          if (this.previousSibling !== draggedElement) {
+            this.parentNode.insertBefore(draggedElement, this);
+          }
+        }
+      }
+    });
+
+    item.addEventListener('dragenter', function(e) {
+      e.preventDefault();
+      if (draggedElement && this !== draggedElement) {
+        this.classList.add('drag-over');
+      }
+    });
+
+    item.addEventListener('dragleave', function(e) {
+      if (!this.contains(e.relatedTarget)) {
+        this.classList.remove('drag-over');
+        if (dragOverElement === this) dragOverElement = null;
+      }
+    });
+
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.classList.remove('drag-over');
+      dragOverElement = null;
+      return false;
+    });
+  });
+}
+
 // document.getElementById('editStatementFromPageBtn')
 //   ?.addEventListener('click', () => currentStatementId && openEditStatement(currentStatementId));
 function filterByInsurer(insurers = null) {
