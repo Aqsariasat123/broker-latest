@@ -163,7 +163,11 @@ public function edit(CommissionStatement $statement)
 
     public function export(Request $request)
     {
-        $statements = \App\Models\CommissionStatement::with(['insurer', 'modeOfPayment'])->get();
+        $statements = \App\Models\CommissionStatement::with([
+            'commissions.commissionNote.schedule.policy.insurer',
+            'commissions.commissionNote.schedule.policy.policyClass',
+            'commissions.modeOfPayment'
+        ])->get();
 
         $fileName = 'statements_export_' . date('Y-m-d') . '.csv';
         $headers = [
@@ -171,26 +175,37 @@ public function edit(CommissionStatement $statement)
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ];
 
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, [
-            'Statement No', 'Year', 'Insurer', 'Business Category', 'Date Received', 'Amount Received', 'Mode Of Payment (Life)', 'Remarks'
-        ]);
-
-        foreach ($statements as $st) {
+        $callback = function() use ($statements) {
+            $handle = fopen('php://output', 'w');
             fputcsv($handle, [
-                $st->statement_no,
-                $st->year,
-                $st->insurer ? $st->insurer->name : '',
-                $st->business_category,
-                $st->date_received,
-                $st->amount_received,
-                $st->modeOfPayment ? $st->modeOfPayment->name : '',
-                $st->remarks,
+                'Statement No', 'Year', 'Insurer', 'Business Category', 'Date Received', 'Amount Received', 'Mode Of Payment', 'Remarks'
             ]);
-        }
 
-        fclose($handle);
-        return response()->streamDownload(function() use ($handle) {}, $fileName, $headers);
+            foreach ($statements as $st) {
+                $commission = $st->commissions->first();
+                $year = $commission?->date_received ? \Carbon\Carbon::parse($commission->date_received)->format('Y') : '';
+                $insurerName = $commission?->commissionNote?->schedule?->policy?->insurer?->name ?? '';
+                $businessCategory = $commission?->commissionNote?->schedule?->policy?->policyClass?->name ?? '';
+                $dateReceived = $commission?->date_received ? \Carbon\Carbon::parse($commission->date_received)->format('d-M-y') : '';
+                $amountReceived = $commission?->amount_received ?? '';
+                $modeOfPayment = $commission?->modeOfPayment?->name ?? '';
+
+                fputcsv($handle, [
+                    $st->com_stat_id,
+                    $year,
+                    $insurerName,
+                    $businessCategory,
+                    $dateReceived,
+                    $amountReceived,
+                    $modeOfPayment,
+                    $st->remarks ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, $fileName, $headers);
     }
 
     public function saveColumnSettings(Request $request)
