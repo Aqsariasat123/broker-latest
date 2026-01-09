@@ -12,9 +12,9 @@
   function initDragAndDrop() {
     const columnSelection = document.getElementById('columnSelection');
     if (!columnSelection) return;
-    
-    // Make all column items draggable
-    const columnItems = columnSelection.querySelectorAll('.column-item');
+
+    // Make all column items draggable (support both old and new class names)
+    const columnItems = columnSelection.querySelectorAll('.column-item, .column-item-vertical');
     
     columnItems.forEach(item => {
       // Skip if already initialized
@@ -170,9 +170,9 @@
   function saveColumnSettings(){
     // Mandatory fields that should always be included
     const mandatoryFields = mandatoryColumns;
-    
-    // Get order from DOM - this preserves the drag and drop order
-    const items = Array.from(document.querySelectorAll('#columnSelection .column-item'));
+
+    // Get order from DOM - this preserves the drag and drop order (support both old and new class names)
+    const items = Array.from(document.querySelectorAll('#columnSelection .column-item, #columnSelection .column-item-vertical'));
     const order = items.map(item => item.dataset.column);
     const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n=>n.value);
     
