@@ -306,20 +306,20 @@ function populateProposalDetails(proposal) {
           </div>
           <div class="detail-row">
             <span class="detail-label">Clinic</span>
-            <div class="detail-value">${proposal.medical.clinic.name || '-'}</div>
+            <div class="detail-value">${proposal.medical?.clinic?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Referred Date</span>
-            <div class="detail-value">${formatDate(proposal.medical.ordered_on)}</div>
+            <div class="detail-value">${formatDate(proposal.medical?.ordered_on)}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Completion Date</span>
-            <div class="detail-value">${formatDate(proposal.medical.completed_on)}</div>
+            <div class="detail-value">${formatDate(proposal.medical?.completed_on)}</div>
           </div>
           <div class="detail-row" style="align-items:flex-start;">
             <span class="detail-label">Exam Notes</span>
             <div class="detail-value">
-              <textarea readonly style="width:100%; min-height:40px; padding:3px 6px; font-size:11px; border:1px solid #ddd; border-radius:2px; resize:vertical;">${proposal.medical.notes || ''}</textarea>
+              <textarea readonly style="width:100%; min-height:40px; padding:3px 6px; font-size:11px; border:1px solid #ddd; border-radius:2px; resize:vertical;">${proposal.medical?.notes || ''}</textarea>
             </div>
           </div>
         </div>
@@ -881,12 +881,12 @@ function openProposalForm(mode, proposal = null) {
     document.getElementById('medical_type_id').value = proposal.medical?.medical_type_id || '';
     document.getElementById('sex').value = proposal.sex || '';
     document.getElementById('method_of_payment').value = proposal.method_of_payment || '';
-    document.getElementById('medical_status_id').value = proposal.medical.status_id || '';
+    document.getElementById('medical_status_id').value = proposal.medical?.status_id || '';
     document.getElementById('status_id').value = proposal.status_id || proposal.status?.id || '';
     document.getElementById('source_name').value = proposal.source_name || '';
-    document.getElementById('date_referred').value = proposal.medical.date_referred || '';
-    document.getElementById('date_referred').value = proposal.medical.ordered_on?.substring(0, 10) || '';
-    document.getElementById('date_completed').value = proposal.medical.completed_on?.substring(0, 10) || '';
+    document.getElementById('date_referred').value = proposal.medical?.date_referred || '';
+    document.getElementById('date_referred').value = proposal.medical?.ordered_on?.substring(0, 10) || '';
+    document.getElementById('date_completed').value = proposal.medical?.completed_on?.substring(0, 10) || '';
 
     // === Riders ===
     if (proposal.riders && Array.isArray(proposal.riders)) {
