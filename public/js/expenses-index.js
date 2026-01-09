@@ -242,7 +242,7 @@
     const mandatoryFields = mandatoryColumns;
 
     // Get order from DOM - this preserves the drag and drop order
-    const items = Array.from(document.querySelectorAll('#columnSelection .column-item'));
+    const items = Array.from(document.querySelectorAll('#columnSelection .column-item, #columnSelection .column-item-vertical'));
     const order = items.map(item => item.dataset.column);
     const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n => n.value);
 
@@ -592,7 +592,7 @@
     // Only initialize once to avoid duplicate event listeners
     if (dragInitialized) {
       // Re-enable draggable on all items
-      const columnItems = columnSelection.querySelectorAll('.column-item');
+      const columnItems = columnSelection.querySelectorAll('.column-item, .column-item-vertical');
       columnItems.forEach(item => {
         item.setAttribute('draggable', 'true');
       });
@@ -600,7 +600,7 @@
     }
 
     // Make all column items draggable
-    const columnItems = columnSelection.querySelectorAll('.column-item');
+    const columnItems = columnSelection.querySelectorAll('.column-item, .column-item-vertical');
 
     columnItems.forEach(item => {
       // Ensure draggable attribute is set

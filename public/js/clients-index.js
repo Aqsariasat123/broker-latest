@@ -3111,7 +3111,7 @@ function deselectAllColumns() {
 }
 
 function saveColumnSettings() {
-  const items = Array.from(document.querySelectorAll('#columnSelection .column-item'));
+  const items = Array.from(document.querySelectorAll('#columnSelection .column-item, #columnSelection .column-item-vertical'));
   const order = items.map(item => item.dataset.column);
   const checked = Array.from(document.querySelectorAll('.column-checkbox:checked')).map(n => n.value);
 
@@ -3146,7 +3146,7 @@ function initDragAndDrop() {
   const columnSelection = document.getElementById('columnSelection');
   if (!columnSelection) return;
 
-  const columnItems = columnSelection.querySelectorAll('.column-item');
+  const columnItems = columnSelection.querySelectorAll('.column-item, .column-item-vertical');
 
   columnItems.forEach(item => {
     if (item.dataset.dragInitialized === 'true') return;
