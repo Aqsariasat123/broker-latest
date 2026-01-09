@@ -360,5 +360,5 @@
   const documentsStoreRoute = '{{ route("documents.store") }}';
   const csrfToken = '{{ csrf_token() }}';
 </script>
-<script src="{{ asset('js/documents-index.js') }}"></script>
+<script src="{{ asset('js/documents-index.js') }}?v={{ time() }}"></script>
 @endsection

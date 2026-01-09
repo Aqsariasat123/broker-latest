@@ -522,5 +522,5 @@ input:checked + .slider:before {
 @include('partials.table-scripts', [
   'mandatoryColumns' => $mandatoryColumns,
 ])
-<script src="{{ asset('js/statements-index.js') }}"></script>
+<script src="{{ asset('js/statements-index.js') }}?v={{ time() }}"></script>
 @endsection
