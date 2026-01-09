@@ -227,12 +227,7 @@
           <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
             <div class="form-group">
               <label for="category" style="display: block; margin-bottom: 5px; font-weight: 500;">Category</label>
-              <select class="form-control" id="category" name="category" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
-                <option value="">Select Category</option>
-                @foreach($categories as $cat)
-                  <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                @endforeach
-              </select>
+              <input type="text" class="form-control" id="category" name="category" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;" placeholder="Enter Category">
             </div>
             <div class="form-group">
               <label for="item" style="display: block; margin-bottom: 5px; font-weight: 500;">Item</label>
@@ -244,19 +239,7 @@
             </div>
             <div class="form-group">
               <label for="name" style="display: block; margin-bottom: 5px; font-weight: 500;">Name</label>
-              <select class="form-control" id="name" name="name" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
-                <option value="">Select Name</option>
-                <optgroup label="Contacts">
-                  @foreach($contacts as $contact)
-                    <option value="{{ $contact->id }}" data-contact-no="{{ $contact->contact_no }}">{{ $contact->name }}</option>
-                  @endforeach
-                </optgroup>
-                <optgroup label="Clients">
-                  @foreach($clients as $client)
-                    <option value="{{ $client->id }}" data-contact-no="{{ $client->contact_no }}">{{ $client->name }}</option>
-                  @endforeach
-                </optgroup>
-              </select>
+              <input type="text" class="form-control" id="name" name="name" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;" placeholder="Enter Name">
             </div>
            
           </div>
@@ -289,12 +272,7 @@
           <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
             <div class="form-group">
               <label for="assignee" style="display: block; margin-bottom: 5px; font-weight: 500;">Assignee</label>
-              <select class="form-control" id="assignee" name="assignee" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
-                <option value="">Select Assignee</option>
-                @foreach($users as $user)
-                  <option value="{{ $user->id }}">{{ $user->name }}</option>
-                @endforeach
-              </select>
+              <input type="text" class="form-control" id="assignee" name="assignee" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;" placeholder="Enter Assignee">
             </div>
             <div class="form-group">
               <label for="task_status" style="display: block; margin-bottom: 5px; font-weight: 500;">Task Status</label>
@@ -327,12 +305,7 @@
               <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="repeat" name="repeat" value="1" style="width: 18px; height: 18px; cursor: pointer;">
                 <label for="repeat" style="margin: 0; cursor: pointer;">Repeat</label>
-                <select class="form-control" id="frequency" name="frequency" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
-                  <option value="">Select Frequency</option>
-                  @foreach($frequencyCategories->values as $frequencyCategory)
-                    <option value="{{ $frequencyCategory->id }}">{{ $frequencyCategory->name }}</option>
-                  @endforeach
-                </select>
+                <input type="text" class="form-control" id="frequency" name="frequency" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;" placeholder="Enter Frequency">
               </div>
             
               <div class="form-group">

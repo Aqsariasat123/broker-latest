@@ -123,7 +123,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'category' => 'required|string|max:255',
             'item' => 'nullable|string|max:255',
-            'description' => 'required|string|max:500',
+            'description' => 'nullable|string|max:500',
             'name' => 'required|string|max:255',
             'contact_no' => 'nullable|string|max:20',
             'due_date' => 'required|date',
@@ -138,6 +138,11 @@ class TaskController extends Controller
             'rpt_stop_date' => 'nullable|date',
             'task_notes' => 'nullable|string'
         ]);
+
+        // Set description from item if not provided
+        if (empty($validated['description'])) {
+            $validated['description'] = $validated['item'] ?? $validated['category'];
+        }
 
         $validated['task_id'] = Task::generateTaskId();
         $validated['repeat'] = $request->has('repeat');
@@ -152,7 +157,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'category' => 'required|string|max:255',
             'item' => 'nullable|string|max:255',
-            'description' => 'required|string|max:500',
+            'description' => 'nullable|string|max:500',
             'name' => 'required|string|max:255',
             'contact_no' => 'nullable|string|max:20',
             'due_date' => 'required|date',
@@ -167,6 +172,11 @@ class TaskController extends Controller
             'rpt_stop_date' => 'nullable|date',
             'task_notes' => 'nullable|string'
         ]);
+
+        // Set description from item if not provided
+        if (empty($validated['description'])) {
+            $validated['description'] = $validated['item'] ?? $validated['category'];
+        }
 
         $validated['repeat'] = $request->has('repeat');
 
