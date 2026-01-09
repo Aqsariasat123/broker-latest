@@ -1,6 +1,6 @@
 
 <div class="ks-sidebar-logo">
-  <label class="ks-sidebar-logo-text custom-logo" id="login-title"><span class="ks-sidebar-orange">Key</span>stone</label>
+  <img src="{{ asset('asset/logo.png') }}" alt="Logo" style="max-height: 40px; width: auto;">
 </div>
              @php
                       $currentRoute = request()->path();
