@@ -60,7 +60,7 @@
           form.action = `/tasks/${currentTaskId}`;
           form.method = 'POST';
         }
-        if (formMethod) formMethod.innerHTML = '@method("PUT")';
+        if (formMethod) formMethod.innerHTML = '<input type="hidden" name="_method" value="POST">';
         if (deleteBtn) deleteBtn.style.display = 'block';
         
         // Populate form fields
@@ -210,7 +210,7 @@
           form.action = `/tasks/${currentTaskId}`;
           form.method = 'POST';
         }
-        if (formMethod) formMethod.innerHTML = '@method("PUT")';
+        if (formMethod) formMethod.innerHTML = '<input type="hidden" name="_method" value="POST">';
         if (deleteBtn) deleteBtn.style.display = 'block';
       }
       
