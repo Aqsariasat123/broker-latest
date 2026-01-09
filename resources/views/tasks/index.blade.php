@@ -230,7 +230,7 @@
               <select class="form-control" id="category" name="category" required style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 2px;">
                 <option value="">Select Category</option>
                 @foreach($categories as $cat)
-                  <option value="{{ $cat->value }}">{{ $cat->value }}</option>
+                  <option value="{{ $cat->name }}">{{ $cat->name }}</option>
                 @endforeach
               </select>
             </div>
@@ -327,7 +327,7 @@
                   <option value="">Select Frequency</option>
                   @if($frequencyCategories && $frequencyCategories->values)
                     @foreach($frequencyCategories->values as $freq)
-                      <option value="{{ $freq->value }}">{{ $freq->value }}</option>
+                      <option value="{{ $freq->name }}">{{ $freq->name }}</option>
                     @endforeach
                   @endif
                 </select>
