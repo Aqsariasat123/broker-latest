@@ -595,3 +595,20 @@ function filterByInsurer(insurers = null) {
 
   window.location.href = url.toString();
 }
+
+// Direct event listener attachment (script loads after DOM)
+(function() {
+  const columnBtn = document.getElementById('columnBtn');
+  if (columnBtn) {
+    columnBtn.onclick = function() {
+      openColumnModal();
+    };
+  }
+
+  const addBtn = document.getElementById('addStatementBtn');
+  if (addBtn) {
+    addBtn.onclick = function() {
+      openAddForm();
+    };
+  }
+})();
