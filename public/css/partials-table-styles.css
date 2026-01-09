@@ -157,7 +157,7 @@
     .alert { padding: 8px 12px; margin-bottom: 12px; border-radius: 2px; font-size: 13px; }
     .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     /* Column Selection Styles - Vertical Layout (2 columns) */
-    .column-modal-vertical { max-width: 520px !important; width: 90% !important; }
+    .column-modal-vertical { max-width: 600px !important; width: 95% !important; }
     .column-modal-vertical .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #ddd; }
     .column-modal-vertical .modal-header h4 { margin: 0; font-size: 16px; font-weight: 600; }
     .modal-header-buttons { display: flex; gap: 8px; }
@@ -165,7 +165,7 @@
     .btn-save-orange:hover { background: #e0651f; }
     .btn-cancel-gray { background: #6c757d; color: white; border: none; padding: 6px 16px; border-radius: 3px; cursor: pointer; font-size: 13px; font-weight: 500; }
     .btn-cancel-gray:hover { background: #5a6268; }
-    .column-modal-vertical .modal-body { padding: 15px; max-height: 60vh; overflow-y: auto; }
+    .column-modal-vertical .modal-body { padding: 15px; max-height: 85vh; overflow-y: auto; }
     .column-selection-vertical { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .column-item-vertical { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; cursor: move; transition: background 0.2s; background: #fff; }
     .column-item-vertical:hover { background: #f9f9f9; }

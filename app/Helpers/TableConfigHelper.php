@@ -61,7 +61,7 @@ class TableConfigHelper
                     'end_date','insured','policy_status','date_registered','policy_id','insured_item','renewable',
                     'biz_type','term','term_unit','base_premium','premium','frequency','pay_plan','agency','agent','notes'
                 ],
-                'mandatory_columns' => ['policy_code', 'client_name', 'policy_status'],
+                'mandatory_columns' => ['policy_no'],
                 'column_definitions' => [
                     'policy_no' => 'Policy No',
                     'policy_code' => 'Policy Code',
