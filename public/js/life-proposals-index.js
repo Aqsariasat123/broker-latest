@@ -362,6 +362,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const filterToggle = document.getElementById('filterToggle');
   const followUpBtn = document.getElementById('followUpBtn');
   const submittedBtn = document.getElementById('submittedBtn');
+  const listAllBtn = document.getElementById('listAllBtn');
+
+  // List All button handler - clears all filters
+  if (listAllBtn) {
+    listAllBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const u = new URL(window.location.href);
+      u.searchParams.delete('follow_up');
+      u.searchParams.delete('submitted');
+      window.location.href = u.toString();
+    });
+  }
 
   function updateButtonColors() {
     const urlParams = new URLSearchParams(window.location.search);

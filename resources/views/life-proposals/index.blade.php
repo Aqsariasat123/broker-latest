@@ -47,8 +47,12 @@
                     @endphp
                     <input type="checkbox" id="filterToggle" {{ $hasFollowUp || $hasSubmitted ? 'checked' : '' }}>
                   </label>
-                  <button class="btn btn-follow-up" id="followUpBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">To Follow Up</button>
-                  <button class="btn btn-submitted" id="submittedBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Submitted</button>
+                  @if($hasFollowUp || $hasSubmitted)
+                    <button class="btn" id="listAllBtn" type="button" style="background:#28a745; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">List ALL</button>
+                  @else
+                    <button class="btn btn-follow-up" id="followUpBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">To Follow Up</button>
+                    <button class="btn btn-submitted" id="submittedBtn" type="button" style="border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Submitted</button>
+                  @endif
                 </div>
               </div>
           </div>
@@ -164,7 +168,18 @@
                     @elseif($col == 'age')
                       <td data-column="age">{{ $proposal->age }}</td>
                     @elseif($col == 'status')
-                      <td data-column="status"><span class="badge-status" style="background:{{ $proposal->status->name == 'Approved' ? '#28a745' : ($proposal->status->name=='Pending' ? '#ffc107' : ($proposal->status->name=='Declined' ? '#dc3545' : '#6c757d')) }}">{{ $proposal->status->name }}</span></td>
+                      @php
+                        $statusName = $proposal->status->name ?? '';
+                        $statusColor = '#6c757d'; // default gray
+                        if ($statusName == 'Approved') {
+                          $statusColor = '#28a745'; // green
+                        } elseif ($statusName == 'Pending') {
+                          $statusColor = '#ffc107'; // yellow
+                        } elseif ($statusName == 'Declined' || $statusName == 'Not Approved') {
+                          $statusColor = '#dc3545'; // red
+                        }
+                      @endphp
+                      <td data-column="status"><span class="badge-status" style="background:{{ $statusColor }}">{{ $statusName }}</span></td>
                     @elseif($col == 'source_of_payment')
                       <td data-column="source_of_payment">{{ $proposal->sourceOfPayment->name }}</td>
                     @elseif($col == 'mcr')
