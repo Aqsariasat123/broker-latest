@@ -79,6 +79,12 @@
     z-index: 10;
     min-width: 60px;
     text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .category-dropdown:hover {
+    background: #28a745;
   }
 
   .category-dropdown.show {

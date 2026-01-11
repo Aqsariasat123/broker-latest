@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/calender-index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/calender-index.css') }}?v={{ time() }}">
 
 
 
@@ -86,5 +86,5 @@
   // Initialize data from Blade
   const calendarEventsRoute = '{{ route("calendar.events") }}';
 </script>
-<script src="{{ asset('js/calender-index.js') }}"></script>
+<script src="{{ asset('js/calender-index.js') }}?v={{ time() }}"></script>
 @endsection

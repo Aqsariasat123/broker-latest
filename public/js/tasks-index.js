@@ -537,21 +537,26 @@
   function handleBack() {
       const referrer = document.referrer;
 
-      // Get date_range from current URL
+      // Get params from current URL
       const params = new URLSearchParams(window.location.search);
       const dateRange = params.get('date_range') ?? 'month';
+      const fromCalendar = params.get('from_calendar');
 
+      // If coming from calendar via List button
+      if (fromCalendar === '1') {
+          window.location.href = "/calender?filter=tasks&date_range=" + dateRange;
+      }
       // If coming from dashboard
-      if (referrer.includes('/dashboard')) {
+      else if (referrer.includes('/dashboard')) {
           window.location.href =
-              "/calendar" +
+              "/calender" +
               `?filter=tasks&date_range=${dateRange}`;
-      } 
+      }
       else if (window.history.length > 1) {
           window.history.back();
-      } 
+      }
       else {
-          window.location.href = "{{ route('dashboard') }}";
+          window.location.href = "/dashboard";
       }
   }
   function printTable() {

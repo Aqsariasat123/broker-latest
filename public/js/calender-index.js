@@ -243,6 +243,45 @@ document.querySelectorAll('.category-btn').forEach(btn => {
 });
 
 // ---------------------------------
-// 10. INIT
+// 10. LIST DROPDOWN CLICK HANDLERS
+// ---------------------------------
+document.querySelectorAll('.category-dropdown').forEach(dropdown => {
+    dropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const filter = this.id.replace('dropdown-', '');
+
+        // Calculate date range for current month view
+        const startDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+        const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const endDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+        // Navigate to respective list page based on filter
+        let url = '';
+        switch(filter) {
+            case 'tasks':
+                url = `/tasks?from_calendar=1&start_date=${startDate}&end_date=${endDate}`;
+                break;
+            case 'follow-ups':
+                url = `/contacts?from_calendar=1&follow_up=true&start_date=${startDate}&end_date=${endDate}`;
+                break;
+            case 'renewals':
+                url = `/policies?from_calendar=1&filter=expiring&start_date=${startDate}&end_date=${endDate}`;
+                break;
+            case 'instalments':
+                url = `/policies?from_calendar=1&tab=instalments&start_date=${startDate}&end_date=${endDate}`;
+                break;
+            case 'birthdays':
+                url = `/clients?from_calendar=1&birthdays=true&start_date=${startDate}&end_date=${endDate}`;
+                break;
+        }
+
+        if (url) {
+            window.location.href = url;
+        }
+    });
+});
+
+// ---------------------------------
+// 11. INIT
 // ---------------------------------
 updateDisplay();
