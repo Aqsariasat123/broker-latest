@@ -30,45 +30,53 @@ class TaskController extends Controller
                     ->where('task_status', '!=', 'Completed');
             }
 
-            // Handle date range filter
-            $dateRange = $request->get('date_range', 'month'); // default = 'month'
-            $now = Carbon::now();
+            // Handle date filtering - from calendar or date_range
             $startDate = null;
             $endDate = null;
 
-            switch ($dateRange) {
-                case 'today':
-                    $startDate = $now->copy()->startOfDay();
-                    $endDate = $now->copy()->endOfDay();
-                    break;
+            // If coming from calendar with specific dates
+            if ($request->has('from_calendar') && $request->has('start_date') && $request->has('end_date')) {
+                $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+                $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+            } else {
+                // Handle date range filter
+                $dateRange = $request->get('date_range', 'month'); // default = 'month'
+                $now = Carbon::now();
 
-                case 'week':
-                    $startDate = $now->copy()->startOfWeek();
-                    $endDate = $now->copy()->endOfWeek();
-                    break;
+                switch ($dateRange) {
+                    case 'today':
+                        $startDate = $now->copy()->startOfDay();
+                        $endDate = $now->copy()->endOfDay();
+                        break;
 
-                case 'month':
-                    $startDate = $now->copy()->startOfMonth();
-                    $endDate = $now->copy()->endOfMonth();
-                    break;
+                    case 'week':
+                        $startDate = $now->copy()->startOfWeek();
+                        $endDate = $now->copy()->endOfWeek();
+                        break;
 
-                case 'quarter':
-                    $startDate = $now->copy()->firstOfQuarter();
-                    $endDate = $now->copy()->lastOfQuarter();
-                    break;
+                    case 'month':
+                        $startDate = $now->copy()->startOfMonth();
+                        $endDate = $now->copy()->endOfMonth();
+                        break;
 
-                case 'year':
-                    $startDate = $now->copy()->startOfYear();
-                    $endDate = $now->copy()->endOfYear();
-                    break;
+                    case 'quarter':
+                        $startDate = $now->copy()->firstOfQuarter();
+                        $endDate = $now->copy()->lastOfQuarter();
+                        break;
 
-                default:
-                    if (str_starts_with($dateRange, 'year-')) {
-                        $selectedYear = (int) str_replace('year-', '', $dateRange);
-                        $startDate = Carbon::create($selectedYear, 1, 1)->startOfDay();
-                        $endDate = Carbon::create($selectedYear, 12, 31)->endOfDay();
-                    }
-                    break;
+                    case 'year':
+                        $startDate = $now->copy()->startOfYear();
+                        $endDate = $now->copy()->endOfYear();
+                        break;
+
+                    default:
+                        if (str_starts_with($dateRange, 'year-')) {
+                            $selectedYear = (int) str_replace('year-', '', $dateRange);
+                            $startDate = Carbon::create($selectedYear, 1, 1)->startOfDay();
+                            $endDate = Carbon::create($selectedYear, 12, 31)->endOfDay();
+                        }
+                        break;
+                }
             }
 
             if ($startDate && $endDate) {

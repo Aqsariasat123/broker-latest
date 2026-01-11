@@ -181,7 +181,6 @@
              <div class="footer-left">
               <a class="btn btn-export" href="{{ route('tasks.export', array_merge(request()->query(), ['page' => $tasks->currentPage()])) }}">Export</a>
               <button class="btn btn-column" id="columnBtn" type="button">Column</button>
-               <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
 
             </div>
             <div class="paginator">
@@ -211,13 +210,13 @@
 
   <!-- Add/Edit Task Modal (hidden, used for form structure) -->
   <div class="modal" id="taskModal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #ddd;">
-        <h4 id="modalTitle" style="margin: 0; font-size: 18px; font-weight: bold;">View/Edit Task</h4>
-        <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn-delete" id="deleteBtn" style="display: none; background: #dc3545; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;" onclick="deleteTask()">Delete</button>
-          <button type="submit" form="taskForm" class="btn-save" style="background: #28a745; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Save</button>
-          <button type="button" class="btn-cancel" onclick="closeModal()" style="background: #6c757d; color: #fff; border: none; padding: 6px 16px; border-radius: 2px; cursor: pointer;">Cancel</button>
+        <h4 id="modalTitle" style="margin: 0; font-size: 16px; font-weight: 600;">View/Edit Task</h4>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-delete" id="deleteBtn" style="display: none; background: #f3742a; color: #fff; border: none; padding: 5px 14px; border-radius: 3px; cursor: pointer; font-size: 13px;" onclick="deleteTask()">Delete</button>
+          <button type="submit" form="taskForm" class="btn-save" style="background: #f3742a; color: #fff; border: none; padding: 5px 14px; border-radius: 3px; cursor: pointer; font-size: 13px;">Save</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()" style="background: #000; color: #fff; border: none; padding: 5px 14px; border-radius: 3px; cursor: pointer; font-size: 13px;">Cancel</button>
         </div>
       </div>
       <form id="taskForm" method="POST">
@@ -414,5 +413,5 @@
   const tasksStoreRoute = '{{ route("tasks.store") }}';
   const csrfToken = '{{ csrf_token() }}';
 </script>
-<script src="{{ asset('js/tasks-index.js') }}"></script>
+<script src="{{ asset('js/tasks-index.js') }}?v={{ time() }}"></script>
 @endsection
