@@ -83,8 +83,8 @@ class FollowupController extends Controller
             }
 
             $policyNo = '';
-            if ($followup->lifeProposal && $followup->lifeProposal->policy) {
-                $policyNo = $followup->lifeProposal->policy->policy_no ?? '';
+            if ($followup->lifeProposal) {
+                $policyNo = $followup->lifeProposal->proposal_no ?? '';
             }
 
             $dueIn = '';
