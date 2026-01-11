@@ -6,8 +6,8 @@
 @php
   $selectedColumns = session('client_columns', [
     'client_name','client_type','nin_bcrn','dob_dor','mobile_no','wa','district','occupation','source','status','signed_up',
-    'employer','clid','contact_person','income_source','married','spouses_name','alternate_no','email_address','location',
-    'island','country','po_box_no','pep','pep_comment','image','salutation','first_name','other_names','surname','passport_no'
+    'employer','clid','contact_person','income_source','married','spouses_name','children','children_details','alternate_no','email_address','location',
+    'island','country','po_box_no','pep','pep_comment','image','salutation','first_name','other_names','surname','passport_no','pic','industry'
   ]);
 @endphp
 
@@ -111,6 +111,8 @@
                 'income_source' => ['label' => 'Income Source', 'filter' => false],
                 'married' => ['label' => 'Married', 'filter' => false],
                 'spouses_name' => ['label' => 'Spouses Name', 'filter' => false],
+                'children' => ['label' => 'Children', 'filter' => false],
+                'children_details' => ['label' => 'Children Details', 'filter' => false],
                 'alternate_no' => ['label' => 'Alternate No', 'filter' => false],
                 'email_address' => ['label' => 'Email Address', 'filter' => false],
                 'location' => ['label' => 'Location', 'filter' => false],
@@ -125,6 +127,8 @@
                 'other_names' => ['label' => 'Other Names', 'filter' => false],
                 'surname' => ['label' => 'Surname', 'filter' => false],
                 'passport_no' => ['label' => 'Passport No', 'filter' => false],
+                'pic' => ['label' => 'PIC', 'filter' => false],
+                'industry' => ['label' => 'Industry', 'filter' => false],
               ];
             @endphp
             @foreach($selectedColumns as $col)
@@ -198,6 +202,10 @@
                   <td data-column="married">{{ $client->married ? 'Yes' : 'No' }}</td>
                 @elseif($col == 'spouses_name')
                   <td data-column="spouses_name">{{ $client->spouses_name ?? '-' }}</td>
+                @elseif($col == 'children')
+                  <td data-column="children">{{ $client->children ?? '-' }}</td>
+                @elseif($col == 'children_details')
+                  <td data-column="children_details">{{ $client->children_details ?? '-' }}</td>
                 @elseif($col == 'alternate_no')
                   <td data-column="alternate_no">{{ $client->alternate_no ?? '-' }}</td>
                 @elseif($col == 'email_address')
@@ -226,6 +234,10 @@
                   <td data-column="surname">{{ $client->surname }}</td>
                 @elseif($col == 'passport_no')
                   <td data-column="passport_no">{{ $client->passport_no ?? '-' }}</td>
+                @elseif($col == 'pic')
+                  <td data-column="pic">{{ $client->pic ?? '-' }}</td>
+                @elseif($col == 'industry')
+                  <td data-column="industry">{{ $client->industry ?? '-' }}</td>
                 @endif
               @endforeach
             </tr>
@@ -684,6 +696,22 @@
                 <input id="spouses_name" name="spouses_name" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
               </div>
               <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Children</span>
+                <input id="children" name="children" type="number" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Children Details</span>
+                <input id="children_details" name="children_details" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">PIC</span>
+                <input id="pic" name="pic" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
+                <span class="detail-label">Industry</span>
+                <input id="industry" name="industry" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
+              </div>
+              <div class="detail-row" data-field-type="individual" style="display:none;">
                 <span class="detail-label">Issuing Country</span>
                 <div style="display:flex; gap:5px; align-items:center; flex:1;">
                   <select id="issuing_country" name="issuing_country" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
@@ -902,6 +930,8 @@
                 'income_source'=>'Income Source',
                 'married'=>'Married',
                 'spouses_name'=>'Spouses Name',
+                'children'=>'Children',
+                'children_details'=>'Children Details',
                 'alternate_no'=>'Alternate No',
                 'email_address'=>'Email Address',
                 'location'=>'Location',
@@ -915,7 +945,9 @@
                 'first_name'=>'First Name',
                 'other_names'=>'Other Names',
                 'surname'=>'Surname',
-                'passport_no'=>'Passport No'
+                'passport_no'=>'Passport No',
+                'pic'=>'PIC',
+                'industry'=>'Industry'
               ];
               $ordered = [];
               foreach($selectedColumns as $col) {

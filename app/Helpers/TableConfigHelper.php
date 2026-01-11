@@ -464,6 +464,29 @@ class TableConfigHelper
                     'removed' => 'Removed',
                 ],
             ],
+            'followups' => [
+                'module' => 'followups',
+                'route_prefix' => 'followups',
+                'session_key' => 'followup_columns',
+                'default_columns' => [
+                    'fuid', 'due_date', 'due_in', 'category', 'name', 'follow_up_note',
+                    'contact_no', 'policy_no', 'fu_status', 'date_done', 'comment'
+                ],
+                'mandatory_columns' => ['fuid', 'name'],
+                'column_definitions' => [
+                    'fuid' => 'FUID',
+                    'due_date' => 'Due Date',
+                    'due_in' => 'Due in',
+                    'category' => 'Category',
+                    'name' => 'Name',
+                    'follow_up_note' => 'Follow Up Note',
+                    'contact_no' => 'Contact No',
+                    'policy_no' => 'Policy No',
+                    'fu_status' => 'FU Status',
+                    'date_done' => 'Date Done',
+                    'comment' => 'Comment',
+                ],
+            ],
         ];
 
         return $configs[$module] ?? null;

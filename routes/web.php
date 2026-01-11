@@ -27,6 +27,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\NomineeController;
+use App\Http\Controllers\FollowupController;
 
 
 
@@ -279,6 +280,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
     Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+
+    // Followups Routes
+    Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
+    Route::get('/followups/export', [FollowupController::class, 'export'])->name('followups.export');
+    Route::post('/followups/save-column-settings', [FollowupController::class, 'saveColumnSettings'])->name('followups.save-column-settings');
+    Route::post('/followups/{followup}/status', [FollowupController::class, 'updateStatus'])->name('followups.update-status');
 
     // Secure file download route for encrypted files
     Route::get('/secure-file/{type}/{id}', function ($type, $id) {

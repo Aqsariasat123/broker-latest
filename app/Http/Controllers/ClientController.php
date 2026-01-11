@@ -60,11 +60,11 @@ class ClientController extends Controller
                 }
                 break;
        }
-        if ($startDate && $endDate) {
+        // Only apply date filter if explicitly requested (from_calendar or specific date filters)
+        if ($request->has('from_calendar') && $startDate && $endDate) {
              $query->whereBetween('id_expiry_date', [$startDate, $endDate]);
-
         }
-      
+
         // Filter for To Follow Up - show only clients with expired or expiring policies
         if ($request->has('follow_up') && $request->follow_up == 'true') {
             $query->whereHas('policies', function($q) {
@@ -154,6 +154,8 @@ class ClientController extends Controller
             'income_source' => 'nullable|string|max:255',
             'married' => 'boolean',
             'spouses_name' => 'nullable|string|max:255',
+            'children' => 'nullable|integer',
+            'children_details' => 'nullable|string',
             'alternate_no' => 'nullable|string|max:20',
             'email_address' => 'nullable|email',
             'location' => 'nullable|string',
@@ -167,6 +169,8 @@ class ClientController extends Controller
             'other_names' => 'nullable|string|max:255',
             'surname' => 'nullable|string|max:255',
             'passport_no' => 'nullable|string|max:50',
+            'pic' => 'nullable|string|max:255',
+            'industry' => 'nullable|string|max:255',
             'id_expiry_date' => 'nullable|date',
             'monthly_income' => 'nullable|string|max:255',
             'agency' => 'nullable|string|max:255',
@@ -349,6 +353,8 @@ class ClientController extends Controller
             'income_source' => 'nullable|string|max:255',
             'married' => 'boolean',
             'spouses_name' => 'nullable|string|max:255',
+            'children' => 'nullable|integer',
+            'children_details' => 'nullable|string',
             'alternate_no' => 'nullable|string|max:20',
             'email_address' => 'nullable|email',
             'location' => 'nullable|string',
@@ -361,6 +367,8 @@ class ClientController extends Controller
             'salutation' => 'nullable|string|max:50',
             'other_names' => 'nullable|string|max:255',
             'passport_no' => 'nullable|string|max:50',
+            'pic' => 'nullable|string|max:255',
+            'industry' => 'nullable|string|max:255',
             'id_expiry_date' => 'nullable|date',
             'monthly_income' => 'nullable|string|max:255',
             'agency' => 'nullable|string|max:255',

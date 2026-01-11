@@ -55,7 +55,7 @@
       const formMethod = document.getElementById('formMethod');
       
       if (mode === 'edit' && task) {
-        if (title) title.textContent = 'Edit Task';
+        if (title) title.textContent = 'View/Edit Task';
         if (form) {
           form.action = `/tasks/${currentTaskId}`;
           form.method = 'POST';
@@ -205,7 +205,7 @@
         if (deleteBtn) deleteBtn.style.display = 'none';
         currentTaskId = null;
       } else {
-        if (title) title.textContent = 'Edit Task';
+        if (title) title.textContent = 'View/Edit Task';
         if (form) {
           form.action = `/tasks/${currentTaskId}`;
           form.method = 'POST';

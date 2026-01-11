@@ -262,7 +262,7 @@ document.querySelectorAll('.category-dropdown').forEach(dropdown => {
                 url = `/tasks?from_calendar=1&start_date=${startDate}&end_date=${endDate}`;
                 break;
             case 'follow-ups':
-                url = `/contacts?from_calendar=1&follow_up=1&start_date=${startDate}&end_date=${endDate}`;
+                url = `/followups?from_calendar=1&start_date=${startDate}&end_date=${endDate}`;
                 break;
             case 'renewals':
                 url = `/policies?from_calendar=1&filter=expiring&start_date=${startDate}&end_date=${endDate}`;
