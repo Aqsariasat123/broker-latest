@@ -535,23 +535,15 @@
       }
     });
   function handleBack() {
-      const referrer = document.referrer;
-
       // Get params from current URL
       const params = new URLSearchParams(window.location.search);
-      const dateRange = params.get('date_range') ?? 'month';
       const fromCalendar = params.get('from_calendar');
 
-      // If coming from calendar via List button
+      // If coming from calendar via List button, go back to calendar
       if (fromCalendar === '1') {
-          window.location.href = "/calendar?filter=tasks&date_range=" + dateRange;
+          window.location.href = "/calendar?filter=tasks";
       }
-      // If coming from dashboard
-      else if (referrer.includes('/dashboard')) {
-          window.location.href =
-              "/calendar" +
-              `?filter=tasks&date_range=${dateRange}`;
-      }
+      // Otherwise use browser back or go to dashboard
       else if (window.history.length > 1) {
           window.history.back();
       }
