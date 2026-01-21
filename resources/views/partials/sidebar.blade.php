@@ -1,7 +1,6 @@
 
 <div class="ks-sidebar-logo">
     <img src="{{ asset('asset/logo.png') }}" alt="Keystone Brokers" class="ks-sidebar-logo-img">
-    <span class="ks-sidebar-logo-text">KEYSTONE BROKERS (PTY) LTD</span>
 </div>
 
 @php
