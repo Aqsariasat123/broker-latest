@@ -60,11 +60,36 @@
             <tbody>
               @forelse($followups as $followup)
                 <tr class="{{ $followup->is_overdue ? 'overdue' : '' }}">
-                  <td class="bell-cell {{ $followup->is_overdue ? 'expired' : '' }}">
+                  @php
+                    // Determine priority color based on due_in
+                    $dueIn = $followup->due_in;
+                    $priorityColor = '#ccc'; // Default gray
+                    $priorityBg = 'transparent';
+                    $priorityBorder = '#ccc';
+
+                    if ($followup->is_overdue || $dueIn < 0) {
+                      $priorityColor = '#dc3545'; // Red - overdue
+                      $priorityBg = '#dc3545';
+                      $priorityBorder = '#dc3545';
+                    } elseif ($dueIn <= 7) {
+                      $priorityColor = '#ffc107'; // Yellow - due within 7 days
+                      $priorityBg = '#ffc107';
+                      $priorityBorder = '#ffc107';
+                    } elseif ($dueIn <= 14) {
+                      $priorityColor = '#e6c700'; // Light yellow - due within 14 days
+                      $priorityBg = '#e6c700';
+                      $priorityBorder = '#e6c700';
+                    } elseif ($dueIn <= 30) {
+                      $priorityColor = '#17a2b8'; // Blue - due within 30 days
+                      $priorityBg = '#17a2b8';
+                      $priorityBorder = '#17a2b8';
+                    }
+                  @endphp
+                  <td class="bell-cell">
                     <div style="display:flex; align-items:center; justify-content:center;">
-                      <div class="status-indicator {{ $followup->is_overdue ? 'expired' : 'normal' }}"
-                           style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $followup->is_overdue ? '#dc3545' : '#ccc' }};
-                                  background-color:{{ $followup->is_overdue ? '#dc3545' : 'transparent' }};">
+                      <div class="status-indicator"
+                           style="width:14px; height:14px; border-radius:50%; border:2px solid {{ $priorityBorder }};
+                                  background-color:{{ $priorityBg }};">
                       </div>
                     </div>
                   </td>
