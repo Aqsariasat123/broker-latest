@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('page-title', 'Calendar')
+
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/calender-index.css') }}?v={{ time() }}">
 

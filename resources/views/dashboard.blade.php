@@ -1,15 +1,13 @@
 @extends('layouts.app')
 
+@section('page-title', 'Dashboard')
+
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
 
 
 <div class="dashboard">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>Dashboard</h2>
-  </div>
-
   <!-- Statistics Cards -->
   <div class="cards">
 

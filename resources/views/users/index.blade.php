@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('page-title', 'Users')
+
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/users-index.css') }}">
 

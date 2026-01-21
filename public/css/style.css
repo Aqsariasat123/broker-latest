@@ -304,20 +304,83 @@ body {
   line-height: 1;
 }
 
-/* removed body.sidebar-open shifting so button stays fixed after click */      
+/* removed body.sidebar-open shifting so button stays fixed after click */
 
-/* Top Header with Profile Dropdown */
-.top-header {
+/* Global Page Header */
+.page-header {
   position: sticky;
   top: 0;
-  background: #fff;
+  background: #e8e8e8;
   padding: 12px 20px;
-  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 100;
   margin: -20px -20px 20px -20px;
+  min-height: 50px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.header-avatar-initials {
+  background: #f3742a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.header-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #555;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.header-logout:hover {
+  background: #ddd;
+  color: #333;
+}
+
+.header-logout i {
+  font-size: 18px;
+}
+
+/* Legacy top-header (hidden) */
+.top-header {
+  display: none;
 }
 
 .profile-dropdown {

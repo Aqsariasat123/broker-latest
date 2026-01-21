@@ -1,4 +1,6 @@
 @extends('layouts.app')
+
+@section('page-title', 'Policies')
 @section('content')
 
 @include('partials.table-styles')

@@ -1,4 +1,6 @@
 @extends('layouts.app')
+
+@section('page-title', 'Clients')
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/clients-index.css') }}">
 @include('partials.table-styles')

@@ -1,4 +1,6 @@
 @extends('layouts.app')
+
+@section('page-title', 'Payment Plans')
 @section('content')
 
 @include('partials.table-styles')

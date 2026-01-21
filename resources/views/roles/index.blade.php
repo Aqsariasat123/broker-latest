@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('page-title', 'Roles')
+
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/roles-index.css') }}">
 
