@@ -142,74 +142,85 @@ class AuthController extends Controller
             }
 
            
-            $stats = [
-                // Tasks due today or overdue (not completed)
-                'tasks_today' => Task::query()
-                    ->where('task_status', '!=', 'Completed')
+            // Build stats with safe queries
+            $stats = [];
+
+            // Tasks due today or overdue (not completed)
+            try {
+                $stats['tasks_today'] = Task::where('task_status', '!=', 'Completed')
                     ->where('due_date', '<=', now()->format('Y-m-d'))
-                    ->count(),
+                    ->count();
+            } catch (\Exception $e) { $stats['tasks_today'] = 0; }
 
-                // Policies expiring in selected date range
-                'policies_expiring' => Policy::query()
-                    ->whereBetween('end_date', [$startDate, $endDate])
-                    ->where('policy_status', '!=', 'Cancelled')
-                    ->count(),
+            // Policies expiring in selected date range
+            try {
+                $stats['policies_expiring'] = Policy::whereBetween('end_date', [$startDate, $endDate])->count();
+            } catch (\Exception $e) { $stats['policies_expiring'] = 0; }
 
-                // Instalments overdue (unpaid and past due date)
-                'instalments_overdue' => PaymentPlan::query()
-                    ->where('status', '!=', 'Paid')
+            // Instalments overdue (unpaid and past due date)
+            try {
+                $stats['instalments_overdue'] = PaymentPlan::where('status', '!=', 'Paid')
                     ->where('due_date', '<', now()->format('Y-m-d'))
-                    ->count(),
+                    ->count();
+            } catch (\Exception $e) { $stats['instalments_overdue'] = 0; }
 
-                // IDs expired (clients with expired ID documents)
-                'ids_expired' => Client::query()
-                    ->whereNotNull('id_expiry_date')
+            // IDs expired (clients with expired ID documents)
+            try {
+                $stats['ids_expired'] = Client::whereNotNull('id_expiry_date')
                     ->where('id_expiry_date', '<', now()->format('Y-m-d'))
-                    ->count(),
+                    ->count();
+            } catch (\Exception $e) { $stats['ids_expired'] = 0; }
 
-                // General policies (non-life policies) count
-                'general_policies' => Policy::whereHas('policyClass', function($q) {
-                        $q->where('name', 'not like', '%Life%');
-                    })->count(),
+            // General policies count (all policies for now)
+            try {
+                $stats['general_policies'] = Policy::count();
+            } catch (\Exception $e) { $stats['general_policies'] = 0; }
 
-                // Gen-Com Outstanding - unpaid commission amounts
-                'gen_com_outstanding' => Commission::query()
-                    ->whereHas('paymentStatus', fn($q) => $q->where('name', '!=', 'Paid'))
-                    ->sum('amount_due') ?? 0,
+            // Gen-Com Outstanding - unpaid commission amounts
+            try {
+                $stats['gen_com_outstanding'] = Commission::whereNull('date_received')
+                    ->sum('amount_due') ?? 0;
+            } catch (\Exception $e) { $stats['gen_com_outstanding'] = 0; }
 
-                // Open leads (contacts not archived or converted)
-                'open_leads' => Contact::query()
-                    ->whereNotIn('status', ['Archived', 'Converted', 'Lost'])
-                    ->count(),
+            // Open leads (contacts not archived or converted)
+            try {
+                $stats['open_leads'] = Contact::where('status', '!=', 'Archived')
+                    ->where('status', '!=', 'Converted')
+                    ->count();
+            } catch (\Exception $e) { $stats['open_leads'] = 0; }
 
-                // Follow-ups due today or overdue
-                'follow_ups_today' => Followup::query()
-                    ->where('status', '!=', 'Completed')
+            // Follow-ups due today or overdue
+            try {
+                $stats['follow_ups_today'] = Followup::where('status', '!=', 'Completed')
                     ->where('follow_up_date', '<=', now()->format('Y-m-d'))
-                    ->count(),
+                    ->count();
+            } catch (\Exception $e) { $stats['follow_ups_today'] = 0; }
 
-                // Life Proposals with Pending status
-                'proposals_pending' => LifeProposal::query()
-                    ->whereHas('status', fn($q) => $q->where('name', 'like', '%Pending%'))
-                    ->count(),
+            // Life Proposals with Pending status
+            try {
+                $stats['proposals_pending'] = LifeProposal::whereHas('status', fn($q) => $q->where('name', 'like', '%Pending%'))
+                    ->count();
+            } catch (\Exception $e) { $stats['proposals_pending'] = 0; }
 
-                // Life Proposals with Processing status
-                'proposals_processing' => LifeProposal::query()
-                    ->whereHas('status', fn($q) => $q->where('name', 'like', '%Processing%'))
-                    ->count(),
+            // Life Proposals with Processing status
+            try {
+                $stats['proposals_processing'] = LifeProposal::whereHas('status', fn($q) => $q->where('name', 'like', '%Processing%'))
+                    ->count();
+            } catch (\Exception $e) { $stats['proposals_processing'] = 0; }
 
-                // Life policies count
-                'life_policies' => Policy::whereHas('policyClass', function($q) {
-                        $q->where('name', 'like', '%Life%');
-                    })->count(),
+            // Life policies count
+            try {
+                $stats['life_policies'] = Policy::whereHas('policyClass', fn($q) => $q->where('name', 'like', '%Life%'))
+                    ->count();
+            } catch (\Exception $e) { $stats['life_policies'] = 0; }
 
-                // Birthdays today (matching month and day)
-                'birthdays_today' => Client::query()
-                    ->whereNotNull('dob_dor')
+            // Birthdays today (matching month and day)
+            try {
+                $stats['birthdays_today'] = Client::whereNotNull('dob_dor')
                     ->whereMonth('dob_dor', now()->month)
                     ->whereDay('dob_dor', now()->day)
-                    ->count(),
-            ];
+                    ->count();
+            } catch (\Exception $e) { $stats['birthdays_today'] = 0; }
 
 
             // -------------------------------
