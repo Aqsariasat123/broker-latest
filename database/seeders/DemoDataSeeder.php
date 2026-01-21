@@ -126,13 +126,15 @@ class DemoDataSeeder extends Seeder
         if ($lifeClassId) {
             $this->command->info('Adding Life Policies...');
             for ($i = 0; $i < 5; $i++) {
+                $startDate = Carbon::now()->subMonths(rand(1, 12));
                 Policy::create([
                     'client_id' => $clientId,
                     'policy_no' => 'LIFE' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                     'policy_code' => 'POL' . str_pad(300 + $i, 6, '0', STR_PAD_LEFT),
                     'policy_class_id' => $lifeClassId,
-                    'start_date' => Carbon::now()->subMonths(rand(1, 12)),
+                    'start_date' => $startDate,
                     'end_date' => Carbon::now()->addMonths(rand(6, 24)),
+                    'date_registered' => $startDate,
                     'premium' => rand(500, 2000),
                     'sum_insured' => rand(50000, 500000),
                 ]);
@@ -142,13 +144,15 @@ class DemoDataSeeder extends Seeder
         // === GENERAL POLICIES (expiring this month) ===
         $this->command->info('Adding General Policies expiring this month...');
         for ($i = 0; $i < 3; $i++) {
+            $startDate = Carbon::now()->subYear();
             Policy::create([
                 'client_id' => $clientId,
                 'policy_no' => 'GEN' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                 'policy_code' => 'POL' . str_pad(400 + $i, 6, '0', STR_PAD_LEFT),
                 'policy_class_id' => $generalClassId,
-                'start_date' => Carbon::now()->subYear(),
+                'start_date' => $startDate,
                 'end_date' => Carbon::now()->addDays(rand(1, 30)), // Expiring this month
+                'date_registered' => $startDate,
                 'premium' => rand(1000, 5000),
                 'sum_insured' => rand(100000, 1000000),
             ]);
