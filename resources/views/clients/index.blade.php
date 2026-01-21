@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
-@section('page-title', 'Clients')
+@section('page-title')
+@if($filter == "ids_expired")
+Expired IDs
+@elseif($filter == "birthday_today")
+Birthdays Today
+@else
+Clients
+@endif
+@endsection
+
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/clients-index.css') }}">
 @include('partials.table-styles')
@@ -21,29 +30,11 @@
   </div>
 
   <!-- Main Clients Table View -->
-
-  <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3 style="margin:0; font-size:18px; font-weight:600;">
-          @if($filter == "ids_expired")
-             Expired IDs
-          @elseif($filter == "birthday_today")
-             Birthdays Today
-          @else
-             Clients
-            <span id="followUpLabel" style="display:{{ request()->get('follow_up') == 'true' && !request()->get('client_id') ? 'inline' : 'none' }}; color:#f3742a; font-size:16px; font-weight:500;"> - To Follow Up</span>
-            <span class="client-name" id="clientPageName" style="color:#f3742a; font-size:16px; font-weight:500;"></span>
-          @endif
-          </h3>
-
-      </div>
-    </div>
-   
   <div class="clients-table-view" id="clientsTableView">
   <div class="container-table">
     <!-- Clients Card -->
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
-      <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
+      <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
                 <div class="records-found">Records Found - {{ $clients->total() }}</div>
 
       <div class="page-title-section">

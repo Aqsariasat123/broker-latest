@@ -378,6 +378,19 @@ body {
   font-size: 18px;
 }
 
+/* Table Header (for content areas, not to be confused with global page-header) */
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  gap: 15px;
+  background: #f5f5f5;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
 /* Legacy top-header (hidden) */
 .top-header {
   display: none;

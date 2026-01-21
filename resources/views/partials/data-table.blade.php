@@ -14,7 +14,7 @@
   <div class="container-table">
     <!-- Data Card -->
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
-      <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
+      <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
         <h3>{{ ucfirst($module) }}</h3>
         <div class="records-found">Records Found - {{ $data->total() ?? count($data) }}</div>
