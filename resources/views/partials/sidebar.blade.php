@@ -29,6 +29,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('dashboard.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('dashboard') || request()->is('/') ? 'active' : '' }}" data-tooltip="Dashboard">
         <a href="/dashboard">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-house"></i></span>
             <span class="ks-sidebar-label">Dashboard</span>
         </a>
     </li>
@@ -38,6 +39,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('calendar.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('calendar*') ? 'active' : '' }}" data-tooltip="Calendar">
         <a href="/calendar">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-calendar-days"></i></span>
             <span class="ks-sidebar-label">Calendar</span>
         </a>
     </li>
@@ -47,6 +49,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('tasks.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('tasks*') ? 'active' : '' }}" data-tooltip="Tasks">
         <a href="/tasks">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-clipboard-check"></i></span>
             <span class="ks-sidebar-label">Tasks</span>
         </a>
     </li>
@@ -56,6 +59,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('contacts.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('contacts*') ? 'active' : '' }}" data-tooltip="Contacts">
         <a href="/contacts">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-address-book"></i></span>
             <span class="ks-sidebar-label">Contacts</span>
         </a>
     </li>
@@ -65,6 +69,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('clients.view') || auth()->user()->isAdmin()))
     <li class="{{ $isClientContext || request()->is('clients*') ? 'active' : '' }}" data-tooltip="Clients">
         <a href="/clients">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-users"></i></span>
             <span class="ks-sidebar-label">Clients</span>
         </a>
     </li>
@@ -74,6 +79,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('life-proposals.view') || auth()->user()->isAdmin()))
     <li class="{{ (request()->is('life-proposals*') || $isProposalNominee) && !request()->has('client_id') ? 'active' : '' }}" data-tooltip="Life Proposals">
         <a href="/life-proposals">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-file-signature"></i></span>
             <span class="ks-sidebar-label">Life Proposals</span>
         </a>
     </li>
@@ -83,6 +89,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('policies.view') || auth()->user()->isAdmin()))
     <li class="{{ (request()->is('policies*') || $isPolicyNominee || $isPolicyComision || $isPolicyEndorment || $isPolicySchedule || $isPolicyVehicle || $isPolicyPayment || $isPolicyClaim || $isPolicyDoc) && !request()->has('client_id') ? 'active' : '' }}" data-tooltip="Policies">
         <a href="/policies">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-shield-halved"></i></span>
             <span class="ks-sidebar-label">Policies</span>
         </a>
     </li>
@@ -92,6 +99,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('commissions.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('commissions*') && !request()->has('policy_id') ? 'active' : '' }}" data-tooltip="Commission">
         <a href="/commissions">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-percent"></i></span>
             <span class="ks-sidebar-label">Commission</span>
         </a>
     </li>
@@ -101,6 +109,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('statements.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('statements*') ? 'active' : '' }}" data-tooltip="Statements">
         <a href="/statements">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-file-invoice"></i></span>
             <span class="ks-sidebar-label">Statements</span>
         </a>
     </li>
@@ -110,6 +119,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('incomes.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('incomes*') ? 'active' : '' }}" data-tooltip="Income">
         <a href="/incomes">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
             <span class="ks-sidebar-label">Income</span>
         </a>
     </li>
@@ -119,6 +129,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('expenses.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('expenses*') ? 'active' : '' }}" data-tooltip="Expenses">
         <a href="/expenses">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-arrow-trend-down"></i></span>
             <span class="ks-sidebar-label">Expenses</span>
         </a>
     </li>
@@ -128,6 +139,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('claims.view') || auth()->user()->isAdmin()))
     <li class="{{ (!request()->has('client_id') && !request()->has('policy_id') && request()->is('claims*')) ? 'active' : '' }}" data-tooltip="Claims">
         <a href="/claims?pending=1">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
             <span class="ks-sidebar-label">Claims</span>
         </a>
     </li>
@@ -137,6 +149,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('vehicles.view') || auth()->user()->isAdmin()))
     <li class="{{ (request()->is('vehicles*') && !$isPolicyVehicle) && (!request()->has('client_id')) ? 'active' : '' }}" data-tooltip="Vehicles">
         <a href="/vehicles">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-car"></i></span>
             <span class="ks-sidebar-label">Vehicles</span>
         </a>
     </li>
@@ -146,6 +159,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('documents.view') || auth()->user()->isAdmin()))
     <li class="{{ (!request()->has('client_id') && !request()->has('policy_id') && request()->is('documents*')) ? 'active' : '' }}" data-tooltip="Documents">
         <a href="/documents">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-folder-open"></i></span>
             <span class="ks-sidebar-label">Documents</span>
         </a>
     </li>
@@ -155,6 +169,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('reports.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('reports*') ? 'active' : '' }}" data-tooltip="Reports">
         <a href="/reports">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-chart-pie"></i></span>
             <span class="ks-sidebar-label">Reports</span>
         </a>
     </li>
@@ -164,6 +179,7 @@
     @if(auth()->check() && (auth()->user()->hasPermission('settings.view') || auth()->user()->isAdmin()))
     <li class="{{ request()->is('settings*') ? 'active' : '' }}" data-tooltip="Settings">
         <a href="/settings">
+            <span class="ks-sidebar-icon"><i class="fa-solid fa-gear"></i></span>
             <span class="ks-sidebar-label">Settings</span>
         </a>
     </li>
