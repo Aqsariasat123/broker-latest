@@ -25,8 +25,8 @@ var currentDebitNoteData = null;
 // Open payment side panel for editing
 window.openPaymentDetails = async function(debitNoteId) {
   try {
-    // Fetch the debit note data with payment info
-    const res = await fetch(`/api/debit-notes/${debitNoteId}/payment-info`, {
+    // Fetch the debit note data with payment info from debit-notes endpoint
+    const res = await fetch(`/debit-notes/${debitNoteId}`, {
       headers: {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
@@ -34,17 +34,7 @@ window.openPaymentDetails = async function(debitNoteId) {
     });
 
     if (!res.ok) {
-      // Fallback to fetching from payments endpoint
-      const paymentRes = await fetch(`/payments/${debitNoteId}`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-      if (!paymentRes.ok) throw new Error(`HTTP ${paymentRes.status}`);
-      const payment = await paymentRes.json();
-      openPaymentPanelWithData(payment);
-      return;
+      throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
@@ -64,10 +54,10 @@ function openPaymentPanelWithData(data) {
   const form = document.getElementById('paymentPanelForm');
   const formMethod = document.getElementById('paymentPanelFormMethod');
 
-  // Extract data (handle different response formats)
-  const debitNote = data.debit_note || data.debitNote || data;
-  const payment = data.payment || data.payments?.[0] || data;
-  const paymentPlan = debitNote.payment_plan || debitNote.paymentPlan || {};
+  // Data from /debit-notes/{id} - debit note is the main object
+  const debitNote = data;
+  const payment = data.payments?.[0] || null;
+  const paymentPlan = data.payment_plan || {};
   const schedule = paymentPlan.schedule || {};
   const policy = schedule.policy || {};
 
@@ -75,9 +65,9 @@ function openPaymentPanelWithData(data) {
     id: debitNote.id,
     debit_note_no: debitNote.debit_note_no,
     policy_no: policy.policy_no || 'N/A',
-    date_due: paymentPlan.due_date,
-    amount_due: debitNote.amount || paymentPlan.amount,
-    payment_type: paymentPlan.installment_label?.toLowerCase().includes('full') ? 'Full payment' : 'Instalment'
+    date_due: paymentPlan.due_date || debitNote.issued_on,
+    amount_due: debitNote.amount || paymentPlan.amount || 0,
+    payment_type: (paymentPlan.installment_label || '').toLowerCase().includes('full') ? 'Full payment' : 'Instalment'
   };
 
   // Populate readonly fields
