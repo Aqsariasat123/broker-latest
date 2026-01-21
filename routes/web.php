@@ -33,22 +33,18 @@ use App\Http\Controllers\FollowupController;
 
 
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect('/dashboard');
 });
 
-// Login routes
+// Login routes (temporarily disabled for development)
 Route::get('/login', function () {
-    // If user is logged in, redirect to dashboard
-    if (auth()->check()) {
-        return redirect('/dashboard');
-    }
-    return app(AuthController::class)->showLoginForm();
+    return redirect('/dashboard');
 })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// All protected routes
-Route::middleware('auth')->group(function () {
+// All routes - auth temporarily disabled for development
+Route::group([], function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard/export', [AuthController::class, 'exportDashboard'])->name('dashboard.export');
 
