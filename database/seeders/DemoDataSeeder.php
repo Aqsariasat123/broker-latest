@@ -199,11 +199,16 @@ class DemoDataSeeder extends Seeder
 
         // Skip if demo life proposals already exist
         if (!LifeProposal::where('proposers_name', 'like', 'Proposer%')->exists()) {
+            // Get max proposal ID for unique prid
+            $maxProposalId = LifeProposal::max('id') ?? 0;
+
             if ($pendingStatusId) {
                 $this->command->info('Adding Life Proposals (Pending)...');
                 for ($i = 0; $i < 3; $i++) {
+                    $maxProposalId++;
                     LifeProposal::create([
                         'proposers_name' => 'Proposer Pending ' . ($i + 1),
+                        'prid' => 'DEMO-PR' . str_pad($maxProposalId, 5, '0', STR_PAD_LEFT),
                         'contact_id' => $contactId,
                         'status_id' => $pendingStatusId,
                         'sum_assured' => rand(50000, 200000),
@@ -216,8 +221,10 @@ class DemoDataSeeder extends Seeder
             if ($processingStatusId) {
                 $this->command->info('Adding Life Proposals (Processing)...');
                 for ($i = 0; $i < 2; $i++) {
+                    $maxProposalId++;
                     LifeProposal::create([
                         'proposers_name' => 'Proposer Processing ' . ($i + 1),
+                        'prid' => 'DEMO-PR' . str_pad($maxProposalId, 5, '0', STR_PAD_LEFT),
                         'contact_id' => $contactId,
                         'status_id' => $processingStatusId,
                         'sum_assured' => rand(50000, 200000),
