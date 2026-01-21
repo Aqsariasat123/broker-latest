@@ -171,7 +171,7 @@ class TableConfigHelper
                 'default_columns' => [
                     'proposers_name','insurer','policy_plan','sum_assured','term','add_ons','offer_date',
                     'premium','frequency','stage','date','age','status','source_of_payment','mcr','doctor',
-                    'date_sent','date_completed','notes','agency','prid','class','is_submitted'
+                    'date_sent','date_completed','notes','agency','prid','class'
                 ],
                 'mandatory_columns' => ['proposers_name', 'insurer', 'policy_plan', 'status'],
                 'column_definitions' => [
@@ -197,7 +197,6 @@ class TableConfigHelper
                     'agency' => 'Agency',
                     'prid' => 'PRID',
                     'class' => 'Class',
-                    'is_submitted' => 'Submitted',
                 ],
             ],
             'tasks' => [

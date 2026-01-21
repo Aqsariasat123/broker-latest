@@ -196,8 +196,6 @@
                       <td data-column="agency">{{ $proposal->agencies->name ?? '-' }}</td>
                     @elseif($col == 'class')
                       <td data-column="class">{{ $proposal->class }}</td>
-                    @elseif($col == 'is_submitted')
-                      <td data-column="is_submitted">{{ $proposal->is_submitted ? 'Yes' : 'No' }}</td>
                     @endif
                   @endforeach
                 </tr>
