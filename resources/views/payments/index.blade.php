@@ -8,6 +8,16 @@
   $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('payments');
   $columnDefinitions = $config['column_definitions'] ?? [];
   $mandatoryColumns = $config['mandatory_columns'] ?? [];
+
+  // Context-aware column filtering
+  $contextColumns = $selectedColumns;
+  if ($context == 'policy') {
+      // Hide policy_no when viewing from Policy context
+      $contextColumns = array_filter($contextColumns, fn($col) => $col != 'policy_no');
+  } elseif ($context == 'client') {
+      // Hide client_name when viewing from Client context
+      $contextColumns = array_filter($contextColumns, fn($col) => $col != 'client_name');
+  }
 @endphp
 
 <div class="dashboard">
@@ -16,21 +26,18 @@
   <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
           <h3 style="margin:0; font-size:18px; font-weight:600;">
-            
-              @if($policy)
-                {{ $policy->policy_code }} - 
-              @endif
-              
-              @if($policy)
-                 <span class="client-name" style="color:#f3742a; font-size:20px; font-weight:500;"> Payments</span>
-              @else
-                 <span class="client-name" > Payments</span>
-              @endif
-            @if(isset($client) && $client)
-              <span class="client-name" style="color:#f3742a; font-size:16px; font-weight:500;"> - {{ $client->client_name }}</span>
+            @if($context == 'policy' && $policy)
+              {{ $policy->policy_code ?? $policy->policy_no }} -
+              <span style="color:#f3742a; font-size:20px; font-weight:500;">Payments</span>
+            @elseif($context == 'client' && $client)
+              <span style="color:#f3742a; font-size:20px; font-weight:500;">Payments</span>
+              <span style="color:#f3742a; font-size:16px; font-weight:500;"> - {{ $client->client_name }}</span>
+            @elseif(request()->get('filter') == 'overdue')
+              <span>Premium Instalments Due</span>
+            @else
+              <span>Payments</span>
             @endif
           </h3>
-       
       </div>
     </div>
   <div class="container-table">
@@ -38,26 +45,41 @@
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
       <div class="page-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
       <div class="page-title-section">
-        <div class="records-found">Records Found - {{ $payments->total() }}</div>
+        <div class="records-found">Records Found - {{ $debitNotes->total() }}</div>
         <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
           <div class="filter-group">
             <form method="GET" action="{{ route('payments.index') }}" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              @if($context == 'policy' && $policy)
+                <input type="hidden" name="policy_id" value="{{ $policy->id }}">
+              @endif
+              @if($context == 'client' && $client)
+                <input type="hidden" name="client_id" value="{{ $client->id }}">
+              @endif
               <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}" style="padding:6px 8px; border:1px solid #ccc; border-radius:2px; font-size:13px;">
+              <select name="status" style="padding:6px 8px; border:1px solid #ccc; border-radius:2px; font-size:13px;">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
+              </select>
               <input type="date" name="date_from" value="{{ request('date_from') }}" placeholder="From" style="padding:6px 8px; border:1px solid #ccc; border-radius:2px; font-size:13px;">
               <input type="date" name="date_to" value="{{ request('date_to') }}" placeholder="To" style="padding:6px 8px; border:1px solid #ccc; border-radius:2px; font-size:13px;">
               <button type="submit" class="btn btn-column" style="background:#fff; color:#000; border:1px solid #ccc;">Filter</button>
-              @if(request()->hasAny(['search', 'date_from', 'date_to']))
-                <a href="{{ route('payments.index') }}" class="btn btn-back" style="background:#ccc; color:#333; border-color:#ccc;">Clear</a>
+              @if(request()->hasAny(['search', 'date_from', 'date_to', 'status']))
+                <a href="{{ route('payments.index', array_filter(['policy_id' => $policy->id ?? null, 'client_id' => $client->id ?? null])) }}" class="btn btn-back" style="background:#ccc; color:#333; border-color:#ccc;">Clear</a>
               @endif
             </form>
           </div>
         </div>
       </div>
       <div class="action-buttons">
-                <button class="btn btn-back" onclick="window.history.back()">Back</button>
-
+        @if(request()->has('from_calendar') && request()->from_calendar == '1')
+          <button class="btn btn-back" onclick="window.location.href='/calendar?filter=instalments'">Back</button>
+        @else
+          <button class="btn btn-back" onclick="window.history.back()">Back</button>
+        @endif
         <button class="btn btn-add" id="addPaymentBtn">Add</button>
-        <a href="{{ route('payments.report') }}" class="btn btn-export" style="background:#fff; color:#000; border:1px solid #ccc;">Report</a>
       </div>
     </div>
 
@@ -73,7 +95,7 @@
         <thead>
           <tr>
             <th>Action</th>
-            @foreach($selectedColumns as $col)
+            @foreach($contextColumns as $col)
               @if(isset($columnDefinitions[$col]))
                 <th data-column="{{ $col }}">{{ $columnDefinitions[$col] }}</th>
               @endif
@@ -81,29 +103,99 @@
           </tr>
         </thead>
         <tbody>
-          @foreach($payments as $payment)
+          @foreach($debitNotes as $note)
+            @php
+              $paymentPlan = $note->paymentPlan;
+              $schedule = $paymentPlan->schedule ?? null;
+              $policyRecord = $schedule->policy ?? null;
+              $clientRecord = $policyRecord->client ?? null;
+
+              // Get the latest payment for this debit note
+              $latestPayment = $note->payments->first();
+              $totalPaid = $note->payments->sum('amount');
+
+              // Calculate due_in days
+              $dueDate = $paymentPlan->due_date ?? null;
+              $dueIn = null;
+              if ($dueDate) {
+                  $dueIn = \Carbon\Carbon::parse($dueDate)->diffInDays(now(), false) * -1;
+              }
+
+              // Determine payment type
+              $paymentType = $paymentPlan->installment_label ?? 'Instalment';
+              if (stripos($paymentType, 'full') !== false || $paymentPlan->frequency == 'single') {
+                  $paymentType = 'Full payment';
+              } else {
+                  $paymentType = 'Instalment';
+              }
+
+              // Determine status display
+              $status = ucfirst($note->status);
+              if ($note->status == 'paid') {
+                  $statusColor = '#28a745';
+              } elseif ($note->status == 'partial') {
+                  $statusColor = '#ffc107';
+              } elseif ($note->status == 'overdue' || ($dueIn !== null && $dueIn < 0 && $note->status != 'paid')) {
+                  $statusColor = '#dc3545';
+                  $status = 'Overdue';
+              } else {
+                  $statusColor = '#6c757d';
+                  $status = 'Unpaid';
+              }
+            @endphp
             <tr>
               <td class="action-cell">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentDetails({{ $payment->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
-               
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentDetails({{ $note->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
               </td>
-              @foreach($selectedColumns as $col)
-                @if($col == 'payment_reference')
-                  <td data-column="payment_reference">
-                    <a href="javascript:void(0)" onclick="openPaymentDetails({{ $payment->id }})" style="color:#007bff; text-decoration:underline;">{{ $payment->payment_reference }}</a>
+              @foreach($contextColumns as $col)
+                @if($col == 'debit_note_no')
+                  <td data-column="debit_note_no">
+                    <a href="javascript:void(0)" onclick="openPaymentDetails({{ $note->id }})" style="color:#007bff; text-decoration:underline;">{{ $note->debit_note_no }}</a>
                   </td>
+                @elseif($col == 'payment_type')
+                  <td data-column="payment_type">{{ $paymentType }}</td>
+                @elseif($col == 'installment_no')
+                  <td data-column="installment_no">{{ $paymentPlan->installment_label ?? '-' }}</td>
+                @elseif($col == 'date_due')
+                  <td data-column="date_due">{{ $dueDate ? \Carbon\Carbon::parse($dueDate)->format('d-M-y') : '-' }}</td>
+                @elseif($col == 'due_in')
+                  <td data-column="due_in" style="{{ $dueIn !== null && $dueIn < 0 ? 'color:#dc3545;' : '' }}">
+                    {{ $dueIn !== null ? $dueIn : '-' }}
+                  </td>
+                @elseif($col == 'amount_due')
+                  <td data-column="amount_due">{{ $note->amount ? number_format($note->amount, 2) : ($paymentPlan->amount ? number_format($paymentPlan->amount, 2) : '-') }}</td>
+                @elseif($col == 'status')
+                  <td data-column="status">
+                    <span style="font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; background:{{ $statusColor }};">
+                      {{ $status }}
+                    </span>
+                  </td>
+                @elseif($col == 'amount_paid')
+                  <td data-column="amount_paid">{{ $totalPaid > 0 ? number_format($totalPaid, 2) : '-' }}</td>
+                @elseif($col == 'date_paid')
+                  <td data-column="date_paid">{{ $latestPayment && $latestPayment->paid_on ? $latestPayment->paid_on->format('d-M-y') : '-' }}</td>
+                @elseif($col == 'payment_mode')
+                  <td data-column="payment_mode">{{ $latestPayment && $latestPayment->modeOfPayment ? $latestPayment->modeOfPayment->name : '-' }}</td>
+                @elseif($col == 'cheque_no')
+                  <td data-column="cheque_no">{{ $latestPayment->cheque_no ?? '-' }}</td>
                 @elseif($col == 'policy_no')
-                  <td data-column="policy_no">{{ $payment->debitNote->paymentPlan->schedule->policy->policy_no ?? '-' }}</td>
+                  <td data-column="policy_no">
+                    @if($policyRecord)
+                      <a href="{{ route('policies.show', $policyRecord->id) }}" style="color:#007bff; text-decoration:underline;">{{ $policyRecord->policy_no }}</a>
+                    @else
+                      -
+                    @endif
+                  </td>
                 @elseif($col == 'client_name')
-                  <td data-column="client_name">{{ $payment->debitNote->paymentPlan->schedule->policy->client->client_name ?? '-' }}</td>
-                @elseif($col == 'debit_note_no')
-                  <td data-column="debit_note_no">{{ $payment->debitNote->debit_note_no ?? '-' }}</td>
-                @elseif($col == 'paid_on')
-                  <td data-column="paid_on">{{ $payment->paid_on ? $payment->paid_on->format('d-M-y') : '-' }}</td>
-                @elseif($col == 'amount')
-                  <td data-column="amount">{{ $payment->amount ? number_format($payment->amount, 2) : '-' }}</td>
-                @elseif($col == 'mode_of_payment')
-                  <td data-column="mode_of_payment">{{ $payment->modeOfPayment ? $payment->modeOfPayment->name : ($payment->debitNote && $payment->debitNote->modeOfPayment ? $payment->debitNote->modeOfPayment->name : '-') }}</td>
+                  <td data-column="client_name">
+                    @if($clientRecord)
+                      <a href="{{ route('clients.show', $clientRecord->id) }}" style="color:#007bff; text-decoration:underline;">{{ $clientRecord->client_name }}</a>
+                    @else
+                      -
+                    @endif
+                  </td>
+                @elseif($col == 'comments')
+                  <td data-column="comments">{{ $latestPayment->notes ?? $note->notes ?? '-' }}</td>
                 @endif
               @endforeach
             </tr>
@@ -122,21 +214,21 @@
         @php
           $base = url()->current();
           $q = request()->query();
-          $current = $payments->currentPage();
-          $last = max(1, $payments->lastPage());
-          function page_url($base, $q, $p) {
+          $current = $debitNotes->currentPage();
+          $last = max(1, $debitNotes->lastPage());
+          function page_url_payments($base, $q, $p) {
             $params = array_merge($q, ['page' => $p]);
             return $base . '?' . http_build_query($params);
           }
         @endphp
 
-        <a class="btn-page" href="{{ $current > 1 ? page_url($base, $q, 1) : '#' }}" @if($current <= 1) disabled @endif>&laquo;</a>
-        <a class="btn-page" href="{{ $current > 1 ? page_url($base, $q, $current - 1) : '#' }}" @if($current <= 1) disabled @endif>&lsaquo;</a>
+        <a class="btn-page" href="{{ $current > 1 ? page_url_payments($base, $q, 1) : '#' }}" @if($current <= 1) disabled @endif>&laquo;</a>
+        <a class="btn-page" href="{{ $current > 1 ? page_url_payments($base, $q, $current - 1) : '#' }}" @if($current <= 1) disabled @endif>&lsaquo;</a>
 
         <span style="padding:0 8px;">Page {{ $current }} of {{ $last }}</span>
 
-        <a class="btn-page" href="{{ $current < $last ? page_url($base, $q, $current + 1) : '#' }}" @if($current >= $last) disabled @endif>&rsaquo;</a>
-        <a class="btn-page" href="{{ $current < $last ? page_url($base, $q, $last) : '#' }}" @if($current >= $last) disabled @endif>&raquo;</a>
+        <a class="btn-page" href="{{ $current < $last ? page_url_payments($base, $q, $current + 1) : '#' }}" @if($current >= $last) disabled @endif>&rsaquo;</a>
+        <a class="btn-page" href="{{ $current < $last ? page_url_payments($base, $q, $last) : '#' }}" @if($current >= $last) disabled @endif>&raquo;</a>
       </div>
     </div>
     </div>
@@ -203,13 +295,13 @@
               <label for="debit_note_id">Debit Note *</label>
               <select class="form-control" name="debit_note_id" id="debit_note_id" required>
                 <option value="">Select Debit Note</option>
-                @foreach($debitNotes as $note)
-                  <option value="{{ $note->id }}">
-                    {{ $note->debit_note_no }} - 
-                    {{ $note->paymentPlan->schedule->policy->policy_no ?? 'N/A' }} - 
-                    {{ $note->paymentPlan->schedule->policy->client->client_name ?? 'N/A' }} - 
-                    Amount: {{ number_format($note->amount, 2) }} - 
-                    Status: {{ ucfirst($note->status) }}
+                @foreach($allDebitNotes as $dn)
+                  <option value="{{ $dn->id }}">
+                    {{ $dn->debit_note_no }} -
+                    {{ $dn->paymentPlan->schedule->policy->policy_no ?? 'N/A' }} -
+                    {{ $dn->paymentPlan->schedule->policy->client->client_name ?? 'N/A' }} -
+                    Amount: {{ number_format($dn->amount, 2) }} -
+                    Status: {{ ucfirst($dn->status) }}
                   </option>
                 @endforeach
               </select>
@@ -241,7 +333,11 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group" style="flex:1 1 100%;">
+            <div class="form-group">
+              <label for="cheque_no">Cheque No</label>
+              <input type="text" class="form-control" name="cheque_no" id="cheque_no" placeholder="If applicable">
+            </div>
+            <div class="form-group">
               <label for="receipt">Receipt Document</label>
               <input type="file" class="form-control" name="receipt" id="receipt" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
             </div>
@@ -318,7 +414,6 @@
 
 <script>
   // Initialize data from Blade - must be before partials-table-scripts
-  // Note: mandatoryColumns is already declared in partials-table-scripts
   let currentPaymentId = null;
   const selectedColumns = @json($selectedColumns);
   const paymentsStoreRoute = '{{ route("payments.store") }}';

@@ -25,6 +25,7 @@
 
     <div class="top-bar">
       <div class="action-buttons">
+        <a href="{{ route('payments.index', ['policy_id' => $policy->id]) }}" class="btn btn-add" style="background:#17a2b8;">Payments</a>
         <button class="btn btn-back" onclick="window.location.href='{{ route('policies.index') }}'">Back</button>
       </div>
     </div>

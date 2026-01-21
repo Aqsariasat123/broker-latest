@@ -20,6 +20,7 @@
       <div class="action-buttons">
         <a href="{{ route('clients.edit', $client->id) }}" class="btn btn-edit">Edit</a>
         <a href="{{ route('policies.create') }}?client_id={{ $client->id }}" class="btn btn-add">Add Policy</a>
+        <a href="{{ route('payments.index', ['client_id' => $client->id]) }}" class="btn btn-add" style="background:#17a2b8;">Payments</a>
         <button class="btn btn-back" onclick="window.location.href='{{ route('clients.index') }}'">Back</button>
       </div>
     </div>

@@ -16,6 +16,7 @@ class Payment extends Model
         'paid_on',
         'amount',
         'mode_of_payment_id',
+        'cheque_no',
         'receipt_path',
         'is_encrypted',
         'notes',

@@ -268,7 +268,7 @@ document.querySelectorAll('.category-dropdown').forEach(dropdown => {
                 url = `/policies?from_calendar=1&filter=expiring&start_date=${startDate}&end_date=${endDate}`;
                 break;
             case 'instalments':
-                url = `/debit-notes?from_calendar=1&filter=overdue&start_date=${startDate}&end_date=${endDate}`;
+                url = `/payments?from_calendar=1&filter=overdue&start_date=${startDate}&end_date=${endDate}`;
                 break;
             case 'birthdays':
                 url = `/clients?from_calendar=1&filter=birthday_today&start_date=${startDate}&end_date=${endDate}`;

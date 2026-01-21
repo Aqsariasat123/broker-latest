@@ -15,62 +15,80 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
+        $policy = null;
+        $client = null;
+        $context = 'all'; // 'all', 'policy', 'client'
 
-        $policy= null;
-
-        $query = Payment::with(['debitNote.paymentPlan.schedule.policy.client']);
+        // Query DebitNotes (what's owed) with related payments (what's paid)
+        $query = DebitNote::with([
+            'paymentPlan.schedule.policy.client',
+            'payments.modeOfPayment'
+        ]);
 
         // Filter by client_id if provided
-        if ($request->has('client_id') && $request->client_id) {
-            $query->whereHas('debitNote.paymentPlan.schedule.policy', function($q) use ($request) {
+        if ($request->filled('client_id')) {
+            $query->whereHas('paymentPlan.schedule.policy', function($q) use ($request) {
                 $q->where('client_id', $request->client_id);
             });
+            $client = \App\Models\Client::find($request->client_id);
+            $context = 'client';
         }
 
-  
-
-
-        // Filter by debit note
-        if ($request->has('debit_note_id') && $request->debit_note_id) {
-            $query->where('debit_note_id', $request->debit_note_id);
+        // Filter by policy_id if provided
+        if ($request->filled('policy_id')) {
+            $query->whereHas('paymentPlan.schedule.policy', function ($subQ) use ($request) {
+                $subQ->where('id', $request->policy_id);
+            });
+            $policy = \App\Models\Policy::with('client')->find($request->policy_id);
+            $context = 'policy';
         }
 
-        // Filter by mode of payment
-        if ($request->has('mode_of_payment_id') && $request->mode_of_payment_id) {
-            $query->where('mode_of_payment_id', $request->mode_of_payment_id);
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        // Search by payment reference
-        if ($request->has('search') && $request->search) {
+        // Search by debit note number or policy number
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('payment_reference', 'like', "%{$search}%")
-                  ->orWhereHas('debitNote.paymentPlan.schedule.policy', function($subQ) use ($search) {
+                $q->where('debit_note_no', 'like', "%{$search}%")
+                  ->orWhereHas('paymentPlan.schedule.policy', function($subQ) use ($search) {
                       $subQ->where('policy_no', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('paymentPlan.schedule.policy.client', function($subQ) use ($search) {
+                      $subQ->where('client_name', 'like', "%{$search}%");
                   });
             });
         }
-        if ($request->filled('policy_id')) {
-            $query->whereHas('debitNote.paymentPlan.schedule.policy', function ($subQ) use ($request) {
-                $subQ->where('id', $request->policy_id);
+
+        // Date range filter (based on due date)
+        if ($request->filled('date_from')) {
+            $query->whereHas('paymentPlan', function($q) use ($request) {
+                $q->whereDate('due_date', '>=', $request->date_from);
             });
         }
-        if ($request->filled('policy_id')) {
-            $policy = \App\Models\Policy::find($request->policy_id);
-           
-       }
-        // Date range filter
-        if ($request->has('date_from') && $request->date_from) {
-            $query->whereDate('paid_on', '>=', $request->date_from);
-        }
-        if ($request->has('date_to') && $request->date_to) {
-            $query->whereDate('paid_on', '<=', $request->date_to);
+        if ($request->filled('date_to')) {
+            $query->whereHas('paymentPlan', function($q) use ($request) {
+                $q->whereDate('due_date', '<=', $request->date_to);
+            });
         }
 
-        $payments = $query->orderBy('paid_on', 'desc')->paginate(15);
+        // Calendar filter - overdue only
+        if ($request->get('filter') == 'overdue') {
+            $query->where('status', '!=', 'paid')
+                  ->whereHas('paymentPlan', function($q) {
+                      $q->whereDate('due_date', '<', now());
+                  });
+        }
 
-        // Get debit notes for filter
-        $debitNotes = DebitNote::with('paymentPlan.schedule.policy')->orderBy('created_at', 'desc')->get();
+        $debitNotes = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Get all debit notes for the add payment dropdown
+        $allDebitNotes = DebitNote::with('paymentPlan.schedule.policy.client')
+            ->where('status', '!=', 'paid')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Get modes of payment
         $modesOfPayment = LookupValue::whereHas('lookupCategory', function($q) {
@@ -81,14 +99,15 @@ class PaymentController extends Controller
         $config = \App\Helpers\TableConfigHelper::getConfig('payments');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('payments');
 
-        // Get client information if filtering by client_id
-        $client = null;
-        if ($request->has('client_id') && $request->client_id) {
-            $client = \App\Models\Client::find($request->client_id);
-        }
-
-        Log::info('Selected payment columns: ', $payments->toArray());
-        return view('payments.index', compact('payments', 'debitNotes', 'modesOfPayment', 'selectedColumns', 'client','policy'));
+        return view('payments.index', compact(
+            'debitNotes',
+            'allDebitNotes',
+            'modesOfPayment',
+            'selectedColumns',
+            'client',
+            'policy',
+            'context'
+        ));
     }
 
     public function create(Request $request)
@@ -120,6 +139,7 @@ class PaymentController extends Controller
             'paid_on' => 'required|date',
             'amount' => 'required|numeric|min:0',
             'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
+            'cheque_no' => 'nullable|string|max:255',
             'receipt' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx',
             'notes' => 'nullable|string',
         ]);
@@ -223,6 +243,7 @@ class PaymentController extends Controller
             'paid_on' => 'required|date',
             'amount' => 'required|numeric|min:0',
             'mode_of_payment_id' => 'nullable|exists:lookup_values,id',
+            'cheque_no' => 'nullable|string|max:255',
             'receipt' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx',
             'notes' => 'nullable|string',
         ]);

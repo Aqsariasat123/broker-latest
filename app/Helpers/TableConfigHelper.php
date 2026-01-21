@@ -426,17 +426,25 @@ class TableConfigHelper
                 'route_prefix' => 'payments',
                 'session_key' => 'payment_columns',
                 'default_columns' => [
-                    'payment_reference','policy_no','client_name','debit_note_no','paid_on','amount','mode_of_payment'
+                    'debit_note_no','payment_type','date_due','amount_due','status',
+                    'amount_paid','date_paid','payment_mode','cheque_no','policy_no','client_name','comments'
                 ],
-                'mandatory_columns' => ['payment_reference', 'paid_on', 'amount'],
+                'mandatory_columns' => ['debit_note_no', 'status'],
                 'column_definitions' => [
-                    'payment_reference' => 'Payment Reference',
-                    'policy_no' => 'Policy',
-                    'client_name' => 'Client',
                     'debit_note_no' => 'Debit Note',
-                    'paid_on' => 'Paid On',
-                    'amount' => 'Amount',
-                    'mode_of_payment' => 'Mode Of Payment',
+                    'payment_type' => 'Payment Type',
+                    'installment_no' => 'No',
+                    'date_due' => 'Date Due',
+                    'due_in' => 'Due In',
+                    'amount_due' => 'Amount Due',
+                    'status' => 'Status',
+                    'amount_paid' => 'Amount Paid',
+                    'date_paid' => 'Date Paid',
+                    'payment_mode' => 'Payment Mode',
+                    'cheque_no' => 'Cheque No',
+                    'policy_no' => 'Policy Number',
+                    'client_name' => 'Clients Name',
+                    'comments' => 'Comments',
                 ],
             ],
             'beneficial_owners' => [
