@@ -212,11 +212,11 @@ function populateProposalDetails(proposal) {
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Insurer</span>
-            <div class="detail-value">${proposal.insurer.name || '-'}</div>
+            <div class="detail-value">${proposal.insurer?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Policy Plan</span>
-            <div class="detail-value">${proposal.policy_plan.name || '-'}</div>
+            <div class="detail-value">${proposal.policy_plan?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Term</span>
@@ -241,7 +241,7 @@ function populateProposalDetails(proposal) {
         <div class="detail-section-body">
           <div class="detail-row">
             <span class="detail-label">Pay Plan</span>
-            <div class="detail-value">${proposal.frequency.name || '-'}</div>
+            <div class="detail-value">${proposal.frequency?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Base Premium</span>
@@ -257,7 +257,7 @@ function populateProposalDetails(proposal) {
           </div>
           <div class="detail-row">
             <span class="detail-label">Premium Source</span>
-            <div class="detail-value">${proposal.source_of_payment.name || '-'}</div>
+            <div class="detail-value">${proposal.source_of_payment?.name || '-'}</div>
           </div>
         </div>
       </div>
@@ -274,7 +274,7 @@ function populateProposalDetails(proposal) {
           </div>
           <div class="detail-row">
             <span class="detail-label">Proposal Stage</span>
-            <div class="detail-value">${proposal.stage.name || '-'}</div>
+            <div class="detail-value">${proposal.stage?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Submitted Date</span>
@@ -282,7 +282,7 @@ function populateProposalDetails(proposal) {
           </div>
           <div class="detail-row">
             <span class="detail-label">Application Status</span>
-            <div class="detail-value">${proposal.status.name || '-'}</div>
+            <div class="detail-value">${proposal.status?.name || '-'}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Close Date</span>
