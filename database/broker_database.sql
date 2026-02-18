@@ -1,11 +1,8 @@
-Warning: A partial dump from a server that has GTIDs will by default include the GTIDs of all transactions, even those that changed suppressed parts of the database. If you don't want to restore GTIDs, pass --set-gtid-purged=OFF. To make a complete dump, pass --all-databases --triggers --routines --events. 
-Warning: A dump from a server that has GTIDs enabled will by default include the GTIDs of all transactions, even those that were executed during its extraction and might not be represented in the dumped data. This might result in an inconsistent data dump. 
-In order to ensure a consistent backup of the database, pass --single-transaction or --lock-all-tables or --source-data. 
--- MySQL dump 10.13  Distrib 9.5.0, for macos14.8 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.45, for Linux (x86_64)
 --
 -- Host: localhost    Database: broker
 -- ------------------------------------------------------
--- Server version	9.5.0
+-- Server version	8.0.45-0ubuntu0.24.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -17,14 +14,6 @@ In order to ensure a consistent backup of the database, pass --single-transactio
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
-SET @@SESSION.SQL_LOG_BIN= 0;
-
---
--- GTID state at the beginning of the backup 
---
-
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '50e828de-cc88-11f0-861c-63dd2c41c108:1-1815';
 
 --
 -- Table structure for table `audit_logs`
@@ -36,16 +25,16 @@ DROP TABLE IF EXISTS `audit_logs`;
 CREATE TABLE `audit_logs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned DEFAULT NULL,
-  `action` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `model_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `model_id` bigint unsigned DEFAULT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `old_values` json DEFAULT NULL,
   `new_values` json DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `method` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `url` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `method` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -53,7 +42,7 @@ CREATE TABLE `audit_logs` (
   KEY `audit_logs_model_type_model_id_index` (`model_type`,`model_id`),
   KEY `audit_logs_action_index` (`action`),
   CONSTRAINT `audit_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +51,7 @@ CREATE TABLE `audit_logs` (
 
 LOCK TABLES `audit_logs` WRITE;
 /*!40000 ALTER TABLE `audit_logs` DISABLE KEYS */;
-INSERT INTO `audit_logs` VALUES (1,NULL,'login_failed',NULL,NULL,'Failed login attempt for: admin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 01:59:53','2026-01-09 01:59:53'),(2,NULL,'login_failed',NULL,NULL,'Failed login attempt for: admin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:01:19','2026-01-09 02:01:19'),(3,NULL,'login_failed',NULL,NULL,'Failed login attempt for: webadmin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:04:08','2026-01-09 02:04:08'),(4,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:04:40','2026-01-09 02:04:40'),(5,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:07:58','2026-01-09 02:07:58'),(6,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-09 06:33:11','2026-01-09 06:33:11');
+INSERT INTO `audit_logs` VALUES (1,NULL,'login_failed',NULL,NULL,'Failed login attempt for: admin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 01:59:53','2026-01-09 01:59:53'),(2,NULL,'login_failed',NULL,NULL,'Failed login attempt for: admin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:01:19','2026-01-09 02:01:19'),(3,NULL,'login_failed',NULL,NULL,'Failed login attempt for: webadmin',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:04:08','2026-01-09 02:04:08'),(4,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:04:40','2026-01-09 02:04:40'),(5,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8000/login','POST','2026-01-09 02:07:58','2026-01-09 02:07:58'),(6,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-09 06:33:11','2026-01-09 06:33:11'),(7,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8002/login','POST','2026-01-09 09:57:02','2026-01-09 09:57:02'),(8,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/logout','GET','2026-01-09 11:42:18','2026-01-09 11:42:18'),(9,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-09 11:42:24','2026-01-09 11:42:24'),(10,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/logout','GET','2026-01-09 11:46:17','2026-01-09 11:46:17'),(11,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-09 11:46:22','2026-01-09 11:46:22'),(12,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-10 06:15:48','2026-01-10 06:15:48'),(13,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-11 00:09:10','2026-01-11 00:09:10'),(14,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/logout','GET','2026-01-11 00:23:38','2026-01-11 00:23:38'),(15,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-11 00:23:45','2026-01-11 00:23:45'),(16,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/logout','GET','2026-01-11 01:10:49','2026-01-11 01:10:49'),(17,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-11 01:10:55','2026-01-11 01:10:55'),(18,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/logout','GET','2026-01-11 01:36:31','2026-01-11 01:36:31'),(19,1,'login',NULL,NULL,'User logged in',NULL,NULL,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','http://127.0.0.1:8001/login','POST','2026-01-11 01:36:37','2026-01-11 01:36:37'),(20,NULL,'login_failed',NULL,NULL,'Failed login attempt for: admin',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-11 10:13:12','2026-01-11 10:13:12'),(21,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-11 10:13:17','2026-01-11 10:13:17'),(22,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/logout','GET','2026-01-11 10:18:18','2026-01-11 10:18:18'),(23,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-11 10:18:24','2026-01-11 10:18:24'),(24,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 05:18:44','2026-01-12 05:18:44'),(25,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 09:33:30','2026-01-12 09:33:30'),(26,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/logout','GET','2026-01-12 09:40:52','2026-01-12 09:40:52'),(27,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 09:41:00','2026-01-12 09:41:00'),(28,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 12:05:27','2026-01-12 12:05:27'),(29,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/logout','GET','2026-01-12 13:21:29','2026-01-12 13:21:29'),(30,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 13:21:31','2026-01-12 13:21:31'),(31,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 17:19:49','2026-01-12 17:19:49'),(32,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 17:52:01','2026-01-12 17:52:01'),(33,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/logout','GET','2026-01-12 18:02:05','2026-01-12 18:02:05'),(34,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 18:02:11','2026-01-12 18:02:11'),(35,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-12 20:36:07','2026-01-12 20:36:07'),(36,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-16 17:11:35','2026-01-16 17:11:35'),(37,1,'logout',NULL,NULL,'User logged out',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/logout','GET','2026-01-16 17:14:33','2026-01-16 17:14:33'),(38,1,'login',NULL,NULL,'User logged in',NULL,NULL,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','https://brokermanagement.byredstone.com/login','POST','2026-01-16 17:14:35','2026-01-16 17:14:35');
 /*!40000 ALTER TABLE `audit_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -75,25 +64,25 @@ DROP TABLE IF EXISTS `beneficial_owners`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `beneficial_owners` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `owner_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `client_id` bigint unsigned NOT NULL,
-  `full_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `full_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `dob` date DEFAULT NULL,
-  `nin_passport_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `country` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nin_passport_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `expiry_date` date DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `position` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `position` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `shares` decimal(5,2) DEFAULT NULL,
   `pep` tinyint(1) NOT NULL DEFAULT '0',
-  `pep_details` text COLLATE utf8mb4_unicode_ci,
+  `pep_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `date_added` date DEFAULT NULL,
   `removed` tinyint(1) NOT NULL DEFAULT '0',
-  `relationship` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `relationship` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ownership_percentage` decimal(5,2) DEFAULT NULL,
-  `id_document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `poa_document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `id_document_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `poa_document_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -120,8 +109,8 @@ DROP TABLE IF EXISTS `cache`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cache` (
-  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expiration` int NOT NULL,
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -144,8 +133,8 @@ DROP TABLE IF EXISTS `cache_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cache_locks` (
-  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `owner` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expiration` int NOT NULL,
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -169,19 +158,19 @@ DROP TABLE IF EXISTS `claims`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `claims` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `claim_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `claim_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `policy_id` bigint unsigned DEFAULT NULL,
   `client_id` bigint unsigned DEFAULT NULL,
   `vehicle_id` bigint unsigned DEFAULT NULL,
   `loss_date` date DEFAULT NULL,
   `claim_date` date DEFAULT NULL,
   `claim_amount` decimal(15,2) DEFAULT NULL,
-  `claim_summary` text COLLATE utf8mb4_unicode_ci,
-  `claim_stage` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `claim_summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `claim_stage` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `close_date` date DEFAULT NULL,
   `paid_amount` decimal(15,2) DEFAULT NULL,
-  `settlment_notes` text COLLATE utf8mb4_unicode_ci,
+  `settlment_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -213,46 +202,54 @@ DROP TABLE IF EXISTS `clients`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clients` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `client_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `client_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nin_bcrn` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `client_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nin_bcrn` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dob_dor` date DEFAULT NULL,
-  `mobile_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `wa` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `district` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `occupation` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `source` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `source_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mobile_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `home_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `wa` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `district` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `occupation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `source_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pc_channel` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `has_vehicle` tinyint(1) NOT NULL DEFAULT '0',
   `has_house` tinyint(1) NOT NULL DEFAULT '0',
   `has_business` tinyint(1) NOT NULL DEFAULT '0',
   `has_boat` tinyint(1) NOT NULL DEFAULT '0',
-  `notes` text COLLATE utf8mb4_unicode_ci,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `signed_up` date NOT NULL,
-  `agency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `agent` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `employer` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_person` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `income_source` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `monthly_income` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agency` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agent` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employer` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_person` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `income_source` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `monthly_income` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `savings_budget` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `married` tinyint(1) NOT NULL DEFAULT '0',
-  `spouses_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `alternate_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email_address` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `location` text COLLATE utf8mb4_unicode_ci,
-  `island` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `country` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `po_box_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `spouses_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `children` int DEFAULT NULL,
+  `children_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `alternate_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_address` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `location` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `island` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `po_box_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pep` tinyint(1) NOT NULL DEFAULT '0',
-  `pep_comment` text COLLATE utf8mb4_unicode_ci,
-  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `salutation` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `first_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `other_names` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `surname` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `passport_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pep_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `salutation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `first_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `other_names` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `surname` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `passport_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pic` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `industry` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_expiry_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -260,7 +257,7 @@ CREATE TABLE `clients` (
   `poa_document_encrypted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `clients_clid_unique` (`clid`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -269,7 +266,7 @@ CREATE TABLE `clients` (
 
 LOCK TABLES `clients` WRITE;
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
-INSERT INTO `clients` VALUES (1,'Jean Grey','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000001',NULL,NULL,NULL,0,NULL,NULL,'jean.grey@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Jean',NULL,'Grey',NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(2,'Barbara Walton','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000002',NULL,NULL,NULL,0,NULL,NULL,'barbara.walton@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Barbara',NULL,'Walton',NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(3,'Cornerstone (Pty) Ltd','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000003',NULL,NULL,NULL,0,NULL,NULL,'cornerstone.(pty).ltd@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Cornerstone',NULL,'(Pty) Ltd',NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(4,'Anna\'s Spa','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000004',NULL,NULL,NULL,0,NULL,NULL,'annas.spa@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Anna\'s',NULL,'Spa',NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(5,'Brian Trapper','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000005',NULL,NULL,NULL,0,NULL,NULL,'brian.trapper@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Brian',NULL,'Trapper',NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(6,'Adbul Juma','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000006',NULL,NULL,NULL,0,NULL,NULL,'adbul.juma@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Adbul',NULL,'Juma',NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(7,'Beta Center','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000007',NULL,NULL,NULL,0,NULL,NULL,'beta.center@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Beta',NULL,'Center',NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(8,'Steven Drax','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,'Direct',NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000008',NULL,NULL,NULL,0,NULL,NULL,'steven.drax@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Steven',NULL,'Drax',NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0);
+INSERT INTO `clients` VALUES (1,'Jean Grey','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000001',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'jean.grey@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Jean',NULL,'Grey',NULL,NULL,NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(2,'Barbara Walton','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000002',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'barbara.walton@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Barbara',NULL,'Walton',NULL,NULL,NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(3,'Cornerstone (Pty) Ltd','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000003',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'cornerstone.(pty).ltd@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Cornerstone',NULL,'(Pty) Ltd',NULL,NULL,NULL,NULL,'2026-01-09 02:03:22','2026-01-09 02:03:22',0,0),(4,'Anna\'s Spa','Individual',NULL,NULL,'00000000',NULL,NULL,'1',NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000004',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'annas.spa@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Anna\'s',NULL,'Spa',NULL,NULL,NULL,NULL,'2026-01-09 02:03:23','2026-01-12 09:42:01',0,0),(5,'Brian Trapper','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000005',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'brian.trapper@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Brian',NULL,'Trapper',NULL,NULL,NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(6,'Adbul Juma','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000006',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'adbul.juma@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Adbul',NULL,'Juma',NULL,NULL,NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(7,'Beta Center','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000007',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'beta.center@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Beta',NULL,'Center',NULL,NULL,NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(8,'Steven Drax','Individual',NULL,NULL,'00000000',NULL,NULL,NULL,NULL,NULL,'Direct',NULL,NULL,0,0,0,0,NULL,'Active','2026-01-09',NULL,NULL,NULL,'CLI000008',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,'steven.drax@example.com',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'Steven',NULL,'Drax',NULL,NULL,NULL,NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23',0,0),(9,'a','Business','a',NULL,'545028212',NULL,NULL,'1','232',NULL,'41','a',NULL,0,0,0,0,'s','Inactive','2026-01-13','79','89',NULL,'CL1','a',NULL,NULL,NULL,0,NULL,NULL,NULL,'q','aqsariasat235@gmail.com',NULL,NULL,'105','q',0,NULL,NULL,NULL,'','','a',NULL,NULL,NULL,NULL,'2026-01-11 01:14:58','2026-01-12 09:41:59',0,0);
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -283,12 +280,12 @@ DROP TABLE IF EXISTS `commission_notes`;
 CREATE TABLE `commission_notes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `schedule_id` bigint unsigned NOT NULL,
-  `com_note_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `com_note_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `issued_on` date DEFAULT NULL,
   `total_premium` decimal(15,2) DEFAULT NULL,
   `expected_commission` decimal(15,2) DEFAULT NULL,
-  `attachment_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remarks` text COLLATE utf8mb4_unicode_ci,
+  `attachment_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -317,13 +314,13 @@ DROP TABLE IF EXISTS `commission_statements`;
 CREATE TABLE `commission_statements` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `commission_note_id` bigint unsigned DEFAULT NULL,
-  `com_stat_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `com_stat_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `period_start` date DEFAULT NULL,
   `period_end` date DEFAULT NULL,
   `net_commission` decimal(15,2) DEFAULT NULL,
   `tax_withheld` decimal(15,2) DEFAULT NULL,
-  `attachment_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remarks` text COLLATE utf8mb4_unicode_ci,
+  `attachment_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -353,7 +350,7 @@ CREATE TABLE `commissions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `commission_note_id` bigint unsigned NOT NULL,
   `commission_statement_id` bigint unsigned DEFAULT NULL,
-  `grouping` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `grouping` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `basic_premium` decimal(15,2) DEFAULT NULL,
   `rate` decimal(8,2) DEFAULT NULL,
   `amount_due` decimal(15,2) DEFAULT NULL,
@@ -362,9 +359,9 @@ CREATE TABLE `commissions` (
   `date_received` date DEFAULT NULL,
   `mode_of_payment_id` bigint unsigned DEFAULT NULL,
   `variance` decimal(15,2) DEFAULT NULL,
-  `variance_reason` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `variance_reason` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_due` date DEFAULT NULL,
-  `commission_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `commission_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -398,41 +395,43 @@ DROP TABLE IF EXISTS `contacts`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `contacts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `contact_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `wa` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `occupation` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `employer` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contact_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mobile_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `wa` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `occupation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employer` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `acquired` date DEFAULT NULL,
-  `source` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rank` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `rank` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `second_follow_up` date DEFAULT NULL,
   `first_contact` date DEFAULT NULL,
   `next_follow_up` date DEFAULT NULL,
-  `coid` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dob` date DEFAULT NULL,
-  `salutation` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `source_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `agency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `agent` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `address` text COLLATE utf8mb4_unicode_ci,
-  `location` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email_address` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `contact_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `salutation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agency` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agent` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `location` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_address` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contact_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `savings_budget` decimal(10,2) DEFAULT NULL,
   `married` tinyint(1) NOT NULL DEFAULT '0',
   `children` int NOT NULL DEFAULT '0',
-  `children_details` text COLLATE utf8mb4_unicode_ci,
-  `vehicle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `house` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `business` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `other` text COLLATE utf8mb4_unicode_ci,
+  `children_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `vehicle` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `house` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `business` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `other` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `contacts_contact_id_unique` (`contact_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -441,6 +440,7 @@ CREATE TABLE `contacts` (
 
 LOCK TABLES `contacts` WRITE;
 /*!40000 ALTER TABLE `contacts` DISABLE KEYS */;
+INSERT INTO `contacts` VALUES (1,'huihftfk','ntrhn','ytm,m',NULL,'2',NULL,NULL,'2026-01-21','43','65','96',NULL,NULL,'2026-01-14',NULL,'2026-01-08',NULL,'mnhgmh','79','89','hymtjlkht',NULL,'aqsariasat235@gmail.com','CT166',850.00,0,5,NULL,NULL,NULL,NULL,NULL,'2026-01-11 01:01:51','2026-01-11 01:12:31');
 /*!40000 ALTER TABLE `contacts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -454,11 +454,11 @@ DROP TABLE IF EXISTS `debit_notes`;
 CREATE TABLE `debit_notes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `payment_plan_id` bigint unsigned NOT NULL,
-  `debit_note_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `debit_note_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `issued_on` date DEFAULT NULL,
   `amount` decimal(15,2) DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `document_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_encrypted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -487,16 +487,16 @@ DROP TABLE IF EXISTS `documents`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `documents` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `doc_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tied_to` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `group` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `format` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `doc_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tied_to` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `group` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `format` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `year` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
-  `file_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `year` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `file_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_encrypted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -524,12 +524,12 @@ DROP TABLE IF EXISTS `endorsements`;
 CREATE TABLE `endorsements` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `policy_id` bigint unsigned NOT NULL,
-  `endorsement_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `endorsement_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `effective_date` date DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `endorsement_notes` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `endorsement_notes` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -557,19 +557,19 @@ DROP TABLE IF EXISTS `expenses`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `expenses` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `expense_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `expense_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payee` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expense_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expense_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payee` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_paid` date DEFAULT NULL,
   `amount_paid` decimal(15,2) DEFAULT NULL,
-  `description` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category_id` bigint unsigned DEFAULT NULL,
-  `mode_of_payment` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `receipt_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mode_of_payment` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `receipt_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `mode_of_payment_id` bigint unsigned DEFAULT NULL,
-  `attachment_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `expense_notes` text COLLATE utf8mb4_unicode_ci,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `attachment_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expense_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -600,11 +600,11 @@ DROP TABLE IF EXISTS `failed_jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `failed_jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
@@ -629,16 +629,16 @@ DROP TABLE IF EXISTS `followups`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `followups` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `follow_up_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `follow_up_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `contact_id` bigint unsigned DEFAULT NULL,
   `client_id` bigint unsigned DEFAULT NULL,
   `life_proposal_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned DEFAULT NULL,
   `follow_up_date` date DEFAULT NULL,
-  `channel` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `summary` text COLLATE utf8mb4_unicode_ci,
-  `next_action` text COLLATE utf8mb4_unicode_ci,
+  `channel` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `next_action` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -651,7 +651,7 @@ CREATE TABLE `followups` (
   CONSTRAINT `followups_contact_id_foreign` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `followups_life_proposal_id_foreign` FOREIGN KEY (`life_proposal_id`) REFERENCES `life_proposals` (`id`) ON DELETE SET NULL,
   CONSTRAINT `followups_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -660,6 +660,7 @@ CREATE TABLE `followups` (
 
 LOCK TABLES `followups` WRITE;
 /*!40000 ALTER TABLE `followups` DISABLE KEYS */;
+INSERT INTO `followups` VALUES (1,'FU000001',1,NULL,NULL,1,'2026-01-14','Phone','Open','vhgfgh','vhh','2026-01-11 01:12:31','2026-01-11 01:12:31');
 /*!40000 ALTER TABLE `followups` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -672,15 +673,15 @@ DROP TABLE IF EXISTS `incomes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `incomes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `income_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `income_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `commission_statement_id` bigint unsigned DEFAULT NULL,
   `income_source_id` bigint unsigned DEFAULT NULL,
   `date_received` date DEFAULT NULL,
   `amount_received` decimal(15,2) DEFAULT NULL,
-  `description` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category_id` bigint unsigned DEFAULT NULL,
   `mode_of_payment_id` bigint unsigned DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -713,13 +714,13 @@ DROP TABLE IF EXISTS `job_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `job_batches` (
-  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_jobs` int NOT NULL,
   `pending_jobs` int NOT NULL,
   `failed_jobs` int NOT NULL,
-  `failed_job_ids` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `options` mediumtext COLLATE utf8mb4_unicode_ci,
+  `failed_job_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `options` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cancelled_at` int DEFAULT NULL,
   `created_at` int NOT NULL,
   `finished_at` int DEFAULT NULL,
@@ -745,8 +746,8 @@ DROP TABLE IF EXISTS `jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `queue` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `attempts` tinyint unsigned NOT NULL,
   `reserved_at` int unsigned DEFAULT NULL,
   `available_at` int unsigned NOT NULL,
@@ -774,14 +775,14 @@ DROP TABLE IF EXISTS `life_proposals`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `life_proposals` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `proposers_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `proposers_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `contact_id` bigint unsigned NOT NULL,
   `insurer_id` bigint unsigned DEFAULT NULL,
   `policy_plan_id` bigint unsigned DEFAULT NULL,
   `salutation_id` bigint unsigned DEFAULT NULL,
   `sum_assured` decimal(15,2) DEFAULT NULL,
   `term` int DEFAULT NULL,
-  `add_ons` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `add_ons` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `offer_date` date DEFAULT NULL,
   `premium` decimal(15,2) DEFAULT NULL,
   `frequency_id` bigint unsigned DEFAULT NULL,
@@ -789,12 +790,12 @@ CREATE TABLE `life_proposals` (
   `age` int DEFAULT NULL,
   `status_id` bigint unsigned DEFAULT NULL,
   `source_of_payment_id` bigint unsigned DEFAULT NULL,
-  `mcr` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `agency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `prid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mcr` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agency` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `prid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `class_id` bigint unsigned DEFAULT NULL,
   `is_submitted` tinyint(1) NOT NULL DEFAULT '0',
-  `sex` varchar(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sex` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `anb` int DEFAULT NULL,
   `riders` json DEFAULT NULL,
   `rider_premiums` json DEFAULT NULL,
@@ -803,12 +804,12 @@ CREATE TABLE `life_proposals` (
   `admin_fee` decimal(15,2) DEFAULT NULL,
   `total_premium` decimal(15,2) DEFAULT NULL,
   `medical_examination_required` tinyint(1) NOT NULL DEFAULT '0',
-  `policy_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `policy_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `loading_premium` decimal(15,2) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `maturity_date` date DEFAULT NULL,
-  `method_of_payment` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `source_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `method_of_payment` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -852,7 +853,7 @@ DROP TABLE IF EXISTS `lookup_categories`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `lookup_categories` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -882,11 +883,11 @@ CREATE TABLE `lookup_values` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `lookup_category_id` bigint unsigned NOT NULL,
   `seq` int NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -915,14 +916,14 @@ DROP TABLE IF EXISTS `medicals`;
 CREATE TABLE `medicals` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `life_proposal_id` bigint unsigned NOT NULL,
-  `medical_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `medical_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `medical_type_id` bigint unsigned DEFAULT NULL,
-  `clinic` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clinic` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ordered_on` date DEFAULT NULL,
   `completed_on` date DEFAULT NULL,
   `status_id` bigint unsigned DEFAULT NULL,
-  `results_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `results_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -954,10 +955,10 @@ DROP TABLE IF EXISTS `migrations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `migrations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `migration` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -966,7 +967,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'0001_01_01_000000_create_users_table',1),(2,'0001_01_01_000001_create_cache_table',1),(3,'0001_01_01_000002_create_jobs_table',1),(4,'2025_10_05_171758_create_tasks_table',1),(5,'2025_10_11_084446_create_lookup_tables',1),(6,'2025_10_14_153256_create_clients_table',1),(7,'2025_10_15_101405_create_policies_table',1),(8,'2025_10_19_112711_create_contacts_table',1),(9,'2025_10_19_184103_create_life_proposals_table',1),(10,'2025_10_19_200529_create_expenses_table',1),(11,'2025_11_09_125623_create_documents_table',1),(12,'2025_11_09_141513_create_vehicles_table',1),(13,'2025_11_09_145357_create_claims_table',1),(14,'2025_11_09_152400_create_schedules_table',1),(15,'2025_11_09_152500_create_commission_notes_table',1),(16,'2025_11_09_152600_create_commission_statements_table',1),(17,'2025_11_09_152705_create_incomes_table',1),(18,'2025_11_09_163024_create_commissions_table',1),(19,'2025_11_09_180836_create_statements_table',1),(20,'2025_11_18_112128_create_beneficial_owners_table',1),(21,'2025_11_18_112148_create_nominees_table',1),(22,'2025_11_18_112215_create_renewal_notices_table',1),(23,'2025_11_18_112248_create_payment_plans_table',1),(24,'2025_11_18_112305_create_debit_notes_table',1),(25,'2025_11_18_112314_create_payments_table',1),(26,'2025_11_18_112323_create_endorsements_table',1),(27,'2025_11_18_112341_create_followups_table',1),(28,'2025_11_18_112352_create_medicals_table',1),(29,'2025_11_18_112435_create_tax_returns_table',1),(30,'2025_11_19_100000_add_roles_to_users_table',1),(31,'2025_11_19_100100_create_permissions_table',1),(32,'2025_11_19_100200_create_audit_logs_table',1),(33,'2025_11_19_100300_create_roles_table',1),(34,'2025_11_27_101333_update_role_permissions_table_to_use_role_id',1),(35,'2025_11_27_110318_add_encryption_flags_to_tables',1),(36,'2025_11_27_111755_add_client_id_to_policies_table',1),(37,'2025_12_02_090031_add_additional_fields_to_clients_table',1),(38,'2025_12_09_093600_add_policy_status_id_to_policies_table',1),(39,'2025_12_10_120000_remove_redundant_fields_from_policies_table',1),(40,'2025_12_11_095000_add_nin_passport_no_to_nominees_table',1),(41,'2025_12_11_100000_add_date_removed_to_nominees_table',1),(42,'2025_12_11_101000_make_policy_id_nullable_in_nominees_table',1),(43,'2025_12_13_012248_add_item_to_tasks_table',1),(44,'2025_12_13_015306_add_wa_to_contacts_table',1),(45,'2025_12_15_063841_update_claims_table_add_policy_id_foreign_key',1),(46,'2025_12_15_064602_add_claim_stage_to_claims_table',1),(47,'2025_12_15_065910_remove_client_name_from_claims_table',1),(48,'2025_12_15_071004_add_receipt_no_to_expenses_table',1),(49,'2025_12_15_072345_remove_receipt_path_from_expenses_table',1),(50,'2025_12_15_072351_remove_document_path_from_incomes_table',1),(51,'2025_12_15_073025_add_category_id_to_incomes_table',1),(52,'2025_12_15_105446_add_missing_columns_to_expenses_table',1),(53,'2025_12_20_055847_add_columns_to_beneficial_owners_table',1);
+INSERT INTO `migrations` VALUES (1,'0001_01_01_000000_create_users_table',1),(2,'0001_01_01_000001_create_cache_table',1),(3,'0001_01_01_000002_create_jobs_table',1),(4,'2025_10_05_171758_create_tasks_table',1),(5,'2025_10_11_084446_create_lookup_tables',1),(6,'2025_10_14_153256_create_clients_table',1),(7,'2025_10_15_101405_create_policies_table',1),(8,'2025_10_19_112711_create_contacts_table',1),(9,'2025_10_19_184103_create_life_proposals_table',1),(10,'2025_10_19_200529_create_expenses_table',1),(11,'2025_11_09_125623_create_documents_table',1),(12,'2025_11_09_141513_create_vehicles_table',1),(13,'2025_11_09_145357_create_claims_table',1),(14,'2025_11_09_152400_create_schedules_table',1),(15,'2025_11_09_152500_create_commission_notes_table',1),(16,'2025_11_09_152600_create_commission_statements_table',1),(17,'2025_11_09_152705_create_incomes_table',1),(18,'2025_11_09_163024_create_commissions_table',1),(19,'2025_11_09_180836_create_statements_table',1),(20,'2025_11_18_112128_create_beneficial_owners_table',1),(21,'2025_11_18_112148_create_nominees_table',1),(22,'2025_11_18_112215_create_renewal_notices_table',1),(23,'2025_11_18_112248_create_payment_plans_table',1),(24,'2025_11_18_112305_create_debit_notes_table',1),(25,'2025_11_18_112314_create_payments_table',1),(26,'2025_11_18_112323_create_endorsements_table',1),(27,'2025_11_18_112341_create_followups_table',1),(28,'2025_11_18_112352_create_medicals_table',1),(29,'2025_11_18_112435_create_tax_returns_table',1),(30,'2025_11_19_100000_add_roles_to_users_table',1),(31,'2025_11_19_100100_create_permissions_table',1),(32,'2025_11_19_100200_create_audit_logs_table',1),(33,'2025_11_19_100300_create_roles_table',1),(34,'2025_11_27_101333_update_role_permissions_table_to_use_role_id',1),(35,'2025_11_27_110318_add_encryption_flags_to_tables',1),(36,'2025_11_27_111755_add_client_id_to_policies_table',1),(37,'2025_12_02_090031_add_additional_fields_to_clients_table',1),(38,'2025_12_09_093600_add_policy_status_id_to_policies_table',1),(39,'2025_12_10_120000_remove_redundant_fields_from_policies_table',1),(40,'2025_12_11_095000_add_nin_passport_no_to_nominees_table',1),(41,'2025_12_11_100000_add_date_removed_to_nominees_table',1),(42,'2025_12_11_101000_make_policy_id_nullable_in_nominees_table',1),(43,'2025_12_13_012248_add_item_to_tasks_table',1),(44,'2025_12_13_015306_add_wa_to_contacts_table',1),(45,'2025_12_15_063841_update_claims_table_add_policy_id_foreign_key',1),(46,'2025_12_15_064602_add_claim_stage_to_claims_table',1),(47,'2025_12_15_065910_remove_client_name_from_claims_table',1),(48,'2025_12_15_071004_add_receipt_no_to_expenses_table',1),(49,'2025_12_15_072345_remove_receipt_path_from_expenses_table',1),(50,'2025_12_15_072351_remove_document_path_from_incomes_table',1),(51,'2025_12_15_073025_add_category_id_to_incomes_table',1),(52,'2025_12_15_105446_add_missing_columns_to_expenses_table',1),(53,'2025_12_20_055847_add_columns_to_beneficial_owners_table',1),(54,'2026_01_09_210631_add_mobile_no_to_contacts_table',2),(55,'2026_01_09_230000_add_wsc_lou_pa_to_policies_table',2),(56,'2026_01_11_090122_make_salutation_nullable_in_contacts_table',3),(57,'2026_01_11_092415_add_missing_columns_to_clients_table',4),(58,'2026_01_11_114158_add_second_follow_up_to_contacts_table',5),(59,'2026_01_12_045743_add_extra_fields_to_clients_table',5),(60,'2026_01_21_000001_add_cheque_no_to_payments_table',6);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -979,17 +980,17 @@ DROP TABLE IF EXISTS `nominees`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `nominees` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nominee_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nominee_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `policy_id` bigint unsigned DEFAULT NULL,
   `client_id` bigint unsigned DEFAULT NULL,
-  `full_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `relationship` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `full_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `relationship` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `share_percentage` decimal(5,2) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `date_removed` date DEFAULT NULL,
-  `nin_passport_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `id_document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `nin_passport_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id_document_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1018,8 +1019,8 @@ DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `password_reset_tokens` (
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1044,11 +1045,11 @@ DROP TABLE IF EXISTS `payment_plans`;
 CREATE TABLE `payment_plans` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `schedule_id` bigint unsigned NOT NULL,
-  `installment_label` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installment_label` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `due_date` date DEFAULT NULL,
   `amount` decimal(15,2) NOT NULL,
-  `frequency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `frequency` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1076,13 +1077,14 @@ DROP TABLE IF EXISTS `payments`;
 CREATE TABLE `payments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `debit_note_id` bigint unsigned NOT NULL,
-  `payment_reference` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_reference` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `paid_on` date DEFAULT NULL,
   `amount` decimal(15,2) NOT NULL,
   `mode_of_payment_id` bigint unsigned DEFAULT NULL,
-  `receipt_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cheque_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `receipt_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_encrypted` tinyint(1) NOT NULL DEFAULT '0',
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1112,10 +1114,10 @@ DROP TABLE IF EXISTS `permissions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permissions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `module` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `module` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1143,30 +1145,30 @@ DROP TABLE IF EXISTS `policies`;
 CREATE TABLE `policies` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `client_id` bigint unsigned NOT NULL,
-  `policy_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `policy_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `policy_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `policy_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `insurer_id` bigint unsigned DEFAULT NULL,
   `policy_class_id` bigint unsigned DEFAULT NULL,
   `policy_plan_id` bigint unsigned DEFAULT NULL,
   `sum_insured` decimal(15,2) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `insured` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `insured_item` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `insured` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `insured_item` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `policy_status_id` bigint unsigned DEFAULT NULL,
   `date_registered` date NOT NULL,
   `renewable` tinyint(1) NOT NULL DEFAULT '1',
   `business_type_id` bigint unsigned DEFAULT NULL,
   `term` int DEFAULT NULL,
-  `term_unit` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `term_unit` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `base_premium` decimal(15,2) DEFAULT NULL,
   `premium` decimal(15,2) DEFAULT NULL,
   `frequency_id` bigint unsigned DEFAULT NULL,
   `pay_plan_lookup_id` bigint unsigned DEFAULT NULL,
   `agency_id` bigint unsigned DEFAULT NULL,
-  `agent` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agent` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `channel_id` bigint unsigned DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `wsc` decimal(15,2) DEFAULT NULL,
@@ -1218,12 +1220,12 @@ DROP TABLE IF EXISTS `renewal_notices`;
 CREATE TABLE `renewal_notices` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `policy_id` bigint unsigned NOT NULL,
-  `rnid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `rnid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `notice_date` date DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `delivery_method` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remarks` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `delivery_method` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `document_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1252,7 +1254,7 @@ DROP TABLE IF EXISTS `role_permissions`;
 CREATE TABLE `role_permissions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `role_id` bigint unsigned NOT NULL,
-  `role` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `permission_id` bigint unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1282,9 +1284,9 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `is_system` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1314,17 +1316,17 @@ DROP TABLE IF EXISTS `schedules`;
 CREATE TABLE `schedules` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `policy_id` bigint unsigned NOT NULL,
-  `schedule_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `schedule_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `issued_on` date DEFAULT NULL,
   `effective_from` date DEFAULT NULL,
   `effective_to` date DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
-  `debit_note_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `receipt_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `policy_schedule_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `renewal_notice_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `payment_agreement_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `debit_note_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `receipt_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `policy_schedule_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `renewal_notice_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_agreement_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1351,11 +1353,11 @@ DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sessions` (
-  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint unsigned DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `last_activity` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `sessions_user_id_index` (`user_id`),
@@ -1369,7 +1371,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('61xBAeKnAuimVZGLxrBKxgj9oNmU7Ax1TKJm9ePo',1,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoieTNFWG92aG1ndXlxOHZLd3ZvOVJVZ004U3RHS2lXMjl6bzJDODJzdCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMS9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=',1767970779),('AgaeLPnBNafgVyNoER0v6yHcoWx9iKiN3zkglP6U',NULL,'127.0.0.1','curl/8.7.1','YTozOntzOjY6Il90b2tlbiI7czo0MDoiRmR1N2pDQnZ6U2ppbjY2ZHdHUkFIaTVqVm1OOE0xUDF1RkROWXk3VyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1767955744),('eXO9PMnE1MPwNntmPxIxom6P7DxJYYW6AXeEMFGK',NULL,'127.0.0.1','curl/8.7.1','YTozOntzOjY6Il90b2tlbiI7czo0MDoiTlhFRnJWUnRQdUQzMjJrQ3NYV2hiTktrSXNPR1ZpYzVOTUZmVVdoYyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1767968357),('IWXszvSQ3cGsmkqAExX8tbVaka92WmER3ZaHSxev',1,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiOGdXNXNqU0ZJOEhMd2JmZFdRWDJhcWpHcFBxRDh5OUF5bFZ2VWFnMyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=',1767955767),('uTpN7LmroxC8QycJGAFwd6yzmgXOtZ59XN9jSQqo',NULL,'127.0.0.1','curl/8.7.1','YTozOntzOjY6Il90b2tlbiI7czo0MDoiM3JmQU5GM1RVSmVEVDVmZzN1T0lLN0VxNGNIc3pzWWJ4a2I3WUdXaiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1767968345),('w4Ih3f0G7RS1l4THLZoHREzCCHAZCVc85E8FMN5I',1,'127.0.0.1','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiRlFPaUhHdGFtQ0NWZTllT1JVcVpJa0Nkd1FxbjFRaFhLMUVyR2Q2MSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjQ4OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvZGFzaGJvYXJkP2RhdGVfcmFuZ2U9bW9udGgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=',1767953990),('zmMfUa8Au58E3hAyA1G1CcrYAEvewId9SmTQ0W9P',NULL,'127.0.0.1','curl/8.7.1','YTozOntzOjY6Il90b2tlbiI7czo0MDoiVmxCOEs0WGRRNWtrR2RQZTJIbHppdkV5djJsT0pCeElMVE1Rb0ZUUiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1767952747);
+INSERT INTO `sessions` VALUES ('0c19VJZk9kqcooGR43JEvJNhJduIT4iJshXumEzT',NULL,'167.99.192.160','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiV3dqdDZmZm13R2JjcldraGh1SzQzSTFpdEFvcmJ1U2U4QVlVcnpZbCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768268730),('0eveRKNhhB7DTLknSqe5Jc3kDoFG7s16JSc33gbO',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiM3piQjdMdFJwdHVUc3RkMmNya2l3OTJDRjhWT0U1aDM0TTJwOUdreiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768345661),('2g7X5OMU4WRTc5txbEJDxQlMoRUw3DaM7KxYVp5w',NULL,'198.235.24.16','Hello from Palo Alto Networks, find out more about our scans in https://docs-cortex.paloaltonetworks.com/r/1/Cortex-Xpanse/Scanning-activity','YTozOntzOjY6Il90b2tlbiI7czo0MDoiOURwZE1FYTFTZFd4UHh2MzJaRll4ZTRvdkpFRnVKMlM4T3pwdDRDSCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768578286),('2hhZc5QST3rf5sfJqf9GshxK4mtoglVeF3nK2wWy',NULL,'195.178.110.155','Mozilla/5.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoid3dyVkx1WUU4NENiaUViTjFxeEVHYWlPZEdEek51ZFlaR25NN2ZYbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768320903),('63CMYpMmdukyL0edLfiR1AwTQ4LiY8Rnd6xlTD0I',NULL,'161.142.154.93','curl/8.7.1','YToyOntzOjY6Il90b2tlbiI7czo0MDoiWTN5YkZMZm5wOVNrNWZRWmNKVmR1MGthUDBhTk5PV3pHZ3J3QkJNSCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==',1768583445),('7rmnTJZ3yUv5p9LRl1M9Uey7pU6lccV7XBs4nwFJ',NULL,'195.178.110.132','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoicFgxSXBFcU4xaXhTam5xRzdEa3JRQldiYmdXTE5kUmV3QjFBMUIwdyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768289754),('7xXO2r4hJN5mQ3c3mtDRIMCMFIv050CcKcXeaZP0',NULL,'191.96.37.144','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoibFNlaWZhWTFvV2d5MkE1R2NIVnJhWENWREZ6TzVoWjQ5c1FEb2pONCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768288066),('ceNw9bqSsh2EfHAhbDG2zZcoICnit3K5FuMZF3Uc',NULL,'149.57.180.22','Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/120.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoiZTFtd2dxVTJWQ05WTmc2bGlUZW5OT1hXdkVhTE1Md2pJaFBMcmpZcCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768338856),('cziZeK32iaLChwnsDIugfDItip1X4RjtW8ehM43u',NULL,'165.227.226.212','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiam9FYkhNS0ltZkdBWVRCSlhwSGZESmEySXVTWW1yeVNhRTRURko1bSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768436232),('dRiOZTDS5pF9FVZBSpe3emPrTva9IeWDtFxoAiNH',NULL,'143.110.179.133','Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoiejIxRVZaWjh5V3I0VXhacG9TZXZVMWY1SnBPUm8xNmdmbEx5Qk9pcyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768268321),('esR9DxWgjuhKWbqRULLB8M39HDpUqQrGMdD3YSBk',NULL,'149.57.180.126','Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/120.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoiZUZESzF5NUN0VFJwbTViYld1dWY0V3gwWkdVWnF0SWZXZG1DcnpJNiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768328021),('FwF6hhtJlVed0DTSavcqBzO0q9OZhFYifWSWhk3E',NULL,'18.181.215.202','Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124','YTozOntzOjY6Il90b2tlbiI7czo0MDoiRmNORWRYODY0cGJmankxM3hPMEQ1Z2VhMXB1OWUzODFmcHdjZjNPTyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768409458),('fwMzFVww3W9AWlNZr3hUwYHrIOWNtK9KkLaA50in',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiVEZMNkN2bEd1Q2RtT0EzWDVnUWpxQjBOcWxpN2hTYlNQd0VHRGRubiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768345661),('g3GulShv2FX2Xws341EHl9UpiqQoCAOHaOqaIpQ3',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiSjBqMFprd2o5cmtYUERWNm1GYloxWWNROWc0aXUwY0FxdEdKbEhrTiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768573043),('HuW9zVFgGdfvmq7tZZZPOg3dAvRNPZYwI2yq4AUA',NULL,'146.70.154.69','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoibFdqOGNVdGtMdUc2YzZMSU9PYjdnTkpFcHNyYTIxY1EwSnhHTEUwVyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768307366),('IJZuiuFncYeyMbBfvgUMuFY4wlmvXTUuac5P6Xvl',NULL,'161.142.154.93','curl/8.7.1','YToyOntzOjY6Il90b2tlbiI7czo0MDoiVVBXWlphTVdZR2VOZktwc012N2RGbVRzMEVOMXloaDB3dFdqSHdreSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==',1768583451),('ImHvxDD1dLCsxhNdBTzDxBeNHcQnE1ZybzWxFPl1',1,'161.142.154.93','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiNDNKOHl1MEVBQTRFVGd4eUFJVFVkT1dRdDZKZU5sZWNTN2M4ekxibSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=',1768590971),('jOBYrLpnDBJAJ3qY82w50732wOnad8qAvDXSEu0F',NULL,'191.96.37.144','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiaVhQdDBOdkpIWEJEeUFuc2tZbW9iWmw5eVNVOTYzeUc3VXB0d056cSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768288066),('M6TvyPli3JCrkCUQSK0AxivjyShoweuiBjKTQSNN',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiR2g5bUdUNGQzQ0l4M2FmNHRCOFU3SU93OWJwQWZBUGN1SHpzU3lSbSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768576896),('NpEKvANwTAfNWWwaQAtlHHeywY18roUFonGrRnh5',NULL,'23.27.145.23','Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/120.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoiWUZpZHJiTmkwNjdkRVoyUE9OQWVIR2hZNHduSmQ4dDU0bThaWmxiQyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768590786),('pgIXmftkfog6euWJRvFvGsaDGwhmaDvJcPbYEnCD',NULL,'136.109.139.216','Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)','YTozOntzOjY6Il90b2tlbiI7czo0MDoicjRhMDYzVFMzOUM1RzgxRDZWUmxRMG9VV2d1VFlXVFNIRmY5TnV4ciI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768314635),('Py1jX3WK0qKZShJLi57TZiDYyB8tKdvbQ4qLXdvO',NULL,'136.109.139.216','Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)','YTozOntzOjY6Il90b2tlbiI7czo0MDoiM2lUb0R4UUhsYTJ0WTRwS2NYMXR4d09GY0J1eVNYa254V20zd3BaaiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768314635),('RbdhXOn7NBUcBggCghJBVzeEVXdf2RY3C0suUulG',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiZmlzd0hIYWRGT0w4VEQ4VEJqR3UwQkF0dGtrM1FyU2VNSjhvVHlxeCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768573043),('rqlV8HpTSlRlHu8cA9JVn6FapcNkatmt6SiDOMH0',NULL,'35.245.247.233','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4240.193 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiU3NsaXVZTGg1UHpHclkzTGFsRGJVeTgzMkx2SzlyZUZTajZYMFJlbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768556759),('YkT40InKXUF4gIatJEcHR02YUHNO4CDkhJZteLzz',NULL,'195.178.110.132','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoiVFRPeU5vOFZwSFdMSFc1VkJzTTM4V0NYN01oaUxKNEJvd0xmNmw5YiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768289754),('zdP8Cg2U3PKONVOSEgNmWNme967o56XWvCajg6TY',NULL,'84.254.106.197','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoicVBsSzZJZ1Fid2U4d1hDYkx2UWhYSnhKYndyVVN6WktpOXBnS1dxWSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbS9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768576896),('ZF9lGHY0famAdhn9s5mCIJGUanNpE8szNw9ywjNQ',NULL,'146.70.154.69','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36','YTozOntzOjY6Il90b2tlbiI7czo0MDoicTQ5dUhRRWx2cldtZGU3UThibjJrNkhweFo5U3Q3QWJpZ3BLNjNzNyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzk6Imh0dHBzOi8vYnJva2VybWFuYWdlbWVudC5ieXJlZHN0b25lLmNvbSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1768307365);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1382,14 +1384,14 @@ DROP TABLE IF EXISTS `statements`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `statements` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `statement_no` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `year` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `statement_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `year` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `insurer_id` bigint unsigned DEFAULT NULL,
-  `business_category` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `business_category` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_received` date DEFAULT NULL,
   `amount_received` decimal(15,2) DEFAULT NULL,
   `mode_of_payment_id` bigint unsigned DEFAULT NULL,
-  `remarks` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remarks` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1419,28 +1421,28 @@ DROP TABLE IF EXISTS `tasks`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tasks` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `item` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `task_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `due_date` date NOT NULL,
   `due_time` time DEFAULT NULL,
   `date_in` date DEFAULT NULL,
-  `assignee` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `task_status` enum('Not Done','In Progress','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Not Done',
+  `assignee` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `task_status` enum('Not Done','In Progress','Completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Not Done',
   `date_done` date DEFAULT NULL,
   `repeat` tinyint(1) NOT NULL DEFAULT '0',
-  `frequency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frequency` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rpt_date` date DEFAULT NULL,
   `rpt_stop_date` date DEFAULT NULL,
-  `task_notes` text COLLATE utf8mb4_unicode_ci,
+  `task_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tasks_task_id_unique` (`task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1449,7 +1451,7 @@ CREATE TABLE `tasks` (
 
 LOCK TABLES `tasks` WRITE;
 /*!40000 ALTER TABLE `tasks` DISABLE KEYS */;
-INSERT INTO `tasks` VALUES (1,'TK24043','Payment',NULL,'P.O. Box Rental','Seychelles Postal Services','2765937','2025-10-18',NULL,NULL,'Mandy','Not Done',NULL,1,'Annually','2025-01-01','2027-12-31',NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23'),(2,'TK24044','Report',NULL,'Beneficial Owner Report','FIU','4282828','2025-10-17',NULL,NULL,'Mandy','Not Done',NULL,1,'Bi-Annually','2025-01-15','2026-12-31',NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23'),(3,'TK24045','257','1','1','6','00000000','2026-01-10','22:34:00',NULL,'1','In Progress','2026-01-10',0,'31','2026-01-06','2026-01-08',NULL,'2026-01-09 06:33:50','2026-01-09 06:33:50');
+INSERT INTO `tasks` VALUES (1,'TK24043','Payment',NULL,'P.O. Box Rental','Seychelles Postal Services','2765937','2025-10-18',NULL,NULL,'Mandy','Not Done',NULL,1,'Annually','2025-01-01','2027-12-31',NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23'),(2,'TK24044','Report',NULL,'Beneficial Owner Report','FIU','4282828','2025-10-17',NULL,NULL,'Mandy','Not Done',NULL,1,'Bi-Annually','2025-01-15','2026-12-31',NULL,'2026-01-09 02:03:23','2026-01-09 02:03:23'),(3,'TK24045','257','1','1','6','00000000','2026-01-10','22:34:00',NULL,'1','In Progress','2026-01-10',0,'31','2026-01-06','2026-01-08',NULL,'2026-01-09 06:33:50','2026-01-09 06:33:50'),(4,'TK24046','Report','hdfj','1','huihftfk','jjkfn','2025-12-31','17:57:00',NULL,'admin','In Progress','2026-01-01',1,'Days','2026-01-14','2026-01-22','dcndcmdkl','2026-01-11 01:55:02','2026-01-11 01:55:02');
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1463,14 +1465,14 @@ DROP TABLE IF EXISTS `tax_returns`;
 CREATE TABLE `tax_returns` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `commission_statement_id` bigint unsigned NOT NULL,
-  `tax_ref_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `filing_period` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tax_ref_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `filing_period` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `filed_on` date DEFAULT NULL,
-  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `amount_due` decimal(15,2) DEFAULT NULL,
   `amount_paid` decimal(15,2) DEFAULT NULL,
-  `supporting_doc_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `supporting_doc_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1498,16 +1500,16 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `role_id` bigint unsigned DEFAULT NULL,
-  `role` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'support',
+  `role` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'support',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `last_login_at` timestamp NULL DEFAULT NULL,
-  `last_login_ip` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_login_ip` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1523,7 +1525,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','admin@gmail.com',1,'support',1,'2026-01-09 06:33:11','127.0.0.1','2026-01-09 02:03:11','$2y$12$hyKwrpMvQkRYXpBoj30HnOtErCAlesmVgLY3wglkGEU.LCyR4RjQ2',NULL,'2026-01-09 02:03:11','2026-01-09 06:33:11');
+INSERT INTO `users` VALUES (1,'admin','admin@gmail.com',1,'support',1,'2026-01-16 17:14:35','161.142.154.93','2026-01-09 02:03:11','$2y$12$hyKwrpMvQkRYXpBoj30HnOtErCAlesmVgLY3wglkGEU.LCyR4RjQ2',NULL,'2026-01-09 02:03:11','2026-01-16 17:14:35');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1536,28 +1538,28 @@ DROP TABLE IF EXISTS `vehicles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vehicles` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `vehicle_code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vehicle_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `policy_id` bigint unsigned NOT NULL,
-  `regn_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `make` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `model` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `usage` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `regn_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `make` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `model` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `usage` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `manufacture_year` year DEFAULT NULL,
   `value` decimal(15,2) DEFAULT NULL,
-  `engine` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `engine_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `engine_capacity` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `engine_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `chassis_no` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine_capacity` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `chassis_no` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cover_from` date DEFAULT NULL,
   `cover_to` date DEFAULT NULL,
-  `slta_certificate_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `proof_of_purchase_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `value_certificate_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `vehicle_seats` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `vehicle_color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `slta_certificate_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `proof_of_purchase_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value_certificate_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vehicle_seats` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vehicle_color` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1575,7 +1577,6 @@ LOCK TABLES `vehicles` WRITE;
 /*!40000 ALTER TABLE `vehicles` DISABLE KEYS */;
 /*!40000 ALTER TABLE `vehicles` ENABLE KEYS */;
 UNLOCK TABLES;
-SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1586,4 +1587,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-09 23:03:11
+-- Dump completed on 2026-02-18 13:21:03
