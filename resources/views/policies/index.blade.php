@@ -1,40 +1,52 @@
 @extends('layouts.app')
 
-@section('page-title', 'Policies')
+@section('page-title')
+@if($filter == "expiring")
+Policies Expiring
+@elseif($filter == "birthday_today")
+Birthdays Today
+@elseif(request()->get('type') == "life")
+Policies - <span style="color:#f3742a;">Life </span>
+
+@else
+Policies
+@endif
+@endsection
+
 @section('content')
 
 @include('partials.table-styles')
 <link rel="stylesheet" href="{{ asset('css/policies-index.css') }}">
 @php
-  $config = \App\Helpers\TableConfigHelper::getConfig('policies');
-  $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('policies');
-  $columnDefinitions = $config['column_definitions'];
-  $mandatoryColumns = $config['mandatory_columns'];
+$config = \App\Helpers\TableConfigHelper::getConfig('policies');
+$selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('policies');
+$columnDefinitions = $config['column_definitions'];
+$mandatoryColumns = $config['mandatory_columns'];
 @endphp
 
 <div class="dashboard">
   <!-- Error/Success Messages -->
   @if(session('error'))
-    <div class="alert alert-error" style="background:#fee; border:1px solid #fcc; color:#c33; padding:12px; margin:15px; border-radius:4px;">
-      {{ session('error') }}
-    </div>
+  <div class="alert alert-error" style="background:#fee; border:1px solid #fcc; color:#c33; padding:12px; margin:15px; border-radius:4px;">
+    {{ session('error') }}
+  </div>
   @endif
   @if(session('success'))
-    <div class="alert alert-success" style="background:#efe; border:1px solid #cfc; color:#3c3; padding:12px; margin:15px; border-radius:4px;">
-      {{ session('success') }}
-    </div>
+  <div class="alert alert-success" style="background:#efe; border:1px solid #cfc; color:#3c3; padding:12px; margin:15px; border-radius:4px;">
+    {{ session('success') }}
+  </div>
   @endif
   @if($errors->any())
-    <div class="alert alert-error" style="background:#fee; border:1px solid #fcc; color:#c33; padding:12px; margin:15px; border-radius:4px;">
-      <strong>Please fix the following errors:</strong>
-      <ul style="margin:8px 0 0 0; padding-left:20px;">
-        @foreach($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-    </div>
+  <div class="alert alert-error" style="background:#fee; border:1px solid #fcc; color:#c33; padding:12px; margin:15px; border-radius:4px;">
+    <strong>Please fix the following errors:</strong>
+    <ul style="margin:8px 0 0 0; padding-left:20px;">
+      @foreach($errors->all() as $error)
+      <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
   @endif
-    <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
+  <!-- <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:5px; padding:15px 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
               <h3 style="margin:0; font-size:18px; font-weight:600;">
               @if($filter == "expiring")
@@ -43,216 +55,214 @@
                 Birthdays Today
               @elseif(request()->get('type') == "life")
                 Policies - <span style="color:#f3742a;">Life  </span>
-                
               @else
                 Policies
               @endif
               </h3>
-
       </div>
-  </div>
+  </div> -->
   <!-- Main Policies Table View -->
   <div class="clients-table-view" id="clientsTableView" @if(isset($policyId) && $policyId) style="display:none;" @endif>
-  <div class="container-table">
-    <!-- Policies Card -->
-    <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
-      <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
-                <div class="records-found">Records Found - {{ $policies->total() }}</div>
+    <div class="container-table">
+      <!-- Policies Card -->
+      <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
+        <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
+          <div class="records-found">Records Found - {{ $policies->total() }}</div>
 
-      <div class="page-title-section">
+          <div class="page-title-section">
 
-         @if($filter != "expiring")
-          <div class="filter-group">
+            @if($filter != "expiring")
+            <div class="filter-group">
               <label class="toggle-switch">
                 <input type="checkbox" id="filterToggle" {{ (request()->get('follow_up') == 'true' || request()->get('dfr') == 'true' || request()->get('filter') == 'overdue' ) ? 'checked' : '' }}>
                 <span class="toggle-slider"></span>
               </label>
               <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
             </div>
-         @endif
-        <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
-             @if($filter != "expiring" && $filter != "life")
-                <div class="filter-group">
-                  @if(request()->get('dfr') == 'true')
-                    <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
-                  @else
-                    <button class="btn btn-follow-up" id="dfrOnlyBtn">Due For Renewal</button>
-                  @endif
-                </div>
-             @endif
-        </div>
-      </div>
-      <div class="action-buttons">
-     @if($filter != "expiring")
-        <button type="button" class="btn btn-add" id="addPolicyBtn">Add</button>
-      @endif
-        @if(request()->has('from_calendar') && request()->from_calendar == '1')
-          <button class="btn btn-back" onclick="window.location.href='/calendar?filter=renewals'">Back</button>
-        @else
-          <button class="btn btn-close" onclick="window.history.back()">Close</button>
-        @endif
-      </div>
-    </div>
-
-    @if(session('success'))
-      <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin:15px 20px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
-        {{ session('success') }}
-        <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;">×</button>
-      </div>
-    @endif
-
-    <div class="table-responsive" id="tableResponsive">
-      <table id="policiesTable">
-        <thead>
-          <tr>
-            <th style="text-align:center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
-                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
-                <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff"/>
-              </svg>
-            </th>
-            <th>Action</th>
-            @foreach($selectedColumns as $col)
-              @if(isset($columnDefinitions[$col]))
-                <th data-column="{{ $col }}">{{ $columnDefinitions[$col] }}</th>
+            @endif
+            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+              @if($filter != "expiring" && $filter != "life")
+              <div class="filter-group">
+                @if(request()->get('dfr') == 'true')
+                <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
+                @else
+                <button class="btn btn-follow-up" id="dfrOnlyBtn">Due For Renewal</button>
+                @endif
+              </div>
               @endif
-            @endforeach
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($policies as $policy)
-            @php
+            </div>
+          </div>
+          <div class="action-buttons">
+            @if($filter != "expiring")
+            <button type="button" class="btn btn-add" id="addPolicyBtn">Add</button>
+            @endif
+            @if(request()->has('from_calendar') && request()->from_calendar == '1')
+            <button class="btn btn-back" onclick="window.location.href='/calendar?filter=renewals'">Back</button>
+            @else
+            <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            @endif
+          </div>
+        </div>
+
+        @if(session('success'))
+        <div class="alert alert-success" id="successAlert" style="padding:8px 12px; margin:15px 20px; border:1px solid #c3e6cb; background:#d4edda; color:#155724;">
+          {{ session('success') }}
+          <button type="button" class="alert-close" onclick="document.getElementById('successAlert').style.display='none'" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;">×</button>
+        </div>
+        @endif
+
+        <div class="table-responsive" id="tableResponsive">
+          <table id="policiesTable">
+            <thead>
+              <tr>
+                <th style="text-align:center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 2 16 2 16H22C22 16 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#fff" stroke="#fff" stroke-width="1.5" />
+                    <path d="M9 21C9 22.1 9.9 23 11 23H13C14.1 23 15 22.1 15 21H9Z" fill="#fff" />
+                  </svg>
+                </th>
+                <th>Action</th>
+                @foreach($selectedColumns as $col)
+                @if(isset($columnDefinitions[$col]))
+                <th data-column="{{ $col }}">{{ $columnDefinitions[$col] }}</th>
+                @endif
+                @endforeach
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($policies as $policy)
+              @php
               // Get policy status name from relationship
               $policyStatusName = 'N/A';
               if ($policy->policyStatus && is_object($policy->policyStatus) && isset($policy->policyStatus->name)) {
-                $policyStatusName = $policy->policyStatus->name;
+              $policyStatusName = $policy->policyStatus->name;
               } elseif ($policy->policy_status_name) {
-                $policyStatusName = $policy->policy_status_name;
+              $policyStatusName = $policy->policy_status_name;
               }
               // Determine if policy is DFR (Due For Renewal) - check status name and date range
-              $isDFR = stripos($policyStatusName, 'DFR') !== false || 
-                       (optional($policy->end_date) && $policy->end_date && $policy->end_date->isBetween(now(), now()->addDays(30)));
-              
+              $isDFR = stripos($policyStatusName, 'DFR') !== false ||
+              (optional($policy->end_date) && $policy->end_date && $policy->end_date->isBetween(now(), now()->addDays(30)));
+
               // Determine if policy is Expired - check status name and if end date is in the past
-              $isExpired = stripos($policyStatusName, 'Expired') !== false || 
-                          (optional($policy->end_date) && $policy->end_date && $policy->end_date->isPast());
-              
+              $isExpired = stripos($policyStatusName, 'Expired') !== false ||
+              (optional($policy->end_date) && $policy->end_date && $policy->end_date->isPast());
+
               // Ensure expired takes priority over DFR
               if ($isExpired) {
-                $isDFR = false;
+              $isDFR = false;
               }
-            @endphp
-            <tr class="{{ $isExpired ? 'expired-row' : ($isDFR ? 'dfr-row' : '') }}">
-              <td class="bell-cell {{ $isExpired ? 'expired' : ($isDFR ? 'dfr' : '') }}">
-                <div style="display:flex; align-items:center; justify-content:center;">
-                  <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#f3742a' }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
-                </div>
-              </td>
-              <td class="action-cell">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPolicyDetails({{ $policy->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand"> 
-                <svg class="action-clock" onclick="window.location.href='{{ route('policies.index') }}?dfr=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
-                  <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none"/>
-                  <path d="M12 7V12L15 15" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </td>
-              @foreach($selectedColumns as $col)
+              @endphp
+              <tr class="{{ $isExpired ? 'expired-row' : ($isDFR ? 'dfr-row' : '') }}">
+                <td class="bell-cell {{ $isExpired ? 'expired' : ($isDFR ? 'dfr' : '') }}">
+                  <div style="display:flex; align-items:center; justify-content:center;">
+                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#f3742a' }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                  </div>
+                </td>
+                <td class="action-cell">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPolicyDetails({{ $policy->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <svg class="action-clock" onclick="window.location.href='{{ route('policies.index') }}?dfr=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                    <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none" />
+                    <path d="M12 7V12L15 15" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" />
+                  </svg>
+                </td>
+                @foreach($selectedColumns as $col)
                 @if($col == 'policy_no')
-                  <td data-column="policy_no">{{ $policy->policy_no }} </td>
+                <td data-column="policy_no">{{ $policy->policy_no }} </td>
                 @elseif($col == 'policy_code')
-                  <td data-column="policy_code">{{ $policy->policy_code }} </td>
+                <td data-column="policy_code">{{ $policy->policy_code }} </td>
                 @elseif($col == 'client_name')
-                  <td data-column="client_name">
-                    @php $clientName = $policy->client_name; @endphp
-                    @if($clientName){{ $clientName }}@else<span style="color:#999;" title="Client ID: {{ $policy->client_id ?? 'NULL' }}">—</span>@endif
-                  </td>
+                <td data-column="client_name">
+                  @php $clientName = $policy->client_name; @endphp
+                  @if($clientName){{ $clientName }}@else<span style="color:#999;" title="Client ID: {{ $policy->client_id ?? 'NULL' }}">—</span>@endif
+                </td>
                 @elseif($col == 'insurer')
-                  <td data-column="insurer">
-                    @php $insurerName = $policy->insurer_name; @endphp
-                    @if($insurerName){{ $insurerName }}@else<span style="color:#999;" title="Insurer ID: {{ $policy->insurer_id ?? 'NULL' }}">—</span>@endif
-                  </td>
+                <td data-column="insurer">
+                  @php $insurerName = $policy->insurer_name; @endphp
+                  @if($insurerName){{ $insurerName }}@else<span style="color:#999;" title="Insurer ID: {{ $policy->insurer_id ?? 'NULL' }}">—</span>@endif
+                </td>
                 @elseif($col == 'policy_class')
-                  <td data-column="policy_class">{{ $policy->policy_class_name ?? '—' }}</td>
+                <td data-column="policy_class">{{ $policy->policy_class_name ?? '—' }}</td>
                 @elseif($col == 'policy_plan')
-                  <td data-column="policy_plan">{{ $policy->policy_plan_name ?? '—' }}</td>
+                <td data-column="policy_plan">{{ $policy->policy_plan_name ?? '—' }}</td>
                 @elseif($col == 'sum_insured')
-                  <td data-column="sum_insured">{{ $policy->sum_insured ? number_format($policy->sum_insured,2) : '###########' }}</td>
+                <td data-column="sum_insured">{{ $policy->sum_insured ? number_format($policy->sum_insured,2) : '###########' }}</td>
                 @elseif($col == 'start_date')
-                  <td data-column="start_date">{{ $policy->start_date ? $policy->start_date->format('d-M-y') : '###########' }}</td>
+                <td data-column="start_date">{{ $policy->start_date ? $policy->start_date->format('d-M-y') : '###########' }}</td>
                 @elseif($col == 'end_date')
-                  <td data-column="end_date">{{ $policy->end_date ? $policy->end_date->format('d-M-y') : '###########' }}</td>
+                <td data-column="end_date">{{ $policy->end_date ? $policy->end_date->format('d-M-y') : '###########' }}</td>
                 @elseif($col == 'insured')
-                  <td data-column="insured">{{ $policy->insured ?? '###########' }}</td>
+                <td data-column="insured">{{ $policy->insured ?? '###########' }}</td>
                 @elseif($col == 'policy_status')
-                  @php
-                    $statusColor = '#6c757d';
-                    if ($isExpired || stripos($policyStatusName, 'Expired') !== false) {
-                      $statusColor = '#dc3545';
-                    } elseif ($isDFR || stripos($policyStatusName, 'DFR') !== false || stripos($policyStatusName, 'Due') !== false) {
-                      $statusColor = '#ffc107';
-                    } elseif (stripos($policyStatusName, 'In Force') !== false) {
-                      $statusColor = '#28a745';
-                    } elseif (stripos($policyStatusName, 'Cancelled') !== false) {
-                      $statusColor = '#dc3545';
-                    }
-                  @endphp
-                  <td data-column="policy_status"><span class="badge-status" style="background:{{ $statusColor }}">{{ $policyStatusName }}</span></td>
+                @php
+                $statusColor = '#6c757d';
+                if ($isExpired || stripos($policyStatusName, 'Expired') !== false) {
+                $statusColor = '#dc3545';
+                } elseif ($isDFR || stripos($policyStatusName, 'DFR') !== false || stripos($policyStatusName, 'Due') !== false) {
+                $statusColor = '#ffc107';
+                } elseif (stripos($policyStatusName, 'In Force') !== false) {
+                $statusColor = '#28a745';
+                } elseif (stripos($policyStatusName, 'Cancelled') !== false) {
+                $statusColor = '#dc3545';
+                }
+                @endphp
+                <td data-column="policy_status"><span class="badge-status" style="background:{{ $statusColor }}">{{ $policyStatusName }}</span></td>
                 @elseif($col == 'date_registered')
-                  <td data-column="date_registered">{{ $policy->date_registered ? $policy->date_registered->format('d-M-y') : '###########' }}</td>
+                <td data-column="date_registered">{{ $policy->date_registered ? $policy->date_registered->format('d-M-y') : '###########' }}</td>
                 @elseif($col == 'policy_code')
-                  <td data-column="policy_code">{{ $policy->policy_code ?? '' }}</td>
+                <td data-column="policy_code">{{ $policy->policy_code ?? '' }}</td>
                 @elseif($col == 'insured_item')
-                  <td data-column="insured_item">{{ $policy->insured_item ?? '-' }}</td>
+                <td data-column="insured_item">{{ $policy->insured_item ?? '-' }}</td>
                 @elseif($col == 'renewable')
-                  <td data-column="renewable">{{ $policy->renewable ? 'Yes' : 'No' }}</td>
+                <td data-column="renewable">{{ $policy->renewable ? 'Yes' : 'No' }}</td>
                 @elseif($col == 'biz_type')
-                  <td data-column="biz_type">{{ $policy->business_type_name ?? 'N/A' }}</td>
+                <td data-column="biz_type">{{ $policy->business_type_name ?? 'N/A' }}</td>
                 @elseif($col == 'term')
-                  <td data-column="term">{{ $policy->term ?? '-' }}</td>
+                <td data-column="term">{{ $policy->term ?? '-' }}</td>
                 @elseif($col == 'term_unit')
-                  <td data-column="term_unit">{{ $policy->term_unit ?? '-' }}</td>
+                <td data-column="term_unit">{{ $policy->term_unit ?? '-' }}</td>
                 @elseif($col == 'base_premium')
-                  <td data-column="base_premium">{{ $policy->base_premium ? number_format($policy->base_premium,2) : '###########' }}</td>
+                <td data-column="base_premium">{{ $policy->base_premium ? number_format($policy->base_premium,2) : '###########' }}</td>
                 @elseif($col == 'premium')
-                  <td data-column="premium">{{ $policy->premium ? number_format($policy->premium,2) : '###########' }}</td>
+                <td data-column="premium">{{ $policy->premium ? number_format($policy->premium,2) : '###########' }}</td>
                 @elseif($col == 'frequency')
-                  <td data-column="frequency">{{ $policy->frequency_name ?? 'N/A' }}</td>
+                <td data-column="frequency">{{ $policy->frequency_name ?? 'N/A' }}</td>
                 @elseif($col == 'pay_plan')
-                  <td data-column="pay_plan">{{ $policy->pay_plan_name ?? 'N/A' }}</td>
+                <td data-column="pay_plan">{{ $policy->pay_plan_name ?? 'N/A' }}</td>
                 @elseif($col == 'agency')
-                  <td data-column="agency">{{ $policy->agency_name ?? ($policy->agent ?? '-') }}</td>
+                <td data-column="agency">{{ $policy->agency_name ?? ($policy->agent ?? '-') }}</td>
                 @elseif($col == 'agent')
-                  <td data-column="agent">{{ $policy->agent ?? '-' }}</td>
+                <td data-column="agent">{{ $policy->agent ?? '-' }}</td>
                 @elseif($col == 'notes')
-                  <td data-column="notes">{{ $policy->notes ?? '-' }}</td>
+                <td data-column="notes">{{ $policy->notes ?? '-' }}</td>
                 @endif
+                @endforeach
+              </tr>
               @endforeach
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
+            </tbody>
+          </table>
+        </div>
 
-    </div>
-
-    <div class="footer" style="background:#fff; border-top:1px solid #ddd; margin-top:0;">
-      <div class="footer-left">
-        <a class="btn btn-export" href="{{ route('policies.export', array_merge(request()->query(), ['page' => $policies->currentPage()])) }}">Export</a>
-        <button class="btn btn-column" id="columnBtn" type="button">Column</button>
       </div>
+
+      <div class="footer" style="background:#fff; border-top:1px solid #ddd; margin-top:0;">
+        <div class="footer-left">
+          <a class="btn btn-export" href="{{ route('policies.export', array_merge(request()->query(), ['page' => $policies->currentPage()])) }}">Export</a>
+          <button class="btn btn-column" id="columnBtn" type="button">Column</button>
+        </div>
         <div class="paginator">
-        @php
+          @php
           $base = url()->current();
           $q = request()->query();
           $current = $policies->currentPage();
           $last = max(1,$policies->lastPage());
           function page_url($base,$q,$p){ $params = array_merge($q,['page'=>$p]); return $base . '?' . http_build_query($params); }
-        @endphp
+          @endphp
 
-        <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,1) : '#' }}" @if($current<=1) disabled @endif>&laquo;</a>
-        <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,$current-1) : '#' }}" @if($current<=1) disabled @endif>&lsaquo;</a>
-        <span class="page-info">Page {{ $current }} of {{ $last }}</span>
-        <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$current+1) : '#' }}" @if($current>= $last) disabled @endif>&rsaquo;</a>
-        <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$last) : '#' }}" @if($current>=$last) disabled @endif>&raquo;</a>
+          <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,1) : '#' }}" @if($current<=1) disabled @endif>&laquo;</a>
+          <a class="btn-page" href="{{ $current>1 ? page_url($base,$q,$current-1) : '#' }}" @if($current<=1) disabled @endif>&lsaquo;</a>
+          <span class="page-info">Page {{ $current }} of {{ $last }}</span>
+          <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$current+1) : '#' }}" @if($current>= $last) disabled @endif>&rsaquo;</a>
+          <a class="btn-page" href="{{ $current<$last ? page_url($base,$q,$last) : '#' }}" @if($current>=$last) disabled @endif>&raquo;</a>
         </div>
       </div>
     </div>
@@ -265,8 +275,8 @@
       <div class="client-page-title">
         <span id="policyPageTitle">Policy No</span> - <span class="client-name" id="policyPageName">-</span>
       </div>
-      </div>
-    
+    </div>
+
     <div class="client-page-body">
       <div class="client-page-content">
         <!-- Navigation Tabs and Actions Card -->
@@ -295,23 +305,23 @@
               </div>
            </div> -->
 
-        
+
         <!-- Policy Details Content Card - Separate -->
         <div id="policyDetailsContentWrapper" style="display:none; background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; padding:12px; overflow:hidden;">
-        <div id="policyDetailsPageContent" style="display:none;">
-          <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
+          <div id="policyDetailsPageContent" style="display:none;">
+            <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
               <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #ddd; background:#fff;">
                 <div class="client-page-nav">
-                       
-                
-                <button class="policy-tab active" data-tab="schedules" data-url="{{ route('schedules.index') }}">Schedules</button>
-                <button class="policy-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
-                <button class="policy-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
-                <button class="policy-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
-                <button class="policy-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
-                <button class="policy-tab" data-tab="endorsements" data-url="{{ route('endorsements.index') }}">Endorsements</button>
-                <button class="policy-tab" data-tab="commissions" data-url="{{ route('commissions.index') }}">Commission</button>
-                <button class="policy-tab" data-tab="nominees" data-url="{{ route('nominees.index') }}">Nominees</button>
+
+
+                  <button class="policy-tab active" data-tab="schedules" data-url="{{ route('schedules.index') }}">Schedules</button>
+                  <button class="policy-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
+                  <button class="policy-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
+                  <button class="policy-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
+                  <button class="policy-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
+                  <button class="policy-tab" data-tab="endorsements" data-url="{{ route('endorsements.index') }}">Endorsements</button>
+                  <button class="policy-tab" data-tab="commissions" data-url="{{ route('commissions.index') }}">Commission</button>
+                  <button class="policy-tab" data-tab="nominees" data-url="{{ route('nominees.index') }}">Nominees</button>
 
                 </div>
                 <div class="client-page-actions" id="policyHeaderActions">
@@ -321,12 +331,12 @@
                 </div>
               </div>
             </div>
-          </div> 
-        <div id="policyDetailsContent" style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; padding:0;">
-              <!-- Content will be loaded via JavaScript -->
-            </div>
+          </div>
+          <div id="policyDetailsContent" style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; padding:0;">
+            <!-- Content will be loaded via JavaScript -->
+          </div>
         </div>
-        
+
         <!-- Policy Schedule Card - Separate -->
         <div id="policyScheduleContentWrapper" style="display:none; background:#fff; border:1px solid #ddd; border-radius:4px; padding:12px;  margin-bottom:15px; overflow:hidden;">
           <div style="padding:10px 10px 8px 10px; border-bottom:1px solid #ddd;">
@@ -336,7 +346,7 @@
             <!-- Content will be loaded via JavaScript -->
           </div>
         </div>
-        
+
         <!-- Documents Card - Separate -->
         <div id="documentsContentWrapper" style="display:none; background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; overflow:hidden;">
           <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ddd;">
@@ -347,7 +357,7 @@
             <!-- Documents will be loaded via JavaScript -->
           </div>
         </div>
-        
+
         <!-- Policy Add Form -->
         <div id="policyFormPageContent" style="display:none;">
           <!-- Header for Add/Edit Policy -->
@@ -358,56 +368,56 @@
                 <button type="submit" form="policyForm" class="btn-save" id="policySaveBtnHeader" style="display:inline-block; background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;">Save</button>
                 <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Cancel</button>
               </div>  -->
-           
-         
-    
-       
-          
-        
-          <form id="policyForm" method="POST" action="{{ route('policies.store') }}" enctype="multipart/form-data">
-              @csrf
-         <div class="edit-parent" style="background-color:white; padding:10px ;">
-          <div id="policyFormTabs" style="background:#fff; border:1px solid #ddd; border-radius:4px;  overflow:hidden; display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:#fff;">
-              <div class="client-page-nav">
-     
-                <button class="policy-tab active" data-tab="schedules" data-url="{{ route('schedules.index') }}">Schedules</button>
-                <button class="policy-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
-                <button class="policy-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
-                <button class="policy-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
-                <button class="policy-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
-                <button class="policy-tab" data-tab="endorsements" data-url="{{ route('endorsements.index') }}">Endorsements</button>
-                <button class="policy-tab" data-tab="commissions" data-url="{{ route('commissions.index') }}">Commission</button>
-                <button class="policy-tab" data-tab="nominees" data-url="{{ route('nominees.index') }}">Nominees</button>
 
+
+
+
+
+
+          <form id="policyForm" method="POST" action="{{ route('policies.store') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="edit-parent" style="background-color:white; padding:10px ;">
+              <div id="policyFormTabs" style="background:#fff; border:1px solid #ddd; border-radius:4px;  overflow:hidden; display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:#fff;">
+                  <div class="client-page-nav">
+
+                    <button class="policy-tab active" data-tab="schedules" data-url="{{ route('schedules.index') }}">Schedules</button>
+                    <button class="policy-tab" data-tab="payments" data-url="{{ route('payments.index') }}">Payments</button>
+                    <button class="policy-tab" data-tab="vehicles" data-url="{{ route('vehicles.index') }}">Vehicles</button>
+                    <button class="policy-tab" data-tab="claims" data-url="{{ route('claims.index') }}">Claims</button>
+                    <button class="policy-tab" data-tab="documents" data-url="{{ route('documents.index') }}">Documents</button>
+                    <button class="policy-tab" data-tab="endorsements" data-url="{{ route('endorsements.index') }}">Endorsements</button>
+                    <button class="policy-tab" data-tab="commissions" data-url="{{ route('commissions.index') }}">Commission</button>
+                    <button class="policy-tab" data-tab="nominees" data-url="{{ route('nominees.index') }}">Nominees</button>
+
+                  </div>
+                  <div class="client-page-actions" id="policyFormHeaderActions">
+                    <button type="submit" form="policyForm" class="btn-save" id="policySaveBtnHeader" style="display:inline-block; background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;">Save</button>
+                    <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Cancel</button>
+                  </div>
+                </div>
               </div>
-               <div class="client-page-actions" id="policyFormHeaderActions">
-                <button type="submit" form="policyForm" class="btn-save" id="policySaveBtnHeader" style="display:inline-block; background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-right:8px;">Save</button>
-                <button type="button" class="btn" id="closePolicyFormBtnHeader" style="display:inline-block; background:#fff; color:#333; border:1px solid #ddd; padding:6px 16px; border-radius:3px; cursor:pointer; font-size:13px;" onclick="closePolicyPageView()">Cancel</button>
+              <div id="policyFormMethod" style="display:none;"></div>
+
+              <!-- Policy Form Content Card -->
+              <div id="policyFormContentWrapper" style="background:#fff;  #ddd; border-radius:4px; padding:0; overflow:hidden;gap:10px;">
+                <!-- Content will be loaded via JavaScript -->
+                <div id="policyFormContent" style="padding:0;">
+                  <!-- Content will be loaded via JavaScript -->
+                </div>
               </div>
             </div>
-          </div>
-              <div id="policyFormMethod" style="display:none;"></div>
-            
-            <!-- Policy Form Content Card -->
-            <div id="policyFormContentWrapper" style="background:#fff;  #ddd; border-radius:4px; padding:0; overflow:hidden;gap:10px;">
-              <!-- Content will be loaded via JavaScript -->
-              <div id="policyFormContent" style="padding:0;">
-                <!-- Content will be loaded via JavaScript -->
-              </div>
-          </div>
-             </div>
 
-       
-            
+
+
             <!-- Policy Schedule Card -->
             <div id="policyFormScheduleWrapper">
-            
-            <div id="policyFormScheduleContent" style="padding:0;">
+
+              <div id="policyFormScheduleContent" style="padding:0;">
                 <!-- Content will be loaded via JavaScript -->
               </div>
             </div>
-            
+
             <!-- Documents Card -->
             <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-top:20px; overflow:hidden;">
               <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #ddd;">
@@ -422,7 +432,7 @@
             </div>
           </form>
         </div>
- 
+
       </div>
     </div>
   </div>
@@ -433,7 +443,7 @@
       <div class="modal-header">
         <h4 id="policyModalTitle">Add Policy</h4>
         <button type="button" class="modal-close" onclick="closePolicyModal()">×</button>
-        </div>
+      </div>
       <form id="policyModalForm" method="POST" action="{{ route('policies.store') }}">
         @csrf
         <div id="policyFormMethod" style="display:none;"></div>
@@ -448,7 +458,7 @@
               <select id="client_id" name="client_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['clients'] as $client)
-                  <option value="{{ $client['id'] }}">{{ $client['client_name'] }} ({{ $client['clid'] ?? '' }})</option>
+                <option value="{{ $client['id'] }}">{{ $client['client_name'] }} ({{ $client['clid'] ?? '' }})</option>
                 @endforeach
               </select>
             </div>
@@ -457,7 +467,7 @@
               <select id="insurer_id" name="insurer_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['insurers'] as $insurer)
-                  <option value="{{ $insurer['id'] }}">{{ $insurer['name'] }}</option>
+                <option value="{{ $insurer['id'] }}">{{ $insurer['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -468,7 +478,7 @@
               <select id="policy_class_id" name="policy_class_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['policy_classes'] as $class)
-                  <option value="{{ $class['id'] }}">{{ $class['name'] }}</option>
+                <option value="{{ $class['id'] }}">{{ $class['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -477,7 +487,7 @@
               <select id="policy_plan_id" name="policy_plan_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['policy_plans'] as $plan)
-                  <option value="{{ $plan['id'] }}">{{ $plan['name'] }}</option>
+                <option value="{{ $plan['id'] }}">{{ $plan['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -506,7 +516,7 @@
               <select id="policy_status_id" name="policy_status_id" class="form-control">
                 <option value="">Select</option>
                 @foreach($lookupData['policy_statuses'] as $status)
-                  <option value="{{ $status['id'] }}">{{ $status['name'] }}</option>
+                <option value="{{ $status['id'] }}">{{ $status['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -529,7 +539,7 @@
               <select id="business_type_id" name="business_type_id" class="form-control">
                 <option value="">Select</option>
                 @foreach($lookupData['business_types'] ?? [] as $bizType)
-                  <option value="{{ $bizType['id'] }}">{{ $bizType['name'] }}</option>
+                <option value="{{ $bizType['id'] }}">{{ $bizType['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -558,7 +568,7 @@
               <select id="frequency_id" name="frequency_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['frequencies'] as $freq)
-                  <option value="{{ $freq['id'] ?? '' }}">{{ $freq['name'] }}</option>
+                <option value="{{ $freq['id'] ?? '' }}">{{ $freq['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -567,7 +577,7 @@
               <select id="pay_plan_lookup_id" name="pay_plan_lookup_id" class="form-control" required>
                 <option value="">Select</option>
                 @foreach($lookupData['pay_plans'] as $payPlan)
-                  <option value="{{ $payPlan['id'] ?? '' }}">{{ $payPlan['name'] }}</option>
+                <option value="{{ $payPlan['id'] ?? '' }}">{{ $payPlan['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -576,7 +586,7 @@
               <select id="agency_id" name="agency_id" class="form-control">
                 <option value="">Select</option>
                 @foreach($lookupData['agencies'] ?? [] as $agency)
-                  <option value="{{ $agency['id'] }}">{{ $agency['name'] }}</option>
+                <option value="{{ $agency['id'] }}">{{ $agency['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -587,7 +597,7 @@
               <select id="channel_id" name="channel_id" class="form-control">
                 <option value="">Select</option>
                 @foreach($lookupData['channels'] ?? [] as $channel)
-                  <option value="{{ $channel['id'] }}">{{ $channel['name'] }}</option>
+                <option value="{{ $channel['id'] }}">{{ $channel['name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -703,13 +713,13 @@
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Value</label>
               <input type="number" step="1" name="vehicle_value" id="vehicle_value" class="form-control" style="padding:6px; font-size:12px;">
             </div>
-              <div class="form-group">
+            <div class="form-group">
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Seats</label>
               <input type="number" step="1" name="vehicle_seats" id="vehicle_seats" class="form-control" style="padding:6px; font-size:12px;">
             </div>
-              <div class="form-group">
+            <div class="form-group">
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Color</label>
-              <input type="text"  name="vehicle_color" id="vehicle_color" class="form-control" style="padding:6px; font-size:12px;">
+              <input type="text" name="vehicle_color" id="vehicle_color" class="form-control" style="padding:6px; font-size:12px;">
             </div>
             <div class="form-group">
               <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Usage</label>
@@ -792,19 +802,19 @@
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Policy Plan</label>
-              <select id="renewal_policy_plan" name="policy_plan" class="form-control" >
+              <select id="renewal_policy_plan" name="policy_plan" class="form-control">
                 <option value="">Select Policy Plan</option>
                 @foreach($lookupData['policy_plans'] as $plan)
-                  <option value="{{ $plan['id'] }}">{{ $plan['name'] }}</option>
+                <option value="{{ $plan['id'] }}">{{ $plan['name'] }}</option>
                 @endforeach
               </select>
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Sum Insured</label>
-              <input type="number" id="renewal_sum_insured" name="sum_insured" step="0.01" class="form-control" >
+              <input type="number" id="renewal_sum_insured" name="sum_insured" step="0.01" class="form-control">
             </div>
           </div>
-          
+
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Term</label>
@@ -815,36 +825,36 @@
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Start Date</label>
-              <input type="date" id="renewal_start_date" name="start_date" class="form-control" >
+              <input type="date" id="renewal_start_date" name="start_date" class="form-control">
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">End Date</label>
               <input type="date" id="renewal_end_date" name="end_date" class="form-control" style="text-align:right; background-color:#f5f5f5;" readonly>
             </div>
           </div>
-          
+
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Add Ons</label>
-              <input type="text" id="renewal_add_ons" name="add_ons" class="form-control" >
+              <input type="text" id="renewal_add_ons" name="add_ons" class="form-control">
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Base Premium</label>
-              <input type="number" id="renewal_base_premium" name="base_premium" step="0.01" class="form-control" >
+              <input type="number" id="renewal_base_premium" name="base_premium" step="0.01" class="form-control">
             </div>
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Full Premium</label>
-              <input type="number" id="renewal_full_premium" name="full_premium" step="0.01" class="form-control" >
+              <input type="number" id="renewal_full_premium" name="full_premium" step="0.01" class="form-control">
             </div>
           </div>
-          
+
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Pay Plan Type</label>
-              <select id="renewal_pay_plan_type" name="pay_plan_type" class="form-control" >
+              <select id="renewal_pay_plan_type" name="pay_plan_type" class="form-control">
                 <option value="">Select Pay Plan</option>
                 @foreach($lookupData['pay_plans'] as $payPlan)
-                  <option value="{{ $payPlan['id'] }}">{{ $payPlan['name'] }}</option>
+                <option value="{{ $payPlan['id'] }}">{{ $payPlan['name'] }}</option>
                 @endforeach
               </select>
 
@@ -857,14 +867,14 @@
               </div>
             </div>
           </div>
-          
+
           <div class="form-row" style="margin-bottom:15px;">
             <div class="form-group" style="width:100%;">
               <label style="display:block; margin-bottom:5px; font-weight:600; text-align:left;">Note</label>
               <textarea id="renewal_note" name="note" class="form-control" rows="3" style="text-align:left;"></textarea>
             </div>
           </div>
-          
+
 
         </div>
         <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
@@ -874,174 +884,174 @@
       </form>
     </div>
   </div>
-<div class="modal" id="filterModal">
-  <div class="modal-content" style="max-width:800px; max-height:90vh; overflow-y:auto;">
-    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-bottom:1px solid #ddd; background:#fff;">
-      <h4 id="filterModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Filters</h4>
-      <div style="display:flex; gap:10px;">
-        <button type="submit" form="filterForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Apply</button>
-        <button type="button" class="btn-cancel" onclick="closeFilterModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Close</button>
-      </div>
-    </div>
-
-    <form id="filterForm" method="GET" action="{{ route('policies.index') }}">
-
-      <div class="modal-body" style="padding:20px;">
-        <!-- New Filter Fields -->
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="record_lines" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Set Record Lines</label>
-            <input type="number" id="record_lines" name="record_lines" value="{{ request('record_lines', 15) }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label for="search_term" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Search Term</label>
-            <input type="text" id="search_term" name="search_term" value="{{ request('search_term') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-          </div>
+  <div class="modal" id="filterModal">
+    <div class="modal-content" style="max-width:800px; max-height:90vh; overflow-y:auto;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-bottom:1px solid #ddd; background:#fff;">
+        <h4 id="filterModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Filters</h4>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" form="filterForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Apply</button>
+          <button type="button" class="btn-cancel" onclick="closeFilterModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Close</button>
         </div>
+      </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="client_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Client</label>
-            <select id="client_id" name="client_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              @if(isset($clients))
+      <form id="filterForm" method="GET" action="{{ route('policies.index') }}">
+
+        <div class="modal-body" style="padding:20px;">
+          <!-- New Filter Fields -->
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="record_lines" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Set Record Lines</label>
+              <input type="number" id="record_lines" name="record_lines" value="{{ request('record_lines', 15) }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="search_term" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Search Term</label>
+              <input type="text" id="search_term" name="search_term" value="{{ request('search_term') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+          </div>
+
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="client_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Client</label>
+              <select id="client_id" name="client_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                @if(isset($clients))
                 @foreach($clients as $c)
-                  <option value="{{ $c->id }}" {{ request('client_id') == $c->id ? 'selected' : '' }}>{{ $c->client_name }}</option>
+                <option value="{{ $c->id }}" {{ request('client_id') == $c->id ? 'selected' : '' }}>{{ $c->client_name }}</option>
                 @endforeach
-              @endif
-            </select>
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label for="filter_policy_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Policy Number</label>
-            <select id="filter_policy_id" name="policy_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              @if(isset($policies))
+                @endif
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="filter_policy_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Policy Number</label>
+              <select id="filter_policy_id" name="policy_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                @if(isset($policies))
                 @foreach($policies as $p)
-                  <option value="{{ $p->id }}" data-client-id="{{ $p->client_id }}" {{ request('policy_id') == $p->id ? 'selected' : '' }}>{{ $p->policy_no }} - {{ $p->client->client_name ?? '' }}</option>
+                <option value="{{ $p->id }}" data-client-id="{{ $p->client_id }}" {{ request('policy_id') == $p->id ? 'selected' : '' }}>{{ $p->policy_no }} - {{ $p->client->client_name ?? '' }}</option>
                 @endforeach
-              @endif
-            </select>
+                @endif
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="insurer_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Insurer <span style="color:#dc3545; font-weight:700;">•</span></label>
-            <select id="insurer_id" name="insurer_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              @if(isset($insurers))
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="insurer_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Insurer <span style="color:#dc3545; font-weight:700;">•</span></label>
+              <select id="insurer_id" name="insurer_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                @if(isset($insurers))
                 @foreach($insurers as $ins)
-                  <option value="{{ $ins->id }}" {{ request('insurer_id') == $ins->id ? 'selected' : '' }}>{{ $ins->name }}</option>
+                <option value="{{ $ins->id }}" {{ request('insurer_id') == $ins->id ? 'selected' : '' }}>{{ $ins->name }}</option>
                 @endforeach
-              @endif
-            </select>
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label for="policy_class_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Insurance Class</label>
-            <select id="policy_class_id" name="policy_class_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              @if(isset($policyClasses))
+                @endif
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="policy_class_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Insurance Class</label>
+              <select id="policy_class_id" name="policy_class_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                @if(isset($policyClasses))
                 @foreach($policyClasses as $pc)
-                  <option value="{{ $pc->id }}" {{ request('policy_class_id', 'Motor') == $pc->id ? 'selected' : '' }}>{{ $pc->name }}</option>
+                <option value="{{ $pc->id }}" {{ request('policy_class_id', 'Motor') == $pc->id ? 'selected' : '' }}>{{ $pc->name }}</option>
                 @endforeach
-              @endif
-            </select>
+                @endif
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="agency_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Agency</label>
-            <select id="agency_id" name="agency_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-=                @foreach($agencies as $a)
-                  <option value="{{ $a->id }}" {{ request('agency_id') == $a->id ? 'selected' : '' }}>{{ $a->name }}</option>
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="agency_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Agency</label>
+              <select id="agency_id" name="agency_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                = @foreach($agencies as $a)
+                <option value="{{ $a->id }}" {{ request('agency_id') == $a->id ? 'selected' : '' }}>{{ $a->name }}</option>
                 @endforeach
-            </select>
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label for="agent" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Agent</label>
-            <select id="agent" name="agent" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              @if(isset($agents))
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="agent" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Agent</label>
+              <select id="agent" name="agent" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                @if(isset($agents))
                 @foreach($agents as $ag)
-                  <option value="{{ $ag }}" {{ request('agent') == $ag ? 'selected' : '' }}>{{ $ag }}</option>
+                <option value="{{ $ag }}" {{ request('agent') == $ag ? 'selected' : '' }}>{{ $ag }}</option>
                 @endforeach
-              @endif
-            </select>
+                @endif
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="policy_status_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Status</label>
-            <select id="policy_status_id" name="policy_status_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-              <option value="">All</option>
-              <option value="draft" {{ request('policy_status_id')=='draft' ? 'selected' : '' }}>Draft</option>
-              <option value="active" {{ request('policy_status_id')=='active' ? 'selected' : '' }}>Active</option>
-              <option value="expired" {{ request('policy_status_id')=='expired' ? 'selected' : '' }}>Expired</option>
-              <option value="cancelled" {{ request('policy_status_id')=='cancelled' ? 'selected' : '' }}>Cancelled</option>
-            </select>
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="policy_status_id" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Status</label>
+              <select id="policy_status_id" name="policy_status_id" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+                <option value="">All</option>
+                <option value="draft" {{ request('policy_status_id')=='draft' ? 'selected' : '' }}>Draft</option>
+                <option value="active" {{ request('policy_status_id')=='active' ? 'selected' : '' }}>Active</option>
+                <option value="expired" {{ request('policy_status_id')=='expired' ? 'selected' : '' }}>Expired</option>
+                <option value="cancelled" {{ request('policy_status_id')=='cancelled' ? 'selected' : '' }}>Cancelled</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="from_start_date" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">From Start Date</label>
+              <input type="date" id="from_start_date" name="from_start_date" value="{{ request('from_start_date') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
           </div>
-          <div class="form-group" style="flex:1;">
-            <label for="from_start_date" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">From Start Date</label>
-            <input type="date" id="from_start_date" name="from_start_date" value="{{ request('from_start_date') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-          </div>
-        </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="from_end_date" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">From End Date</label>
-            <input type="date" id="from_end_date" name="from_end_date" value="{{ request('from_end_date') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="from_end_date" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">From End Date</label>
+              <input type="date" id="from_end_date" name="from_end_date" value="{{ request('from_end_date') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label for="premium_unpaid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Premium Unpaid</label>
+              <input type="number" id="premium_unpaid" name="premium_unpaid" value="{{ request('premium_unpaid') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
           </div>
-          <div class="form-group" style="flex:1;">
-            <label for="premium_unpaid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Premium Unpaid</label>
-            <input type="number" id="premium_unpaid" name="premium_unpaid" value="{{ request('premium_unpaid') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
-          </div>
-        </div>
 
-        <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
-          <div class="form-group" style="flex:1;">
-            <label for="commission_unpaid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Commission Unpaid</label>
-            <input type="number" id="commission_unpaid" name="commission_unpaid" value="{{ request('commission_unpaid') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+          <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div class="form-group" style="flex:1;">
+              <label for="commission_unpaid" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Commission Unpaid</label>
+              <input type="number" id="commission_unpaid" name="commission_unpaid" value="{{ request('commission_unpaid') }}" class="form-control" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px;">
+            </div>
           </div>
-        </div>
 
-      </div>
-    </form>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
-@include('partials.column-selection-modal', [
+  @include('partials.column-selection-modal', [
   'selectedColumns' => $selectedColumns,
   'columnDefinitions' => $columnDefinitions,
   'mandatoryColumns' => $mandatoryColumns,
   'columnSettingsRoute' => route('policies.save-column-settings'),
-])
+  ])
 
 
 
-@include('partials.table-scripts', [
+  @include('partials.table-scripts', [
   'mandatoryColumns' => $mandatoryColumns,
-])
+  ])
 
 
-<script>
-// Inject PHP data into window object (safe and minimal inline JS)
-window.appConfig = {
-    lookupData: @json($lookupData ?? []),
-    selectedColumns: @json($selectedColumns ?? []),
-    mandatoryColumns: @json($mandatoryColumns ?? []),
-    currentPolicyId: @json($policyId ?? ''),
-    currentPolicyData: null
-};
-</script>
+  <script>
+    // Inject PHP data into window object (safe and minimal inline JS)
+    window.appConfig = {
+      lookupData: @json($lookupData ?? []),
+      selectedColumns: @json($selectedColumns ?? []),
+      mandatoryColumns: @json($mandatoryColumns ?? []),
+      currentPolicyId: @json($policyId ?? ''),
+      currentPolicyData: null
+    };
+  </script>
 
-<script>
-  window.routes = {
-    policiesStore: "{{ route('policies.store') }}"
-  };
-</script>
+  <script>
+    window.routes = {
+      policiesStore: "{{ route('policies.store') }}"
+    };
+  </script>
 
-<!-- OR if using asset() -->
- <script src="{{ asset('js/policies-index.js') }}"></script> 
-@endsection
+  <!-- OR if using asset() -->
+  <script src="{{ asset('js/policies-index.js') }}"></script>
+  @endsection

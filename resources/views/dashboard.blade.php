@@ -5,9 +5,28 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
-
-
 <div class="dashboard">
+
+  {{-- <div style=" border-radius:4px; overflow:hidden; margin-bottom:15px;">
+    <div class="table-header"
+      style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0; padding:15px 20px;">
+      <h3>
+        Dashboard
+      </h3>
+      <div class="page-header-right">
+        @if(auth()->user()->image)
+        <img src="{{ asset('storage/' . auth()->user()->image) }}" alt="Profile" class="header-avatar">
+        @else
+        <div class="header-avatar header-avatar-initials">
+          {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+        </div>
+        @endif
+        <a href="{{ route('logout') }}" class="header-logout" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
+      </div>
+    </div>
+  </div> --}}
   <!-- Statistics Cards -->
   <div class="cards">
 
@@ -144,92 +163,93 @@
     </a>
 
   </div>
-   @php
-        // Determine selected chart year
-        $chartYear = now()->year;
-        if ($selectedDateRange) {
-            if ($selectedDateRange == 'year') {
-                $chartYear = now()->year;
-            } elseif (str_starts_with($selectedDateRange, 'year-')) {
-                $chartYear = (int) str_replace('year-', '', $selectedDateRange);
-            }
-        }
+  @php
+  // Determine selected chart year
+  $chartYear = now()->year;
+  if ($selectedDateRange) {
+  if ($selectedDateRange == 'year') {
+  $chartYear = now()->year;
+  } elseif (str_starts_with($selectedDateRange, 'year-')) {
+  $chartYear = (int) str_replace('year-', '', $selectedDateRange);
+  }
+  }
 
-        $years = range(now()->year, now()->year - 5);
-    @endphp
+  $years = range(now()->year, now()->year - 5);
+  @endphp
 
 
   <!-- Income vs Expense Charts -->
-<div class="charts">
+  <div class="charts">
     {{-- Income vs Expense --}}
     <div class="chart-box">
-        <div class="chart-controls">
-            <h3 style="margin: 0;">Income v/s Expense - {{ $chartYear }}</h3>
-            <div class="year-selector">
-               <select name="incomeExpenseYear" id="incomeExpenseYear" onchange="updateChartYear('incomeExpense', this.value)">
-                @php
-                    $currentYear = now()->year;
-                    $years = range($currentYear, $currentYear - 5); // last 5 years
-                @endphp
+      <div class="chart-controls">
+        <h3 style="margin: 0;">Income v/s Expense - {{ $chartYear }}</h3>
+        <div class="year-selector">
+          <select name="incomeExpenseYear" id="incomeExpenseYear"
+            onchange="updateChartYear('incomeExpense', this.value)">
+            @php
+            $currentYear = now()->year;
+            $years = range($currentYear, $currentYear - 5); // last 5 years
+            @endphp
 
-                @foreach($years as $y)
-                    <option value="{{ $y }}" {{ ($incomeExpenseYear ?? $chartYear) == $y ? 'selected' : '' }}>
-                        {{ $y }}
-                    </option>
-                @endforeach
-            </select>
-            </div>
+            @foreach($years as $y)
+            <option value="{{ $y }}" {{ ($incomeExpenseYear ?? $chartYear)==$y ? 'selected' : '' }}>
+              {{ $y }}
+            </option>
+            @endforeach
+          </select>
         </div>
-        <div class="date-range">
-            <div class="date-range-item">
-                <div>From : <input type="text" value="{{ $yearStart->format('j-M-y') }}" readonly class="date-input"></div>
-                <input type="text" value="{{ number_format($totalIncome ?? 0, 2) }}" readonly class="amount-input">
-            </div>
-            <div class="date-range-item">
-                <div>To : <input type="text" value="{{ $yearEnd->format('j-M-y') }}" readonly class="date-input"></div>
-                <input type="text" value="{{ number_format($totalExpense ?? 0, 2) }}" readonly class="amount-input">
-            </div>
+      </div>
+      <div class="date-range">
+        <div class="date-range-item">
+          <div>From : <input type="text" value="{{ $yearStart->format('j-M-y') }}" readonly class="date-input"></div>
+          <input type="text" value="{{ number_format($totalIncome ?? 0, 2) }}" readonly class="amount-input">
         </div>
-        <canvas id="incomeExpenseChart"></canvas>
+        <div class="date-range-item">
+          <div>To : <input type="text" value="{{ $yearEnd->format('j-M-y') }}" readonly class="date-input"></div>
+          <input type="text" value="{{ number_format($totalExpense ?? 0, 2) }}" readonly class="amount-input">
+        </div>
+      </div>
+      <canvas id="incomeExpenseChart"></canvas>
     </div>
 
     {{-- Income --}}
     <div class="chart-box">
-        <div class="chart-controls">
-            <h3 style="margin: 0;">Income - {{ $chartYear }}</h3>
-            <div class="year-selector">
-                <select name="incomeYear" id="incomeYear" onchange="updateChartYear('income', this.value)">
-                   @foreach($years as $y)
-                      <option value="{{ $y }}" {{ ($incomeYear ?? $chartYear) == $y ? 'selected' : '' }}>
-                          {{ $y }}
-                      </option>
-                  @endforeach
+      <div class="chart-controls">
+        <h3 style="margin: 0;">Income - {{ $chartYear }}</h3>
+        <div class="year-selector">
+          <select name="incomeYear" id="incomeYear" onchange="updateChartYear('income', this.value)">
+            @foreach($years as $y)
+            <option value="{{ $y }}" {{ ($incomeYear ?? $chartYear)==$y ? 'selected' : '' }}>
+              {{ $y }}
+            </option>
+            @endforeach
 
-                </select>
-            </div>
+          </select>
         </div>
-        <canvas id="incomeChart"></canvas>
-        <div class="month-stats" id="incomeStats"></div>
+      </div>
+      <canvas id="incomeChart"></canvas>
+      <div class="month-stats" id="incomeStats"></div>
     </div>
 
     {{-- Expenses --}}
     <div class="chart-box">
-        <div class="chart-controls">
-            <h3 style="margin: 0;">Expenses - {{ $chartYear }}</h3>
-            <div class="year-selector">
-                <select name="expenseYear" id="expenseYear" onchange="updateChartYear('expense', this.value)">
-                       @foreach($years as $y)
-                            <option value="{{ $y }}" {{ ($expenseYear ?? $chartYear) == $y ? 'selected' : '' }}>
-                                {{ $y }}
-                            </option>
-                        @endforeach
-                </select>
-            </div>
+      <div class="chart-controls">
+        <h3 style="margin: 0;">Expenses - {{ $chartYear }}</h3>
+        <div class="year-selector">
+          <select name="expenseYear" id="expenseYear" onchange="updateChartYear('expense', this.value)">
+            @foreach($years as $y)
+            <option value="{{ $y }}" {{ ($expenseYear ?? $chartYear)==$y ? 'selected' : '' }}>
+              {{ $y }}
+            </option>
+            @endforeach
+          </select>
         </div>
-        <canvas id="expenseChart"></canvas>
-        <div class="month-stats" id="expenseStats"></div>
+      </div>
+      <canvas id="expenseChart"></canvas>
+      <div class="month-stats" id="expenseStats"></div>
     </div>
-</div>
+  </div>
 
 
 </div>
@@ -239,16 +259,32 @@
 <script>
   // Initialize data from Blade
   const incomeExpenseMonthlyData = @json($incomeExpenseMonthlyData ?? $monthlyData ?? []);
-  const incomeExpenseTotalIncome = {{ $incomeExpenseTotalIncome ?? $totalIncome ?? 0 }};
-  const incomeExpenseTotalExpense = {{ $incomeExpenseTotalExpense ?? $totalExpense ?? 0 }};
-  
+  const incomeExpenseTotalIncome = {
+    {
+      $incomeExpenseTotalIncome ?? $totalIncome ?? 0
+    }
+  };
+  const incomeExpenseTotalExpense = {
+    {
+      $incomeExpenseTotalExpense ?? $totalExpense ?? 0
+    }
+  };
+
   const incomeMonthlyData = @json($incomeMonthlyData ?? $monthlyData ?? []);
   const expenseMonthlyData = @json($expenseMonthlyData ?? $monthlyData ?? []);
-  
+
   const monthlyData = @json($monthlyData ?? []);
-  const totalIncome = {{ $totalIncome ?? 0 }};
-  const totalExpense = {{ $totalExpense ?? 0 }};
-  
+  const totalIncome = {
+    {
+      $totalIncome ?? 0
+    }
+  };
+  const totalExpense = {
+    {
+      $totalExpense ?? 0
+    }
+  };
+
   const dashboardRoute = '{{ route('dashboard') }}';
   const dashboardExportRoute = '{{ route('dashboard.export') }}';
 </script>

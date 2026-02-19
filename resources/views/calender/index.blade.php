@@ -6,12 +6,31 @@
 <link rel="stylesheet" href="{{ asset('css/calender-index.css') }}?v={{ time() }}">
 
 
+<!-- <div style=" border-radius:4px; overflow:hidden; margin-bottom:15px;">
+  <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0; padding:15px 20px;">
+    <h3>
+      Calendar
+    </h3>
+    <div class="page-header-right">
+      @if(auth()->user()->image)
+      <img src="{{ asset('storage/' . auth()->user()->image) }}" alt="Profile" class="header-avatar">
+      @else
+      <div class="header-avatar header-avatar-initials">
+        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+      </div>
+      @endif
+      <a href="{{ route('logout') }}" class="header-logout" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </a>
+    </div>
+  </div>
+</div> -->
 
 <div class="calendar-container">
+
   <!-- Header -->
   <div class="calendar-header">
-    <div class="calendar-title">Calendar</div>
-    
+    <!-- <div class="calendar-title">Calendar</div> -->
     <!-- Category Filters -->
     <div class="category-filters">
       <button class="category-btn selected" data-filter="all">ALL</button>
@@ -79,7 +98,9 @@
     </thead>
     <tbody id="calendar-body">
       <!-- Loading placeholder -->
-      <tr><td colspan="7" style="text-align:center; padding:50px; color:#999;">Loading calendar...</td></tr>
+      <tr>
+        <td colspan="7" style="text-align:center; padding:50px; color:#999;">Loading calendar...</td>
+      </tr>
     </tbody>
   </table>
 </div>

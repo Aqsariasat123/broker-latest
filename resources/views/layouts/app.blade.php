@@ -22,12 +22,12 @@
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
       <!-- Global Page Header -->
-      <div class="page-header">
+      <!-- <div class="page-header">
         <div class="page-header-left">
-          <!-- <button class="toggle-btn" id="toggleBtn" aria-label="Toggle sidebar">
+          <button class="toggle-btn" id="toggleBtn" aria-label="Toggle sidebar">
             <span class="toggle-icon-open">☰</span>
             <span class="toggle-icon-close">✕</span>
-          </button> -->
+          </button>
           <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
         </div>
         <div class="page-header-right">
@@ -41,6 +41,26 @@
           <a href="{{ route('logout') }}" class="header-logout" title="Logout">
             <i class="fa-solid fa-right-from-bracket"></i>
           </a>
+        </div>
+      </div> -->
+
+      <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; padding:15px 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:18px; font-weight:600;">
+            @yield('page-title', 'Dashboard')
+          </h3>
+          <div class="page-header-right">
+            @if(auth()->user()->image)
+            <img src="{{ asset('storage/' . auth()->user()->image) }}" alt="Profile" class="header-avatar">
+            @else
+            <div class="header-avatar header-avatar-initials">
+              {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+            </div>
+            @endif
+            <a href="{{ route('logout') }}" class="header-logout" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+          </div>
         </div>
       </div>
 

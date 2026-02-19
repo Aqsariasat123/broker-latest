@@ -195,8 +195,9 @@ body {
 /* Dashboard and end spacing */
 .main-content {
   flex: 1;
-  padding-left: 20px;
-  padding-right: 20px;
+  /* padding-left: 20px;
+  padding-right: 20px; */
+  padding: 20px;
   transition: margin-left 0.3s ease;
   overflow-y: auto;
   overflow-x: hidden;
@@ -205,11 +206,11 @@ body {
 
 /* add small space at end of dashboard content */
 .dashboard {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-
+  /* padding-left: 20px;
+  padding-right: 20px; */
+  padding: 0 !important;
+  /* padding-top: 5px;
+  padding-bottom: 5px; */
   height: 100vh;
   overflow: hidden;
   /* display: flex; */
