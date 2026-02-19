@@ -234,7 +234,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
           <div class="page-title-section">
 
-            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+            <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group">
                 <label class="switch">
                   <input type="checkbox"

@@ -55,7 +55,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
           <div class="page-title-section">
 
-            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+            <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group">
                 <div class="filter-toggle">
                   <label class="toggle-switch">

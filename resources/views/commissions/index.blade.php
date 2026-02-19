@@ -85,7 +85,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             <button class="btn btn-back" onclick="window.location.href='{{ route('commissions.index') }}'">All</button>
           </div>
         </div> -->
-            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+            <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group" style="display:flex; align-items:center; gap:12px;">
 
                 <!-- Custom Toggle Switch -->

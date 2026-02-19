@@ -80,7 +80,7 @@ $mandatoryColumns = $config['mandatory_columns'];
               <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
             </div>
             @endif
-            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+            <div style="display:flex; align-items:center; gap:15px;">
               @if($filter != "expiring" && $filter != "life")
               <div class="filter-group">
                 @if(request()->get('dfr') == 'true')

@@ -39,7 +39,7 @@ $mandatoryColumns = $config['mandatory_columns'];
       <!-- Life Proposals Card -->
       <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
         <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
-          <div class="records-found" style="font-size:14px; font-weight:600; color:#333; white-space:nowrap;">
+          <div class="records-found">
             Records Found - {{ $proposals->total() }}
           </div>
           <div class="page-title-section">
