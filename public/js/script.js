@@ -1,3 +1,24 @@
+// Cookie helper functions
+function setCookie(name, value, days) {
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
 // Update toggle button icon based on sidebar state
 function updateToggleButtonIcon() {
   const sidebar = document.querySelector(".sidebar");
@@ -40,8 +61,11 @@ function toggleSidebar() {
   // On desktop: toggle collapsed state (icons only)
   if (window.innerWidth > 768) {
     sidebar.classList.toggle("collapsed");
+    const isNowCollapsed = sidebar.classList.contains("collapsed");
+    setCookie("sidebarCollapsed", isNowCollapsed, 365);
+
     // Update main content margin
-    if (sidebar.classList.contains("collapsed")) {
+    if (isNowCollapsed) {
       body.classList.add("sidebar-collapsed");
       // Initialize tooltip positioning after sidebar collapses
       setTimeout(() => {
@@ -74,7 +98,7 @@ function initTooltips() {
   const sidebar = document.querySelector(".sidebar");
   if (!sidebar) return;
 
-  const menuItems = sidebar.querySelectorAll(".ks-sidebar-menu li[data-tooltip]");                                                                              
+  const menuItems = sidebar.querySelectorAll(".ks-sidebar-menu li[data-tooltip]");
 
   menuItems.forEach((item) => {
     // Skip if already initialized
@@ -83,14 +107,14 @@ function initTooltips() {
     }
     item.setAttribute('data-tooltip-initialized', 'true');
 
-    item.addEventListener("mouseenter", function(e) {
+    item.addEventListener("mouseenter", function (e) {
       if (!sidebar.classList.contains("collapsed")) return;
 
       const tooltip = this.getAttribute("data-tooltip");
       if (!tooltip) return;
 
       // Remove any existing tooltip
-      const existingTooltip = document.querySelector(".sidebar-tooltip-chip");  
+      const existingTooltip = document.querySelector(".sidebar-tooltip-chip");
       if (existingTooltip) {
         existingTooltip.remove();
       }
@@ -119,11 +143,11 @@ function initTooltips() {
       });
     });
 
-    item.addEventListener("mouseleave", function() {
-      const tooltipEl = document.querySelector(".sidebar-tooltip-chip");        
+    item.addEventListener("mouseleave", function () {
+      const tooltipEl = document.querySelector(".sidebar-tooltip-chip");
       if (tooltipEl) {
         tooltipEl.style.opacity = "0";
-        tooltipEl.style.transform = "translateY(-50%) translateX(-5px)";        
+        tooltipEl.style.transform = "translateY(-50%) translateX(-5px)";
         setTimeout(() => {
           if (tooltipEl.parentNode) {
             tooltipEl.remove();
@@ -137,6 +161,16 @@ function initTooltips() {
 // Initialize sidebar state on page load
 document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.querySelector(".sidebar");
+  const body = document.body;
+
+  // On desktop, check if the sidebar is already collapsed (by the server reading the cookie)
+  // and apply necessary styles and initializations.
+  if (window.innerWidth > 768) {
+    if (sidebar.classList.contains("collapsed")) {
+      body.classList.add("sidebar-collapsed");
+      initTooltips();
+    }
+  }
 
   // Set initial state based on screen size
   if (window.innerWidth <= 768) {
@@ -152,13 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
       e.stopPropagation();
       toggleSidebar();
     });
-  }
-
-  // Initialize tooltips if sidebar is collapsed
-  if (sidebar && sidebar.classList.contains("collapsed")) {
-    setTimeout(() => {
-      initTooltips();
-    }, 100);
   }
 
   // Initialize toggle button icon
@@ -209,23 +236,53 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileDropdown = document.querySelector(".profile-dropdown");
 
   if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", function(e) {
+    profileBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       profileDropdown.classList.toggle("active");
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener("click", function(e) {
+    document.addEventListener("click", function (e) {
       if (!profileDropdown.contains(e.target)) {
         profileDropdown.classList.remove("active");
       }
     });
 
     // Close dropdown on escape key
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && profileDropdown.classList.contains("active")) { 
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && profileDropdown.classList.contains("active")) {
         profileDropdown.classList.remove("active");
       }
     });
   }
 });
+
+// Sidebar Collapse Button (inside sidebar)
+// document.addEventListener("DOMContentLoaded", () => {
+//   // const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+//   const sidebarCollapseBtn = document.getElementById("toggleBtn");
+//   const sidebar = document.querySelector(".sidebar");
+//   const body = document.body;
+
+//   if (sidebarCollapseBtn && sidebar) {
+//     sidebarCollapseBtn.addEventListener("click", function (e) {
+//       e.stopPropagation();
+//       sidebar.classList.toggle("collapsed");
+//       const isNowCollapsed = sidebar.classList.contains("collapsed");
+
+//       // Store the new state in a cookie
+//       setCookie("sidebarCollapsed", isNowCollapsed, 365);
+
+//       if (isNowCollapsed) {
+//         body.classList.add("sidebar-collapsed");
+//         setTimeout(() => initTooltips(), 100);
+//       } else {
+//         body.classList.remove("sidebar-collapsed");
+//         const tooltip = document.querySelector(".sidebar-tooltip-chip");
+//         if (tooltip) tooltip.remove();
+//       }
+
+//       updateToggleButtonIcon();
+//     });
+//   }
+// });

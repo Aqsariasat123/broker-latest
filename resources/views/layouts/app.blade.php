@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,31 +11,32 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+
+<body class="@if(request()->cookie('sidebarCollapsed') == 'true') sidebar-collapsed @endif">
   <div class="container-custom">
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar @if(request()->cookie('sidebarCollapsed') == 'true') collapsed @endif" id="sidebar">
       @include('partials.sidebar')
     </div>
-   
+
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
       <!-- Global Page Header -->
       <div class="page-header">
         <div class="page-header-left">
-          <button class="toggle-btn" id="toggleBtn" aria-label="Toggle sidebar">
+          <!-- <button class="toggle-btn" id="toggleBtn" aria-label="Toggle sidebar">
             <span class="toggle-icon-open">☰</span>
             <span class="toggle-icon-close">✕</span>
-          </button>
+          </button> -->
           <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
         </div>
         <div class="page-header-right">
           @if(auth()->user()->image)
-            <img src="{{ asset('storage/' . auth()->user()->image) }}" alt="Profile" class="header-avatar">
+          <img src="{{ asset('storage/' . auth()->user()->image) }}" alt="Profile" class="header-avatar">
           @else
-            <div class="header-avatar header-avatar-initials">
-              {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-            </div>
+          <div class="header-avatar header-avatar-initials">
+            {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+          </div>
           @endif
           <a href="{{ route('logout') }}" class="header-logout" title="Logout">
             <i class="fa-solid fa-right-from-bracket"></i>
@@ -48,4 +50,5 @@
 
   <script src="{{ asset('js/script.js') }}"></script>
 </body>
+
 </html>

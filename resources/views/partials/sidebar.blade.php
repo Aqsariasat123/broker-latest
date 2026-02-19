@@ -1,27 +1,39 @@
-
-<div class="ks-sidebar-logo">
-    <img src="{{ asset('asset/logo.png') }}" alt="Keystone Brokers" class="ks-sidebar-logo-img">
+<div class="sidebar-branding-section">
+    <div class="ks-sidebar-controls">
+        <!-- <button type="button" class="ks-sidebar-toggle" id="sidebarCollapseBtn" title="Collapse Sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button> -->
+        <button class="toggle-btn" id="toggleBtn" aria-label="Toggle sidebar">
+            <span class="toggle-icon-open">☰</span>
+            <span class="toggle-icon-close">✕</span>
+        </button>
+    </div>
+    <div class="ks-sidebar-logo">
+        <img src="{{ asset('asset/logo.png') }}" alt="Logo" class="ks-sidebar-logo-img" id="sidebar-logo">
+    </div>
 </div>
 
 @php
-    $currentRoute = request()->path();
-    $query = request()->query();
+$currentRoute = request()->path();
+$query = request()->query();
 
-    $isClientContext     = request()->has('client_id');
-    $isPolicyContext     = request()->is('policies*') && !request()->has('client_id');
-    $isPolicySchedule    = request()->is('schedules*') && request()->has('policy_id');
-    $isPolicyPayment     = request()->is('payments*') && request()->has('policy_id');
-    $isPolicyVehicle     = request()->is('vehicles*') && request()->has('policy_id');
-    $isPolicyClaim       = request()->is('claims*') && request()->has('policy_id');
-    $isPolicyDoc         = request()->is('documents*') && request()->has('policy_id');
-    $isPolicyNominee     = request()->is('nominees*') && request()->has('policy_id');
-    $isPolicyEndorment   = request()->is('endorsements*') && request()->has('policy_id');
-    $isPolicyComision    = request()->is('commissions*') && request()->has('policy_id');
-    $isProposalContext   = request()->is('life-proposals*') && !request()->has('client_id');
-    $isProposalNominee   = request()->is('nominees*') && request()->has('life-proposal-id');
-    $isClaimContext      = request()->is('claims*') && !request()->has('client_id');
-    $isVehicleContext    = request()->is('vehicles*') && !request()->has('client_id');
-    $isDocumentContext   = request()->is('documents*') && !request()->has('client_id');
+$isClientContext = request()->has('client_id');
+$isPolicyContext = request()->is('policies*') && !request()->has('client_id');
+$isPolicySchedule = request()->is('schedules*') && request()->has('policy_id');
+$isPolicyPayment = request()->is('payments*') && request()->has('policy_id');
+$isPolicyVehicle = request()->is('vehicles*') && request()->has('policy_id');
+$isPolicyClaim = request()->is('claims*') && request()->has('policy_id');
+$isPolicyDoc = request()->is('documents*') && request()->has('policy_id');
+$isPolicyNominee = request()->is('nominees*') && request()->has('policy_id');
+$isPolicyEndorment = request()->is('endorsements*') && request()->has('policy_id');
+$isPolicyComision = request()->is('commissions*') && request()->has('policy_id');
+$isProposalContext = request()->is('life-proposals*') && !request()->has('client_id');
+$isProposalNominee = request()->is('nominees*') && request()->has('life-proposal-id');
+$isClaimContext = request()->is('claims*') && !request()->has('client_id');
+$isVehicleContext = request()->is('vehicles*') && !request()->has('client_id');
+$isDocumentContext = request()->is('documents*') && !request()->has('client_id');
 @endphp
 
 <ul class="ks-sidebar-menu">
