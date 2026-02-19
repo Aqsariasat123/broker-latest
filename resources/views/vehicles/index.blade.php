@@ -52,9 +52,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
         <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
           <div class="records-found">Records Found - {{ $vehicles->total() }}</div>
-
           <div class="page-title-section">
-
             <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group">
                 <div class="filter-toggle">
@@ -122,11 +120,9 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                   </div>
                 </td>
                 <td class="action-cell">
-
                   <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
                     onclick="openEditVehicleModal({{ $vh->id }})" width="22" height="22"
                     style="cursor:pointer; vertical-align:middle;" alt="Expand">
-
                 </td>
                 @foreach ($selectedColumns as $col)
                 @switch($col)
@@ -208,8 +204,6 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
                 @endswitch
                 @endforeach
-
-
               </tr>
               @endforeach
             </tbody>
