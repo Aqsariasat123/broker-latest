@@ -46,7 +46,7 @@
 
       <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; padding:15px 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3 style="margin:0; font-size:18px; font-weight:600;">
+          <h3 style="margin:0; font-size:13px; font-weight:600;">
             @yield('page-title', 'Dashboard')
           </h3>
           <div class="page-header-right">
