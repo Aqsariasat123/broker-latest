@@ -2,19 +2,19 @@
   .container-table { max-width: 100%; margin: 0 auto; }
   .top-bar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
   .left-group { display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:220px; }
-  .records-found { font-size:14px; color:#555; min-width:150px; }
+  .records-found { color:#555; min-width:150px; }
   .action-buttons { margin-left:auto; display:flex; gap:10px; align-items:center; }
-  .btn { border:none; cursor:pointer; padding:6px 12px; font-size:13px; border-radius:2px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; }
+  .btn { border:none; cursor:pointer; padding:6px 12px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; }
   .btn-add { background:#df7900; color:#fff; border-color:#df7900; }
   .btn-back { background:#ccc; color:#333; border-color:#ccc; }
   .table-responsive { width: 100%; overflow-x: auto; border: 1px solid #ddd; max-height: 520px; overflow-y: auto; background: #fff; }
-  .footer { display:flex; justify-content:center; align-items:center; padding:5px 0; gap:10px; border-top:1px solid #ccc; flex-wrap:wrap; margin-top:15px; }
+  .footer { display:flex; justify-content:center; align-items:center; padding:10px 15px; gap:10px; border-top:1px solid #ccc; flex-wrap:wrap; margin-top:15px; }
   table { width:100%; border-collapse:collapse; font-size:13px; min-width:1000px; }
   thead tr { background-color: black; color: white; height:35px; font-weight: normal; }
-  thead th { padding:6px 5px; text-align:left; border-right:1px solid #444; white-space:nowrap; font-weight: normal; }
-  tbody tr { background-color:#fefefe; border-bottom:1px solid #ddd; }
+  thead th { padding:6px 5px; text-align:left; white-space:nowrap; font-weight: normal; }
+  tbody tr { background-color:#fefefe; }
   tbody tr:nth-child(even) { background-color:#f8f8f8; }
-  tbody td { padding:5px 5px; border-right:1px solid #ddd; white-space:nowrap; vertical-align:middle; font-size:12px; }
+  tbody td { padding:5px 5px; white-space:nowrap; vertical-align:middle; font-size:10px; }
   .btn-action { padding:2px 6px; font-size:11px; margin:1px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:2px; display:inline-block; }
   .badge-status { font-size:11px; padding:4px 8px; display:inline-block; border-radius:4px; color:#fff; }
   .badge-draft { background:#6c757d; }

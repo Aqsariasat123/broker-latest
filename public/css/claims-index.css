@@ -62,12 +62,6 @@
   }
   
   /* Bell/Checkbox Column Styles */
-  .bell-cell { 
-    text-align:center; 
-    padding:8px 5px; 
-    vertical-align:middle; 
-    min-width:50px; 
-  }
   .bell-cell input[type="checkbox"] {
     width: 18px;
     height: 18px;

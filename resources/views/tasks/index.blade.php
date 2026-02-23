@@ -47,9 +47,10 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <div class="page-title-section">
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
               <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
-                <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;">
-                  <span style="font-size:13px;">Filter</span>
+                <span class="filter-label">Filter</span>
+                <label class="toggle-switch">
                   <input type="checkbox" id="filterToggle" {{ request()->has('filter') && request()->filter =='overdue' ? 'checked' : '' }}>
+                  <span class="toggle-slider"></span>
                 </label>
                 @if(request()->has('filter') && request()->filter== 'overdue')
                 <button class="btn" id="listAllBtn" type="button" style="background:#28a745; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">List ALL</button>
@@ -103,15 +104,14 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                     $isExpired = $task->isOverdue();
                     @endphp
                     <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}"
-                      style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#ccc' }}; 
-                        background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};">
+                      style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#ccc' }};">
                     </div>
                   </div>
                 </td>
 
                 <td class="action-cell">
                   <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-                    onclick="openEditTask({{ $task->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                    onclick="openEditTask({{ $task->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
                 </td>
 
                 @foreach($selectedColumns as $col)

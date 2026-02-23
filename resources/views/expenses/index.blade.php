@@ -96,7 +96,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                     $isExpiring = $expense->hasExpiring ?? false;
                     @endphp
                     <div class="status-indicator {{ $isExpired ? 'expired' : ($isExpiring ? 'expiring' : 'normal') }}"
-                      style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : ($isExpiring ? '#ffc107' : 'transparent') }};">
+                      style="background-color:{{ $isExpired ? '#dc3545' : ($isExpiring ? '#ffc107' : 'transparent') }}; border-color:{{ $isExpired ? '#dc3545' : ($isExpiring ? '#ffc107' : '#999') }};">
                     </div>
                   </div>
                 </td>
@@ -104,7 +104,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                   @if(auth()->check() && (auth()->user()->hasPermission('expenses.view') ||
                   auth()->user()->hasPermission('expenses.edit') || auth()->user()->isAdmin()))
                   <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-                    onclick="openExpenseDetails({{ $expense->id }})" width="22" height="22"
+                    onclick="openExpenseDetails({{ $expense->id }})" width="18" height="18"
                     style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
                   @endif

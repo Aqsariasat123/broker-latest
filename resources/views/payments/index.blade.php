@@ -147,7 +147,7 @@
             @endphp
             <tr>
               <td class="action-cell">
-                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentDetails({{ $note->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPaymentDetails({{ $note->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
               </td>
               @foreach($contextColumns as $col)
                 @if($col == 'debit_note_no')

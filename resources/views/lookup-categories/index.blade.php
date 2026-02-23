@@ -11,7 +11,7 @@
           <div class="records-found">Records Found - {{ $categories->total() }}</div>
         <div class="action-buttons">
           <button class="btn btn-add" onclick="openCategoryDialog()">Add</button>
-          <a href="{{ route('dashboard') }}" class="btn" style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">Back</a>
+          <a href="{{ route('dashboard') }}" class="btn btn-back">Back</a>
         </div>
       </div>
       
@@ -31,7 +31,7 @@
           <button onclick="applyFilters()" class="btn" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Filter</button>
         </div>
         <div>
-          <button onclick="clearFilters()" class="btn" style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Clear</button>
+          <button onclick="clearFilters()" class="btn btn-back">Clear</button>
         </div>
       </div>
 
@@ -59,7 +59,7 @@
             @forelse($categories as $category)
               <tr>
                 <td class="action-cell">
-                  <svg class="action-expand" onclick="editCategory({{ $category->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <svg class="action-expand" onclick="editCategory({{ $category->id }})" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <!-- Maximize icon: four arrows pointing outward from center -->
                     <!-- Top arrow -->
                     <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

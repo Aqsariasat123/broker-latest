@@ -68,7 +68,7 @@
             @foreach($data as $row)
               <tr class="{{ isset($rowClass) ? $rowClass($row) : '' }}">
                 <td class="action-cell">
-                  <svg class="action-expand" onclick="{{ isset($editFunction) ? $editFunction : 'openEdit' }}({{ $row->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <svg class="action-expand" onclick="{{ isset($editFunction) ? $editFunction : 'openEdit' }}({{ $row->id }})" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <!-- Maximize icon: four arrows pointing outward from center -->
                     <!-- Top arrow -->
                     <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

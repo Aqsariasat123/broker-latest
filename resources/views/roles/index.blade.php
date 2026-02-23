@@ -122,7 +122,7 @@
                     @endif
                   </div>
                   <div style="display:flex; gap:10px; align-items:center;">
-                    <a href="{{ route('roles.edit', $role->id) }}" class="btn" style="background:#6c757d; color:#fff; border-color:#6c757d;">Edit Role</a>
+                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-back">Edit Role</a>
                     @if(!$role->is_system && $role->users()->count() == 0)
                       <form action="{{ route('roles.destroy', $role->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this role?');">
                         @csrf

@@ -134,7 +134,7 @@ $mandatoryColumns = $config['mandatory_columns'];
                 </td>
                 <td class="action-cell">
 
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openProposalDetails({{ $proposal->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openProposalDetails({{ $proposal->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <circle cx="12" cy="12" r="10" stroke="#2d2d2d" stroke-width="1.5" fill="none" />

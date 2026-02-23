@@ -130,92 +130,6 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
   /* HOVER STATES - This is the fix! */
 </style>
-<style>
-  /* Custom Toggle Switch - Green when ON */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
-    margin-right: 8px;
-  }
-
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
-  }
-
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
-  input:checked+.slider {
-    background-color: #28a745;
-  }
-
-  input:checked+.slider:before {
-    transform: translateX(24px);
-  }
-
-  /* Filter Buttons Base Style */
-  .filter-btn {
-    background: #000;
-    color: #fff;
-    border: none;
-    padding: 6px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: normal;
-    transition: background-color 0.2s ease;
-  }
-
-  /* Show All Active - Green */
-  .filter-btn.active-all {
-    background: #28a745 !important;
-  }
-
-  /* Selected Insurer - Blue */
-  .filter-btn.active-insurer {
-    background: #2e7d32 !important;
-  }
-
-  /* HOVER STATES - This is the fix! */
-
-  /* Hover on inactive buttons (black → dark gray) */
-  .filter-btn:hover:not(.active-all):not(.active-insurer) {
-    background: #333;
-  }
-
-
-  /* Hover on selected insurer when active (blue → darker blue) */
-  .filter-btn.active-insurer:hover {
-    background: #2e7d32 !important;
-    /* Darker blue */
-  }
-</style>
 <div class="dashboard">
   <!-- <div style="background:#fff; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; padding:15px 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -236,14 +150,13 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
             <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group">
-                <label class="switch">
+                <span class="filter-label">Filter</span>
+                <label class="toggle-switch">
                   <input type="checkbox"
                     id="insurerFilterToggle"
                     {{ ( request()->filled('insurer') ) ? 'checked' : '' }}>
-                  <span class="slider round"></span>
+                  <span class="toggle-slider"></span>
                 </label>
-
-                <span style="font-size:13px; font-weight:normal;">Filter</span>
 
                 @foreach($insurers as $soruceBtn)
                 @php $isActive = request()->get('insurer') === $soruceBtn->name; @endphp
@@ -296,7 +209,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               @foreach($statements as $st)
               <tr>
                 <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openStatementDetails({{ $st->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openStatementDetails({{ $st->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
 
                 </td>

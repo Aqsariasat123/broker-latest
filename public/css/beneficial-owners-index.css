@@ -1,12 +1,6 @@
 /* Beneficial Owners Index Styles */
 
 /* Bell cell styles matching clients page */
-.bell-cell { 
-  text-align:center; 
-  padding:8px 5px; 
-  vertical-align:middle; 
-  min-width:50px; 
-}
 
 .bell-cell.expired { 
   background-color:#ffebee !important; 
@@ -40,14 +34,14 @@ tbody tr.expired-row td {
   border:2px solid #000;
 }
 
-.footer { 
-  padding:15px 20px; 
-  border-top:1px solid #ddd; 
-  display:flex; 
-  justify-content:space-between; 
-  align-items:center; 
-  flex-wrap:wrap; 
-  background:#fff; 
+.footer {
+  padding:10px 15px;
+  border-top:1px solid #ddd;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  background:#fff;
 }
 
 .badge-status {

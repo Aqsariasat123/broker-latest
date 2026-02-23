@@ -41,7 +41,7 @@
         <div class="action-buttons">
           <button class="btn" onclick="removeSelectedNominees()" style="background:#f3742a; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Remove</button>
           <button class="btn btn-add" onclick="openNomineeDialog()">Add</button>
-          <a href="{{ $policy ? route('policies.index', ['policy_id' => $policy->id]) : route('policies.index') }}" class="btn" style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">Back</a>
+          <a href="{{ $policy ? route('policies.index', ['policy_id' => $policy->id]) : route('policies.index') }}" class="btn btn-back">Back</a>
         </div>
       </div>
 
@@ -81,14 +81,14 @@
               <tr>
                 <td class="bell-cell {{ $nominee->date_removed ? 'expired' : '' }}">
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="status-indicator {{ $nominee->date_removed ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $nominee->date_removed ? '#000' : '#f3742a' }}; background-color:{{ $nominee->date_removed ? '#000' : 'transparent' }};"></div>
+                    <div class="status-indicator {{ $nominee->date_removed ? 'expired' : 'normal' }}" style="background-color:{{ $nominee->date_removed ? '#000' : 'transparent' }}; border-color:{{ $nominee->date_removed ? '#000' : '#f3742a' }};"></div>
                   </div>
                 </td>
                 <td style="text-align:center;">
                   <input type="checkbox" name="selected_nominees[]" value="{{ $nominee->id }}" class="nominee-checkbox">
                 </td>
                 <td class="action-cell">
-                  <svg class="action-expand" onclick="editNominee({{ $nominee->id }})" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <svg class="action-expand" onclick="editNominee({{ $nominee->id }})" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <!-- Maximize icon: four arrows pointing outward from center -->
                     <!-- Top arrow -->
                     <path d="M12 2L12 8M12 2L10 4M12 2L14 4" stroke="#2d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -309,7 +309,7 @@
         </div>
       </div>
       <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
-        <button type="button" onclick="closeDocumentUploadModal()" style="background:#6c757d; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Cancel</button>
+        <button type="button" onclick="closeDocumentUploadModal()" class="btn btn-back">Cancel</button>
         <button type="submit" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px;">Upload</button>
       </div>
     </form>

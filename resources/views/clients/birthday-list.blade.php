@@ -87,13 +87,12 @@
                   <td class="bell-cell {{ $wishDone ? '' : 'pending' }}">
                     <div style="display:flex; align-items:center; justify-content:center;">
                       <div class="status-indicator {{ $wishDone ? 'done' : 'pending' }}"
-                           style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $wishDone ? '#28a745' : '#ccc' }};
-                                  background-color:{{ $wishDone ? '#28a745' : 'transparent' }};"></div>
+                           style="background-color:{{ $wishDone ? '#28a745' : 'transparent' }}; border-color:{{ $wishDone ? '#28a745' : '#ccc' }};"></div>
                     </div>
                   </td>
                   <td class="action-cell">
                     <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-                         onclick="openBirthdayEditPanel({{ $client->id }})" width="22" height="22"
+                         onclick="openBirthdayEditPanel({{ $client->id }})" width="18" height="18"
                          style="cursor:pointer; vertical-align:middle;" alt="Expand">
                   </td>
                   <td>

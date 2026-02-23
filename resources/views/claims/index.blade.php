@@ -61,13 +61,13 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <div class="page-title-section">
             <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
-                <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;">
-                  <span style="font-size:13px;">Filter</span>
-                  @php
-
-                  $hasPending = request()->has('pending') && (request()->pending == 'true' || request()->pending == '1');
-                  @endphp
+                @php
+                $hasPending = request()->has('pending') && (request()->pending == 'true' || request()->pending == '1');
+                @endphp
+                <span class="filter-label">Filter</span>
+                <label class="toggle-switch">
                   <input type="checkbox" id="filterToggle" {{ $hasPending ? 'checked' : '' }}>
+                  <span class="toggle-slider"></span>
                 </label>
                 @if($hasPending)
                 <button class="btn" id="listAllBtn" type="button" style="background:#28a745; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">List ALL</button>
@@ -128,11 +128,11 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                     $isExpired = $clm->hasExpired ?? false;
                     $isExpiring = $clm->hasExpiring ?? false;
                     @endphp
-                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#999' }};"></div>
                   </div>
                 </td>
                 <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openClaimModal('edit', {{ $clm->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openClaimModal('edit', {{ $clm->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
 
                 </td>

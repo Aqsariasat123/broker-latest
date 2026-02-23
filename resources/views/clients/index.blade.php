@@ -67,11 +67,11 @@ $selectedColumns = session('client_columns', [
             <div style="display:flex; align-items:center; gap:15px;">
               @if($filter != "ids_expired" && $filter != "birthday_today" )
               <div class="filter-group">
+                <span class="filter-label">Filter</span>
                 <label class="toggle-switch">
                   <input type="checkbox" id="filterToggle" {{ request()->get('follow_up') == 'true' ? 'checked' : '' }}>
                   <span class="toggle-slider"></span>
                 </label>
-                <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
               </div>
               @if(request()->get('follow_up') == 'true')
               <button class="btn btn-list-all" id="listAllBtn">List ALL</button>
@@ -167,12 +167,12 @@ $selectedColumns = session('client_columns', [
                     $isExpired = $client->hasExpired ?? false;
                     $isExpiring = $client->hasExpiring ?? false;
                     @endphp
-                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#999' }};"></div>
                   </div>
                 </td>
                 <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openClientDetailsModal({{ $client->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
-                  <svg class="action-clock" onclick="window.location.href='{{ route('clients.index') }}?follow_up=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openClientDetailsModal({{ $client->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <svg class="action-clock" onclick="window.location.href='{{ route('clients.index') }}?follow_up=true'" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none" />
                     <path d="M12 7V12L15 15" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" />
                   </svg>

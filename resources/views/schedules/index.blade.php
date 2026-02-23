@@ -88,14 +88,14 @@
             <tr>
               <td class="bell-cell {{ $isExpired ? 'expired' : ($isDFR ? 'dfr' : '') }}">
                 <div style="display:flex; align-items:center; justify-content:center;">
-                  <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#f3742a' }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                  <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#f3742a' }};"></div>
                 </div>
               </td>
               <td class="action-cell">
                   <a href="{{ route('policies.index') }}">
                       <img src="{{ asset('asset/arrow-expand.svg') }}" 
                           class="action-expand" 
-                          width="22" height="22" 
+                          width="18" height="18" 
                           style="cursor:pointer; vertical-align:middle;" 
                           alt="View Policy">
                   </a>               
@@ -204,7 +204,7 @@
       <h4 id="filterModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Filters</h4>
       <div style="display:flex; gap:10px;">
         <button type="submit" form="filterForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Apply</button>
-        <button type="button" class="btn-cancel" onclick="closeFilterModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Close</button>
+        <button type="button" class="btn-cancel btn btn-back" onclick="closeFilterModal()">Close</button>
       </div>
     </div>
 

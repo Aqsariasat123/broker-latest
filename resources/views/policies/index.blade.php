@@ -73,11 +73,11 @@ $mandatoryColumns = $config['mandatory_columns'];
 
             @if($filter != "expiring")
             <div class="filter-group">
+              <span class="filter-label">Filter</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="filterToggle" {{ (request()->get('follow_up') == 'true' || request()->get('dfr') == 'true' || request()->get('filter') == 'overdue' ) ? 'checked' : '' }}>
                 <span class="toggle-slider"></span>
               </label>
-              <label for="filterToggle" style="font-size:14px; color:#2d2d2d; margin:0; cursor:pointer; user-select:none;">Filter</label>
             </div>
             @endif
             <div style="display:flex; align-items:center; gap:15px;">
@@ -155,12 +155,12 @@ $mandatoryColumns = $config['mandatory_columns'];
               <tr class="{{ $isExpired ? 'expired-row' : ($isDFR ? 'dfr-row' : '') }}">
                 <td class="bell-cell {{ $isExpired ? 'expired' : ($isDFR ? 'dfr' : '') }}">
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $isExpired ? '#dc3545' : '#f3742a' }}; background-color:{{ $isExpired ? '#dc3545' : 'transparent' }};"></div>
+                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#f3742a' }};"></div>
                   </div>
                 </td>
                 <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPolicyDetails({{ $policy->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
-                  <svg class="action-clock" onclick="window.location.href='{{ route('policies.index') }}?dfr=true'" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openPolicyDetails({{ $policy->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <svg class="action-clock" onclick="window.location.href='{{ route('policies.index') }}?dfr=true'" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <circle cx="12" cy="12" r="9" stroke="#2d2d2d" stroke-width="1.5" fill="none" />
                     <path d="M12 7V12L15 15" stroke="#2d2d2d" stroke-width="1.5" stroke-linecap="round" />
                   </svg>
@@ -890,7 +890,7 @@ $mandatoryColumns = $config['mandatory_columns'];
         <h4 id="filterModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Filters</h4>
         <div style="display:flex; gap:10px;">
           <button type="submit" form="filterForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Apply</button>
-          <button type="button" class="btn-cancel" onclick="closeFilterModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 16px; border-radius:2px; cursor:pointer; font-size:13px;">Close</button>
+          <button type="button" class="btn-cancel btn btn-back" onclick="closeFilterModal()">Close</button>
         </div>
       </div>
 

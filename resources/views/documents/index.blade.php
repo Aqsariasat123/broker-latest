@@ -98,15 +98,15 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               <tr>
                 <td class="bell-cell">
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="status-indicator normal" style="width:18px; height:18px; border-radius:50%; border:2px solid #000; background-color:transparent;"></div>
+                    <div class="status-indicator normal" style="background-color:transparent; border-color:#999;"></div>
                   </div>
                 </td>
                 <td class="action-cell">
                   <a href="{{ asset('storage/'.$doc->file_path) }}" target="_blank" style="color:#007bff; text-decoration:underline;">
-                    <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand"></a>
+                    <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand"></a>
 
                   <!-- <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-              onclick="openDocumentDetails({{ $doc->id }})"  width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand"> -->
+              onclick="openDocumentDetails({{ $doc->id }})"  width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand"> -->
 
                   <svg class="action-delete" onclick="if(confirm('Delete this document?')) { deleteDocumentFromTable({{ $doc->id }}); }" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer; vertical-align:middle;">
                     <!-- Trash icon -->

@@ -62,9 +62,10 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             @if(request()->has('follow_up') && request()->follow_up)
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
               <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
-                <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;">
-                  <span style="font-size:13px;">Filter</span>
+                <span class="filter-label">Filter</span>
+                <label class="toggle-switch">
                   <input type="checkbox" id="filterToggle" checked>
+                  <span class="toggle-slider"></span>
                 </label>
                 @if(!request()->has('status') && request()->status != 'open')
                 <button class="btn" id="listAllBtn" type="button" style="background:#28a745; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">List ALL</button>
@@ -74,9 +75,10 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             @else
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
               <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
-                <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;">
-                  <span style="font-size:13px;">Filter</span>
+                <span class="filter-label">Filter</span>
+                <label class="toggle-switch">
                   <input type="checkbox" id="filterToggle">
+                  <span class="toggle-slider"></span>
                 </label>
                 @if(!request()->has('status') && request()->status != 'open')
                 <button class="btn btn-follow-up" id="followUpBtn" type="button" style="background:#2d2d2d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">To Follow Up</button>
@@ -146,11 +148,11 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                     $dotFill = 'transparent';
                     }
                     @endphp
-                    <div class="status-indicator" style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $dotColor }}; background-color:{{ $dotFill }};"></div>
+                    <div class="status-indicator" style="background-color:{{ $dotFill }}; border-color:{{ $dotColor }};"></div>
                   </div>
                 </td>
                 <td class="action-cell">
-                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openContactDetails({{ $contact->id }})" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                  <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand" onclick="openContactDetails({{ $contact->id }})" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
 
 
                 </td>

@@ -56,11 +56,11 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             <div style="display:flex; align-items:center; gap:15px;">
               <div class="filter-group">
                 <div class="filter-toggle">
+                  <span class="filter-label">Filter</span>
                   <label class="toggle-switch">
                     <input type="checkbox" id="filterToggle" onchange="toggleFilter()">
                     <span class="toggle-slider"></span>
                   </label>
-                  <span style="font-size:13px; color:#555;">Filter</span>
                 </div>
               </div>
             </div>
@@ -69,8 +69,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             @if(isset($policy) && $policy)
             <button class="btn btn-add" id="addVehicleBtn">Add</button>
             @endif
-            <a href="{{ route('policies.index', ['policy_id' => $policyId]) }}" class="btn"
-              style="background:#6c757d; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer; text-decoration:none; font-size:13px;">
+            <a href="{{ route('policies.index', ['policy_id' => $policyId]) }}" class="btn btn-back">
               Back
             </a>
           </div>
@@ -115,13 +114,13 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
                 <td class="bell-cell {{ $hasNoPolicy ? 'no-policy' : '' }}">
                   <div style="display:flex; align-items:center; justify-content:center;">
                     <div class="status-indicator {{ $hasNoPolicy ? 'no-policy' : 'normal' }}"
-                      style="width:18px; height:18px; border-radius:50%; border:2px solid {{ $hasNoPolicy ? '#777' : '#777' }}; background-color:{{ $hasNoPolicy ? '#888' : 'transparent' }};">
+                      style="background-color:{{ $hasNoPolicy ? '#888' : 'transparent' }}; border-color:{{ $hasNoPolicy ? '#777' : '#999' }};">
                     </div>
                   </div>
                 </td>
                 <td class="action-cell">
                   <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-                    onclick="openEditVehicleModal({{ $vh->id }})" width="22" height="22"
+                    onclick="openEditVehicleModal({{ $vh->id }})" width="18" height="18"
                     style="cursor:pointer; vertical-align:middle;" alt="Expand">
                 </td>
                 @foreach ($selectedColumns as $col)

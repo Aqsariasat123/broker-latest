@@ -95,7 +95,7 @@
                   </td>
                   <td class="action-cell">
                     <img src="{{ asset('asset/arrow-expand.svg') }}" class="action-expand"
-                         onclick="openEditFollowup('{{ $followup->id }}', '{{ $followup->source }}')" width="22" height="22" style="cursor:pointer; vertical-align:middle;" alt="Expand">
+                         onclick="openEditFollowup('{{ $followup->id }}', '{{ $followup->source }}')" width="18" height="18" style="cursor:pointer; vertical-align:middle;" alt="Expand">
                   </td>
                   @foreach($selectedColumns as $col)
                     @php

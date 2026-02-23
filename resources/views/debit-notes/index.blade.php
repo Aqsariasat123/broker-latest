@@ -32,6 +32,7 @@
 
       <div class="page-title-section">
          <div class="filter-group">
+              <span class="filter-label">Filter</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="filterToggle" {{ (request()->get('filter') == "overdue"
                    ||  request('status') == "pending"
@@ -104,8 +105,8 @@
           data-note-id="{{ $note->id }}">
             <img src="{{ asset('asset/arrow-expand.svg') }}"
                 class="action-expand"
-                width="22"
-                height="22"
+                width="18"
+                height="18"
                 style="cursor:pointer; vertical-align:middle;"
                 alt="Expand">
         </a>
