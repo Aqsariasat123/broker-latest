@@ -31,8 +31,13 @@ class ClaimController extends Controller
         }
         
         // Filter for pending claims (status is 'Processing' or empty)
+        $isDefaultPending = false;
         if ($request->has('pending') && ($request->pending == 'true' || $request->pending == '1')) {
             $query->where('status', 'Processing');
+        } elseif (!$request->has('pending') && !$request->has('show_all') && !$request->filled('policy_id') && !$request->filled('client_id')) {
+            // Default to pending when no explicit filter and not showing all
+            $query->where('status', 'Processing');
+            $isDefaultPending = true;
         }
         
         $claims = $query->with(['policy' => function($q) {
@@ -66,7 +71,7 @@ class ClaimController extends Controller
             $policy = Policy::find($request->policy_id);
         }
         
-        return view('claims.index', compact('claims', 'selectedColumns', 'lookupData', 'policies', 'client', 'policy'));
+        return view('claims.index', compact('claims', 'selectedColumns', 'lookupData', 'policies', 'client', 'policy', 'isDefaultPending'));
     }
 
     public function store(Request $request)

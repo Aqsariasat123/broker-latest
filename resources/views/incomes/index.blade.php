@@ -37,7 +37,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             @if(auth()->check() && (auth()->user()->hasPermission('incomes.create') || auth()->user()->isAdmin()))
             <button class="btn btn-add" id="addIncomeBtn">Add</button>
             @endif
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -314,8 +314,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             <div class="form-group" style="flex:1 1 100%;">
               <label for="income_notes"
                 style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Income Notes</label>
-              <textarea class="form-control" name="income_notes" id="income_notes" rows="4"
-                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+              <textarea class="form-control" name="income_notes" id="income_notes" rows="3"></textarea>
             </div>
           </div>
           <div id="selectedDocumentPreview"

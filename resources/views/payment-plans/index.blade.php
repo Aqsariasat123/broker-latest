@@ -53,7 +53,7 @@
       </div>
       <div class="action-buttons">
         <button class="btn btn-add" id="addPaymentPlanBtn">Add</button>
-        <button class="btn btn-close" onclick="window.history.back()">Close</button>
+        <a href="/dashboard" class="btn btn-back">Close</a>
 
       </div>
     </div>

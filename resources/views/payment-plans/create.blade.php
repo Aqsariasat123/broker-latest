@@ -35,7 +35,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="schedule_id">Schedule *</label>
+            <label for="schedule_id" class="required">Schedule</label>
             <select id="schedule_id" name="schedule_id" class="form-control" required>
               <option value="">Select Schedule</option>
               @foreach($schedules as $schedule)
@@ -58,13 +58,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="due_date">Due Date *</label>
+            <label for="due_date" class="required">Due Date</label>
             <input type="date" id="due_date" name="due_date" class="form-control" required value="{{ old('due_date') }}">
             @error('due_date')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="amount">Amount *</label>
+            <label for="amount" class="required">Amount</label>
             <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-control" required value="{{ old('amount') }}">
             @error('amount')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -86,7 +86,7 @@
           </div>
 
           <div class="form-group">
-            <label for="status">Status *</label>
+            <label for="status" class="required">Status</label>
             <select id="status" name="status" class="form-control" required>
               <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
               <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -112,7 +112,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="instalment_schedule_id">Schedule *</label>
+            <label for="instalment_schedule_id" class="required">Schedule</label>
             <select id="instalment_schedule_id" name="schedule_id" class="form-control" required>
               <option value="">Select Schedule</option>
               @foreach($schedules as $schedule)
@@ -129,7 +129,7 @@
           </div>
 
           <div class="form-group">
-            <label for="total_amount">Total Amount *</label>
+            <label for="total_amount" class="required">Total Amount</label>
             <input type="number" id="total_amount" name="total_amount" step="0.01" min="0" class="form-control" required placeholder="Total amount to split">
             @error('total_amount')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -137,13 +137,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="number_of_instalments">Number of Instalments *</label>
+            <label for="number_of_instalments" class="required">Number of Instalments</label>
             <input type="number" id="number_of_instalments" name="number_of_instalments" min="1" max="12" class="form-control" required placeholder="1-12">
             @error('number_of_instalments')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="first_due_date">First Due Date *</label>
+            <label for="first_due_date" class="required">First Due Date</label>
             <input type="date" id="first_due_date" name="first_due_date" class="form-control" required>
             @error('first_due_date')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -151,7 +151,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="instalment_frequency">Frequency *</label>
+            <label for="instalment_frequency" class="required">Frequency</label>
             <select id="instalment_frequency" name="frequency" class="form-control" required>
               <option value="">Select Frequency</option>
               @foreach($frequencies as $freq)

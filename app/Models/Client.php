@@ -82,6 +82,18 @@ class Client extends Model
         return $this->hasMany(Policy::class);
     }
 
+    /**
+     * Determine client status based on policy existence.
+     * If client has at least one policy → "Client", otherwise → "Prospect"
+     */
+    public function getClientStatusAttribute(): string
+    {
+        if ($this->relationLoaded('policies')) {
+            return $this->policies->count() > 0 ? 'Client' : 'Prospect';
+        }
+        return $this->policies()->exists() ? 'Client' : 'Prospect';
+    }
+
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class, 'tied_to', 'clid');

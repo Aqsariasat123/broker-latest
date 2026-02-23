@@ -28,7 +28,7 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label for="policy_id">Policy *</label>
+            <label for="policy_id" class="required">Policy</label>
             <select id="policy_id" name="policy_id" class="form-control" required>
               <option value="">Select Policy</option>
               @foreach($policies as $policy)
@@ -43,13 +43,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="schedule_no">Schedule Number *</label>
+            <label for="schedule_no" class="required">Schedule Number</label>
             <input type="text" id="schedule_no" name="schedule_no" class="form-control" required value="{{ old('schedule_no') }}">
             @error('schedule_no')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="status">Status *</label>
+            <label for="status" class="required">Status</label>
             <select id="status" name="status" class="form-control" required>
               <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft</option>
               <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -85,7 +85,7 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label for="notes">Notes</label>
-            <textarea id="notes" name="notes" class="form-control" style="min-height:80px;">{{ old('notes') }}</textarea>
+            <textarea id="notes" name="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
             @error('notes')<span class="error-message">{{ $message }}</span>@enderror
           </div>
         </div>

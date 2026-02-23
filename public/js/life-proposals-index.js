@@ -22,9 +22,14 @@ function calculateAge(dob) {
 }
 
 // Calculate ANB (Age Next Birthday)
-function calculateANB(age) {
+// For females: ANB = age - 3, for others: ANB = age + 1
+function calculateANB(age, sex) {
   if (!age) return null;
-  return parseInt(age) + 1;
+  const a = parseInt(age);
+  if (sex && sex.toLowerCase() === 'f') {
+    return a - 3;
+  }
+  return a + 1;
 }
 
 // Calculate total rider premium
@@ -495,16 +500,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Contact selection handler removed - Proposer's Name is now a text input
 
-  // DOB change handler
+  // DOB change handler - auto-calculate Age and ANB
   const dobInput = document.getElementById('dob');
+  const sexSelect = document.getElementById('sex');
+  function updateAgeAndANB() {
+    const dob = document.getElementById('dob').value;
+    const sex = document.getElementById('sex');
+    const sexVal = sex ? sex.options[sex.selectedIndex]?.text?.trim() : '';
+    const age = calculateAge(dob);
+    if (age !== null) {
+      document.getElementById('age').value = age;
+      document.getElementById('anb').value = calculateANB(age, sexVal);
+    }
+  }
   if (dobInput) {
-    dobInput.addEventListener('change', function () {
-      const age = calculateAge(this.value);
-      if (age !== null) {
-        document.getElementById('age').value = age;
-        document.getElementById('anb').value = calculateANB(age);
-      }
-    });
+    dobInput.addEventListener('change', updateAgeAndANB);
+  }
+  // Recalculate ANB when sex changes
+  if (sexSelect) {
+    sexSelect.addEventListener('change', updateAgeAndANB);
   }
 
   // Rider checkbox handlers

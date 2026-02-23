@@ -79,6 +79,16 @@ class CommissionController extends Controller
                 }
             }
 
+            // Default to Unpaid when no explicit paid_status and not showing all
+            $isDefaultUnpaid = false;
+            if (!$statusFilter && !$request->has('show_all') && !$request->filled('policy_id')) {
+                $unpaidStatus = $paymentStatuses->firstWhere('name', 'Unpaid');
+                if ($unpaidStatus) {
+                    $query->where('payment_status_id', $unpaidStatus->id);
+                    $isDefaultUnpaid = true;
+                }
+            }
+
             // Filter for Outstanding commissions (match dashboard query: date_received is null)
             if ($request->has('filter') && $request->filter == 'outstanding') {
                 $query->whereNull('date_received');
@@ -104,8 +114,8 @@ class CommissionController extends Controller
                 'insurerFilter',
                 'selectedColumns',
                 'commissionNote',
-                'commissionstatements'
-                
+                'commissionstatements',
+                'isDefaultUnpaid'
             )
         );
     }

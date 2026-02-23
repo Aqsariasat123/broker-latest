@@ -31,9 +31,7 @@
                 <button type="button" class="btn btn-add" onclick="openAddCategoryModal()">
                     <i class="fas fa-plus"></i> Add Category
                 </button>
-                <button class="btn btn-back" onclick="window.history.back()">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
+                <a href="/dashboard" class="btn btn-back">Close</a>
             </div>
         </div>
         <div class="table-responsive">

@@ -319,7 +319,7 @@
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1;">
               <label for="pep_details" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">PEP Details</label>
-              <textarea class="form-control" name="pep_details" id="pep_details" rows="3" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+              <textarea class="form-control" name="pep_details" id="pep_details" rows="3"></textarea>
             </div>
           </div>
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">

@@ -156,25 +156,28 @@ document.addEventListener('DOMContentLoaded', function () {
     columnBtn.addEventListener('click', () => openColumnModal());
   }
 
-  // Filter toggle handler
+  // Filter toggle handler - filter is ON by default (pending)
   const filterToggle = document.getElementById('filterToggle');
   if (filterToggle) {
     const urlParams = new URLSearchParams(window.location.search);
     const hasPending = urlParams.get('pending') === 'true' || urlParams.get('pending') === '1';
-    filterToggle.checked = hasPending;
+    const showAll = urlParams.has('show_all');
+    // Filter is ON by default unless show_all is set
+    filterToggle.checked = hasPending || !showAll;
 
     filterToggle.addEventListener('change', function (e) {
       e.preventDefault();
       e.stopPropagation();
       if (!this.checked) {
-        // Clear filter when toggle is unchecked
+        // Show all - clear pending filter and set show_all flag
         const u = new URL(window.location.href);
         u.searchParams.delete('pending');
+        u.searchParams.set('show_all', '1');
         window.location.href = u.toString();
       } else {
-        // Activate pending filter
+        // Re-enable default pending filter by removing show_all
         const u = new URL(window.location.href);
-        u.searchParams.set('pending', '1');
+        u.searchParams.delete('show_all');
         window.location.href = u.toString();
       }
     });
@@ -187,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
       e.stopPropagation();
       const u = new URL(window.location.href);
-      u.searchParams.set('pending', '1');
+      u.searchParams.delete('show_all');
       window.location.href = u.toString();
     });
   }
@@ -200,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
       e.stopPropagation();
       const u = new URL(window.location.href);
       u.searchParams.delete('pending');
+      u.searchParams.set('show_all', '1');
       window.location.href = u.toString();
     });
   }

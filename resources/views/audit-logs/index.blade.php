@@ -64,7 +64,7 @@
         <div class="records-found">Records Found - {{ $logs->total() }}</div>
       </div>
       <div class="action-buttons">
-        <button class="btn btn-back" onclick="window.history.back()">Back</button>
+        <a href="/dashboard" class="btn btn-back">Close</a>
       </div>
     </div>
 

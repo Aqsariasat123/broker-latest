@@ -12,7 +12,7 @@
 @if(isset($client) && $client)
 <span class="client-name" style="color:#f3742a; font-size:16px; font-weight:500;"> - {{ $client->client_name }}</span>
 @endif
-<span id="followUpLabel" style="display:{{ request()->get('pending') == 1 ? 'inline' : 'none' }}; color:#f3742a; font-size:16px; font-weight:500;"> - Pending </span>
+<span id="followUpLabel" style="display:{{ (request()->get('pending') == 1 || ($isDefaultPending ?? false)) ? 'inline' : 'none' }}; color:#f3742a; font-size:16px; font-weight:500;"> - Pending </span>
 @endsection
 
 @section('content')
@@ -63,13 +63,15 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               <div class="filter-group" style="display:flex; align-items:center; gap:10px;">
                 @php
                 $hasPending = request()->has('pending') && (request()->pending == 'true' || request()->pending == '1');
+                $isPendingActive = $hasPending || ($isDefaultPending ?? false);
+                $isShowAll = request()->has('show_all');
                 @endphp
                 <span class="filter-label">Filter</span>
                 <label class="toggle-switch">
-                  <input type="checkbox" id="filterToggle" {{ $hasPending ? 'checked' : '' }}>
+                  <input type="checkbox" id="filterToggle" {{ $isPendingActive ? 'checked' : '' }}>
                   <span class="toggle-slider"></span>
                 </label>
-                @if($hasPending)
+                @if($isPendingActive)
                 <button class="btn" id="listAllBtn" type="button" style="background:#28a745; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">List ALL</button>
                 @else
                 <button class="btn" id="showPendingBtn" type="button" style="background:#000; color:#fff; border:none; padding:6px 16px; border-radius:2px; cursor:pointer;">Show Pending</button>
@@ -88,7 +90,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           @endif
           <div class="action-buttons">
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
 
         </div>
@@ -214,7 +216,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <div class="modal-body">
             <div class="form-row">
               <div class="form-group">
-                <label for="policy_id">Policy Number</label>
+                <label for="policy_id" class="required">Policy Number</label>
                 <select class="form-control" name="policy_id" id="policy_id" required>
                   <option value="">Select Policy</option>
                   @if(isset($policies))
@@ -277,7 +279,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             <div class="form-row full-width">
               <div class="form-group">
                 <label for="claim_summary">Claim Summary</label>
-                <textarea class="form-control" name="claim_summary" id="claim_summary" rows="4"></textarea>
+                <textarea class="form-control" name="claim_summary" id="claim_summary" rows="3"></textarea>
               </div>
             </div>
           </div>
@@ -300,7 +302,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           @csrf
           <div class="modal-body">
             <div class="form-group">
-              <label for="documentType">Document Type</label>
+              <label for="documentType" class="required">Document Type</label>
               <select class="form-control" name="document_type" id="documentType" required>
                 <option value="">Select Document Type</option>
                 <option value="claim_form">Claim Form</option>
@@ -312,7 +314,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               </select>
             </div>
             <div class="form-group">
-              <label for="documentFile">Select File</label>
+              <label for="documentFile" class="required">Select File</label>
               <input type="file" class="form-control" name="document" id="documentFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
               <small style="color:#666; font-size:11px;">Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)</small>
             </div>

@@ -191,7 +191,7 @@
       <input type="hidden" name="policy_id" id="nominee_policy_id" value="{{ $policy->id ?? '' }}">
       <div class="modal-body" style="padding:20px;">
         <div class="form-group" style="margin-bottom:15px;">
-          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Full Name</label>
+          <label class="required" style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Full Name</label>
           <input type="text" name="full_name" id="nominee_full_name" class="form-control" required style="padding:6px; font-size:12px;">
         </div>
         <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -294,7 +294,7 @@
     <form id="documentUploadForm" onsubmit="event.preventDefault(); uploadDocument();">
       <div class="modal-body" style="padding:20px;">
         <div class="form-group" style="margin-bottom:15px;">
-          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Document Type</label>
+          <label class="required" style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">Document Type</label>
           <select name="document_type" id="document_type" required style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:2px;">
             <option value="">Select Type</option>
             <option value="nominee_document">Nominee Document</option>
@@ -303,7 +303,7 @@
           </select>
         </div>
         <div class="form-group" style="margin-bottom:15px;">
-          <label style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">File</label>
+          <label class="required" style="display:block; margin-bottom:5px; font-weight:600; font-size:12px;">File</label>
           <input type="file" name="document" id="document" required accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" style="width:100%; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:2px;">
           <small style="color:#666; font-size:11px;">Max size: 5MB. Allowed: JPG, PNG, PDF, DOC, DOCX</small>
         </div>

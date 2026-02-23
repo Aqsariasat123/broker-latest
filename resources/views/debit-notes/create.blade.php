@@ -28,7 +28,7 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label for="payment_plan_id">Payment Plan *</label>
+            <label for="payment_plan_id" class="required">Payment Plan</label>
             <select id="payment_plan_id" name="payment_plan_id" class="form-control" required>
               <option value="">Select Payment Plan</option>
               @foreach($paymentPlans as $plan)
@@ -48,13 +48,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="debit_note_no">Debit Note Number *</label>
+            <label for="debit_note_no" class="required">Debit Note Number</label>
             <input type="text" id="debit_note_no" name="debit_note_no" class="form-control" required value="{{ old('debit_note_no') }}">
             @error('debit_note_no')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="issued_on">Issued On *</label>
+            <label for="issued_on" class="required">Issued On</label>
             <input type="date" id="issued_on" name="issued_on" class="form-control" required value="{{ old('issued_on', date('Y-m-d')) }}">
             @error('issued_on')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -62,13 +62,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="amount">Amount *</label>
+            <label for="amount" class="required">Amount</label>
             <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-control" required value="{{ old('amount') }}">
             @error('amount')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="status">Status *</label>
+            <label for="status" class="required">Status</label>
             <select id="status" name="status" class="form-control" required>
               <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
               <option value="issued" {{ old('status') == 'issued' ? 'selected' : '' }}>Issued</option>

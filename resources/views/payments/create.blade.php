@@ -35,7 +35,7 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label for="debit_note_id">Debit Note *</label>
+            <label for="debit_note_id" class="required">Debit Note</label>
             <select id="debit_note_id" name="debit_note_id" class="form-control" required>
               <option value="">Select Debit Note</option>
               @foreach($debitNotes as $note)
@@ -54,13 +54,13 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="payment_reference">Payment Reference *</label>
+            <label for="payment_reference" class="required">Payment Reference</label>
             <input type="text" id="payment_reference" name="payment_reference" class="form-control" required value="{{ old('payment_reference') }}" placeholder="e.g., PAY-2025-001">
             @error('payment_reference')<span class="error-message">{{ $message }}</span>@enderror
           </div>
 
           <div class="form-group">
-            <label for="paid_on">Paid On *</label>
+            <label for="paid_on" class="required">Paid On</label>
             <input type="date" id="paid_on" name="paid_on" class="form-control" required value="{{ old('paid_on', date('Y-m-d')) }}">
             @error('paid_on')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -68,7 +68,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="amount">Amount *</label>
+            <label for="amount" class="required">Amount</label>
             <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-control" required value="{{ old('amount') }}">
             @error('amount')<span class="error-message">{{ $message }}</span>@enderror
           </div>
@@ -97,7 +97,7 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label for="notes">Notes</label>
-            <textarea id="notes" name="notes" class="form-control" style="min-height:80px;">{{ old('notes') }}</textarea>
+            <textarea id="notes" name="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
             @error('notes')<span class="error-message">{{ $message }}</span>@enderror
           </div>
         </div>

@@ -62,7 +62,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           <div class="action-buttons">
             <button class="btn btn-add" id="addTaskBtn">Add</button>
-            <button class="btn btn-back" onclick="handleBack()">Back</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -240,7 +240,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       <input type="hidden" id="date_in" name="date_in">
 
       <div class="panel-form-row">
-        <label for="category">Category</label>
+        <label for="category" class="required">Category</label>
         <select class="form-control" id="category" name="category" required>
           <option value="">Select Category</option>
           @foreach($categories as $cat)
@@ -255,7 +255,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       </div>
 
       <div class="panel-form-row">
-        <label for="name">Name</label>
+        <label for="name" class="required">Name</label>
         <select class="form-control" id="name" name="name" required>
           <option value="">Select Name</option>
           @foreach($contacts as $contact)
@@ -273,7 +273,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       </div>
 
       <div class="panel-form-row">
-        <label for="due_date">Due Date</label>
+        <label for="due_date" class="required">Due Date</label>
         <input type="date" class="form-control" id="due_date" name="due_date" required>
       </div>
 
@@ -283,7 +283,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       </div>
 
       <div class="panel-form-row">
-        <label for="assignee">Assignee</label>
+        <label for="assignee" class="required">Assignee</label>
         <select class="form-control" id="assignee" name="assignee" required>
           <option value="">Select Assignee</option>
           @foreach($users as $user)
@@ -293,7 +293,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       </div>
 
       <div class="panel-form-row">
-        <label for="task_status">Task Status</label>
+        <label for="task_status" class="required">Task Status</label>
         <select class="form-control" id="task_status" name="task_status" required>
           <option value="Not Done">Not Done</option>
           <option value="In Progress">In Progress</option>

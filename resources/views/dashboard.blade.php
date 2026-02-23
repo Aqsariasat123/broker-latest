@@ -66,7 +66,7 @@
     <!-- IDs Expired -->
     <a href="{{ route('clients.index', ['filter' => 'ids_expired']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-user"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-id-card"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['ids_expired'] ?? 0 }}</span>
           <span>IDs Expired</span>
@@ -77,7 +77,7 @@
     <!-- General Policies -->
     <a href="{{ route('policies.index', ['type' => 'general']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-expand"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-shield-halved"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['general_policies'] ?? 0 }}</span>
           <span>General Policies</span>
@@ -88,7 +88,7 @@
     <!-- Gen-Com Outstanding -->
     <a href="{{ route('commissions.index', ['filter' => 'outstanding']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-expand"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-coins"></i></span>
         <div class="card-content">
           <span class="value">{{ number_format($stats['gen_com_outstanding'] ?? 0, 2) }}</span>
           <span>Gen-Com Outstanding</span>
@@ -99,7 +99,7 @@
     <!-- Open Leads -->
     <a href="{{ route('contacts.index', ['status' => 'open']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-user"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-user-plus"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['open_leads'] ?? 0 }}</span>
           <span>Open Leads</span>
@@ -110,7 +110,7 @@
     <!-- Follow Ups Today -->
     <a href="{{ route('contacts.index', ['follow_up' => '1']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-red"><i class="fa-solid fa-calendar-days"></i></span>
+        <span class="icon icon-red"><i class="fa-solid fa-phone"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['follow_ups_today'] ?? 0 }}</span>
           <span>Follow Ups Today</span>
@@ -121,7 +121,7 @@
     <!-- Proposals Pending -->
     <a href="{{ route('life-proposals.index', ['status' => 'pending']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-expand"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-file-circle-question"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['proposals_pending'] ?? 0 }}</span>
           <span>Proposals Pending</span>
@@ -132,7 +132,7 @@
     <!-- Proposals Processing -->
     <a href="{{ route('life-proposals.index', ['status' => 'processing']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-expand"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-spinner"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['proposals_processing'] ?? 0 }}</span>
           <span>Proposals Processing</span>
@@ -143,7 +143,7 @@
     <!-- Life Policies -->
     <a href="{{ route('policies.index', ['type' => 'life']) }}" class="card-link">
       <div class="card">
-        <span class="icon icon-black"><i class="fa-solid fa-expand"></i></span>
+        <span class="icon icon-black"><i class="fa-solid fa-heart-pulse"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['life_policies'] ?? 0 }}</span>
           <span>Life Policies</span>
@@ -154,7 +154,7 @@
     <!-- Birthdays This Month -->
     <a href="{{ route('clients.birthday-list') }}" class="card-link">
       <div class="card">
-        <span class="icon icon-red"><i class="fa-solid fa-calendar-days"></i></span>
+        <span class="icon icon-red"><i class="fa-solid fa-cake-candles"></i></span>
         <div class="card-content">
           <span class="value">{{ $stats['birthdays_today'] ?? 0 }}</span>
           <span>Birthdays This Month</span>

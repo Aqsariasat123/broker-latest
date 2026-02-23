@@ -202,6 +202,152 @@
     form.submit();
   }
 
+  // Autocomplete for name fields
+  function initAutocomplete() {
+    document.querySelectorAll('input[data-autocomplete]').forEach(input => {
+      if (input.dataset.acInit) return;
+      input.dataset.acInit = 'true';
+
+      const type = input.dataset.autocomplete; // 'clients' or 'contacts'
+      let dropdown = document.createElement('div');
+      dropdown.className = 'ac-dropdown';
+      dropdown.style.cssText = 'display:none; position:absolute; background:#fff; border:1px solid #ddd; border-radius:3px; max-height:180px; overflow-y:auto; z-index:9999; box-shadow:0 2px 8px rgba(0,0,0,0.15); font-size:12px; min-width:200px;';
+      input.parentNode.style.position = 'relative';
+      input.parentNode.appendChild(dropdown);
+
+      let debounce = null;
+      input.addEventListener('input', function() {
+        clearTimeout(debounce);
+        const q = this.value.trim();
+        if (q.length < 1) { dropdown.style.display = 'none'; return; }
+
+        debounce = setTimeout(() => {
+          fetch(`/api/search?type=${type}&q=${encodeURIComponent(q)}&limit=10`, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (!data.length) { dropdown.style.display = 'none'; return; }
+            dropdown.innerHTML = data.map(item =>
+              `<div class="ac-item" data-id="${item.id}" style="padding:6px 10px; cursor:pointer; border-bottom:1px solid #f0f0f0;">${item.name}</div>`
+            ).join('');
+            dropdown.style.display = 'block';
+            dropdown.style.width = input.offsetWidth + 'px';
+
+            dropdown.querySelectorAll('.ac-item').forEach(item => {
+              item.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                input.value = this.textContent;
+                // Set hidden ID field if exists
+                const idField = document.getElementById(input.dataset.idField);
+                if (idField) idField.value = this.dataset.id;
+                dropdown.style.display = 'none';
+              });
+              item.addEventListener('mouseenter', function() {
+                this.style.background = '#f5f5f5';
+              });
+              item.addEventListener('mouseleave', function() {
+                this.style.background = '#fff';
+              });
+            });
+          })
+          .catch(() => { dropdown.style.display = 'none'; });
+        }, 250);
+      });
+
+      input.addEventListener('blur', function() {
+        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
+      });
+    });
+  }
+
+  // Table search - live filter rows by text
+  function initTableSearch() {
+    document.querySelectorAll('input[data-table-search]').forEach(input => {
+      if (input.dataset.searchInit) return;
+      input.dataset.searchInit = 'true';
+
+      const tableId = input.dataset.tableSearch;
+      const table = document.getElementById(tableId);
+      if (!table) return;
+
+      input.addEventListener('input', function() {
+        const q = this.value.trim().toLowerCase();
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          if (!q) { row.style.display = ''; return; }
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(q) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initAutocomplete();
+    initTableSearch();
+  });
+
+  // Column resize functionality
+  function initColumnResize() {
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+      if (table.dataset.resizeInit) return;
+      table.dataset.resizeInit = 'true';
+
+      const ths = table.querySelectorAll('thead th');
+      ths.forEach(th => {
+        // Skip bell-cell and action columns
+        if (th.querySelector('svg') || th.textContent.trim() === 'Action') return;
+
+        const handle = document.createElement('div');
+        handle.className = 'col-resize-handle';
+        th.appendChild(handle);
+
+        let startX, startWidth, colIndex;
+
+        handle.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          startX = e.pageX;
+          startWidth = th.offsetWidth;
+          colIndex = Array.from(th.parentNode.children).indexOf(th);
+          handle.classList.add('resizing');
+          table.classList.add('resizing');
+
+          function onMouseMove(ev) {
+            const diff = ev.pageX - startX;
+            const newWidth = Math.max(40, startWidth + diff);
+            th.style.width = newWidth + 'px';
+            th.style.minWidth = newWidth + 'px';
+            // Also set width on matching tbody tds
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+              const td = row.children[colIndex];
+              if (td) {
+                td.style.width = newWidth + 'px';
+                td.style.minWidth = newWidth + 'px';
+              }
+            });
+          }
+
+          function onMouseUp() {
+            handle.classList.remove('resizing');
+            table.classList.remove('resizing');
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          }
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    });
+  }
+
+  // Initialize column resize on DOM ready
+  document.addEventListener('DOMContentLoaded', initColumnResize);
+
   // close modals on ESC and clicking backdrop
   document.addEventListener('keydown', e => { 
     if (e.key === 'Escape') { 

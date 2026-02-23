@@ -405,7 +405,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             </div>
             <div class="form-group" style="flex:1 1 100%;">
               <label for="notes">Notes</label>
-              <textarea class="form-control" name="notes" id="notes" rows="2"></textarea>
+              <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
             </div>
           </div>
         </div>

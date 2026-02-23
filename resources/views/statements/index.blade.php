@@ -182,7 +182,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           @endif
 
           <div class="action-buttons">
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -374,7 +374,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <div class="form-row">
             <div class="form-group" style="flex:1 1 100%;">
               <label for="remarks">Remarks</label>
-              <textarea class="form-control" name="remarks" id="remarks" rows="2"></textarea>
+              <textarea class="form-control" name="remarks" id="remarks" rows="3"></textarea>
             </div>
           </div>
         </div>

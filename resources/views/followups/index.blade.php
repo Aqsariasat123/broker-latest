@@ -28,7 +28,7 @@
             </div>
           </div>
           <div class="action-buttons">
-            <button class="btn btn-back" onclick="handleBack()">Back</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 

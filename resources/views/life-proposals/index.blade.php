@@ -64,7 +64,7 @@ $mandatoryColumns = $config['mandatory_columns'];
           </div>
           <div class="action-buttons" style="display:flex; align-items:center; gap:10px; white-space:nowrap;">
             <button class="btn btn-add" id="addProposalBtn">Add</button>
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
         @if ($errors->any())
@@ -317,8 +317,8 @@ $mandatoryColumns = $config['mandatory_columns'];
             <div class="form-section-title">Proposer's Details</div>
             <div class="form-row proposer-fields-row">
               <div class="form-group grow">
-                <label for="proposers_name">Proposer's Name *</label>
-                <input type="text" id="proposers_name" name="proposers_name" class="form-control" required>
+                <label for="proposers_name" class="required">Proposer's Name</label>
+                <input type="text" id="proposers_name" name="proposers_name" class="form-control" required data-autocomplete="clients" autocomplete="off">
               </div>
               <div class="form-group">
                 <label for="salutation_id">Salutation</label>
@@ -332,21 +332,21 @@ $mandatoryColumns = $config['mandatory_columns'];
                 <input id="dob" name="dob" type="date" class="form-control">
               </div>
               <div class="form-group">
-                <label for="insurer_id">Insurer *</label>
+                <label for="insurer_id" class="required">Insurer</label>
                 <select id="insurer_id" name="insurer_id" class="form-control" required>
                   <option value="">Select</option>
                   @foreach($lookupData['insurers'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group grow">
-                <label for="policy_plan_id">Policy Plan *</label>
+                <label for="policy_plan_id" class="required">Policy Plan</label>
                 <select id="policy_plan_id" name="policy_plan_id" class="form-control" required>
                   <option value="">Select</option>
                   @foreach($lookupData['policy_plans'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
                 </select>
               </div>
               <div class="form-group">
-                <label for="term">Term *</label>
+                <label for="term" class="required">Term</label>
                 <input id="term" name="term" type="number" min="1" class="form-control" required>
               </div>
               <div class="form-group grow">
@@ -355,7 +355,7 @@ $mandatoryColumns = $config['mandatory_columns'];
               </div>
               <div class="form-group small-grow">
                 <label for="age">Age</label>
-                <input id="age" name="age" type="number" min="1" max="120" class="form-control">
+                <input id="age" name="age" type="number" min="1" max="120" class="form-control" readonly style="background:#f0f0f0; color:#666;">
               </div>
               <div class="form-group small-grow">
                 <label for="sex">Sex</label>
@@ -366,7 +366,7 @@ $mandatoryColumns = $config['mandatory_columns'];
               </div>
               <div class="form-group small-grow">
                 <label for="anb">ANB</label>
-                <input id="anb" name="anb" type="number" class="form-control">
+                <input id="anb" name="anb" type="number" class="form-control" readonly style="background:#f0f0f0; color:#666;">
               </div>
             </div>
 
@@ -404,11 +404,11 @@ $mandatoryColumns = $config['mandatory_columns'];
             <div class="form-section">
               <div class="form-row proposer-fields-row">
                 <div class="form-group grow">
-                  <label for="offer_date">Offer Date *</label>
+                  <label for="offer_date" class="required">Offer Date</label>
                   <input id="offer_date" name="offer_date" type="date" class="form-control" required>
                 </div>
                 <div class="form-group grow">
-                  <label for="proposal_stage_id">Proposal Stage *</label>
+                  <label for="proposal_stage_id" class="required">Proposal Stage</label>
                   <select id="proposal_stage_id" name="proposal_stage_id" class="form-control" required>
                     <option value="">Select</option>
                     @foreach($lookupData['stages'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -445,7 +445,7 @@ $mandatoryColumns = $config['mandatory_columns'];
               <div class="form-section-title " style="margin-top:6px;">Payment Plan</div>
               <div class="form-row proposer-fields-row">
                 <div class="form-group grow">
-                  <label for="frequency">Frequency Of Payment *</label>
+                  <label for="frequency" class="required">Frequency Of Payment</label>
                   <select id="frequency_id" name="frequency_id" class="form-control" required>
                     <option value="">Select</option>
                     @foreach($lookupData['frequencies'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -459,7 +459,7 @@ $mandatoryColumns = $config['mandatory_columns'];
                   </select>
                 </div>
                 <div class="form-group grow">
-                  <label for="source_of_payment_id">Source Of Payment *</label>
+                  <label for="source_of_payment_id" class="required">Source Of Payment</label>
                   <select id="source_of_payment_id" name="source_of_payment_id" class="form-control" required>
                     <option value="">Select</option>
                     @foreach($lookupData['sources_of_payment'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -547,7 +547,7 @@ $mandatoryColumns = $config['mandatory_columns'];
                   </div>
                   <div class="form-group full-width">
                     <label for="exam_notes">Exam Notes</label>
-                    <textarea id="exam_notes" name="exam_notes" class="form-control field-required" rows="1"></textarea>
+                    <textarea id="exam_notes" name="exam_notes" class="form-control field-required" rows="3"></textarea>
                   </div>
                 </div>
 
@@ -559,11 +559,11 @@ $mandatoryColumns = $config['mandatory_columns'];
               <div class="form-section-title">Application Details</div>
               <div class="form-row proposer-fields-row">
                 <div class="form-group grow">
-                  <label for="date">Date *</label>
+                  <label for="date" class="required">Date</label>
                   <input id="date" name="date" type="date" class="form-control" required>
                 </div>
                 <div class="form-group grow">
-                  <label for="status_id">Proposal Status *</label>
+                  <label for="status_id" class="required">Proposal Status</label>
                   <select id="status_id" name="status_id" class="form-control" required>
                     <option value="">Select</option>
                     @foreach($lookupData['statuses'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -619,7 +619,7 @@ $mandatoryColumns = $config['mandatory_columns'];
       <input type="hidden" name="proposal_id" id="documentProposalId">
       <div class="modal-body">
         <div class="form-group">
-          <label>Document Type *</label>
+          <label class="required">Document Type</label>
           <select name="document_type" class="form-control" required>
             <option value="">Select Type</option>
             <option value="proposal_document">Proposal Document</option>
@@ -629,7 +629,7 @@ $mandatoryColumns = $config['mandatory_columns'];
           </select>
         </div>
         <div class="form-group">
-          <label>Document File *</label>
+          <label class="required">Document File</label>
           <input type="file" name="document" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
         </div>
       </div>

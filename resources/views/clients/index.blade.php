@@ -85,11 +85,7 @@ $selectedColumns = session('client_columns', [
             @if($filter != "ids_expired" && $filter != "birthday_today" )
             <button class="btn btn-add" id="addClientBtn">Add</button>
             @endif
-            @if(request()->has('from_calendar') && request()->from_calendar == '1')
-            <button class="btn btn-back" onclick="window.location.href='/calendar?filter=birthdays'">Back</button>
-            @else
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
-            @endif
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -202,7 +198,7 @@ $selectedColumns = session('client_columns', [
                 @elseif($col == 'source')
                 <td data-column="source">{{ $client->sources?->name }}</td>
                 @elseif($col == 'status')
-                <td data-column="status">{{ $client->status == 'Inactive' ? 'Dormant' : ($client->status == 'Active' ? 'Active' : $client->status) }}</td>
+                <td data-column="status">{{ $client->client_status }}</td>
                 @elseif($col == 'signed_up')
                 <td data-column="signed_up">{{ $client->signed_up ? $client->signed_up->format('d-M-y') : '##########' }}</td>
                 @elseif($col == 'employer')
@@ -381,7 +377,7 @@ $selectedColumns = session('client_columns', [
           <!-- Column 1 -->
           <div>
             <div class="detail-row">
-              <span class="detail-label">Client Type</span>
+              <span class="detail-label required">Client Type</span>
               <select id="client_type" name="client_type" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                 <option value="">Select</option>
                 @if(isset($lookupData['client_types']))
@@ -397,7 +393,7 @@ $selectedColumns = session('client_columns', [
               </select>
             </div>
             <div class="detail-row" data-field-type="individual" style="display:none;">
-              <span class="detail-label">Status</span>
+              <span class="detail-label required">Status</span>
               <select id="status" name="status" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                 <option value="">Select</option>
                 @if(isset($lookupData['client_statuses']))
@@ -415,7 +411,7 @@ $selectedColumns = session('client_columns', [
               </select>
             </div>
             <div class="detail-row" data-field-type="business" style="display:none;">
-              <span class="detail-label">Status</span>
+              <span class="detail-label required">Status</span>
               <select id="status_business" name="status" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                 <option value="">Select</option>
                 @if(isset($lookupData['client_statuses']))
@@ -453,11 +449,11 @@ $selectedColumns = session('client_columns', [
               </div>
             </div>
             <div class="detail-row" id="mobile_no_row_individual" data-field-type="individual" style="display:none;">
-              <span class="detail-label">Mobile No</span>
+              <span class="detail-label required">Mobile No</span>
               <input id="mobile_no_individual" name="mobile_no" type="text" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
             <div class="detail-row" id="mobile_no_row_business" data-field-type="business" style="display:none;">
-              <span class="detail-label">Mobile No</span>
+              <span class="detail-label required">Mobile No</span>
               <input id="mobile_no_business" name="mobile_no" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
             <div class="detail-row" data-field-type="individual" style="display:none;">
@@ -475,11 +471,11 @@ $selectedColumns = session('client_columns', [
               </select>
             </div>
             <div class="detail-row" data-field-type="individual" style="display:none;">
-              <span class="detail-label">Sign Up Date</span>
+              <span class="detail-label required">Sign Up Date</span>
               <input id="signed_up" name="signed_up" type="date" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
             <div class="detail-row" data-field-type="business" style="display:none;">
-              <span class="detail-label">Sign Up Date</span>
+              <span class="detail-label required">Sign Up Date</span>
               <input id="signed_up_business" name="signed_up" type="date" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
           </div>
@@ -491,7 +487,7 @@ $selectedColumns = session('client_columns', [
               <input id="first_name" name="first_name" type="text" class="detail-value" style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
             <div class="detail-row" data-field-type="business" style="display:none;">
-              <span class="detail-label">Name</span>
+              <span class="detail-label required">Name</span>
               <input id="business_name" name="business_name" type="text" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
             </div>
             <div class="detail-row" data-field-type="individual" style="display:none;">
@@ -649,7 +645,7 @@ $selectedColumns = session('client_columns', [
               </select>
             </div>
             <div class="detail-row" data-field-type="individual" style="display:none;">
-              <span class="detail-label">Source</span>
+              <span class="detail-label required">Source</span>
               <select id="source" name="source" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                 <option value="">Select</option>
                 @foreach($lookupData['sources'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -675,7 +671,7 @@ $selectedColumns = session('client_columns', [
               </select>
             </div>
             <div class="detail-row" data-field-type="business" style="display:none;">
-              <span class="detail-label">Source</span>
+              <span class="detail-label required">Source</span>
               <select id="source_business" name="source" class="detail-value" required style="flex:1; border:1px solid #ddd; padding:4px 6px; border-radius:2px; font-size:11px;">
                 <option value="">Select</option>
                 @foreach($lookupData['sources'] as $s) <option value="{{ $s['id'] }}">{{ $s['name']  }}</option> @endforeach
@@ -865,7 +861,7 @@ $selectedColumns = session('client_columns', [
     <div class="modal-body">
       <form id="documentUploadForm">
         <div class="form-group" style="margin-bottom:15px;">
-          <label for="documentType" style="display:block; margin-bottom:5px; font-weight:600;">Document Type</label>
+          <label for="documentType" class="required" style="display:block; margin-bottom:5px; font-weight:600;">Document Type</label>
           <select id="documentType" name="document_type" class="form-control" required>
             <option value="">Select Document Type</option>
             <option value="id_document">ID Card</option>
@@ -874,7 +870,7 @@ $selectedColumns = session('client_columns', [
           </select>
         </div>
         <div class="form-group" style="margin-bottom:15px;">
-          <label for="documentFile" style="display:block; margin-bottom:5px; font-weight:600;">Select File</label>
+          <label for="documentFile" class="required" style="display:block; margin-bottom:5px; font-weight:600;">Select File</label>
           <input type="file" id="documentFile" name="document" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" required onchange="previewDocument(event)">
           <small style="color:#666; font-size:11px;">Accepted formats: JPG, PNG, PDF, DOC, DOCX (Max 5MB)</small>
         </div>

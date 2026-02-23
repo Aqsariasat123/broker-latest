@@ -16,7 +16,7 @@ $hasinsurer = request()->filled('insurer');
 
 
 
-@if($hasPaidStatus)
+@if($hasPaidStatus || ($isDefaultUnpaid ?? false))
 -
 <span style="color:#f3742a;">Out Standing </span>
 @endif
@@ -90,22 +90,24 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
                 <!-- Custom Toggle Switch -->
                 <span class="filter-label">Filter</span>
+                @php
+                $hasPaidStatus = request()->filled('paid_status');
+                $isUnpaidActive = $hasPaidStatus || ($isDefaultUnpaid ?? false);
+                $isShowAll = request()->has('show_all');
+                $filterOn = $isUnpaidActive || request()->filled('insurer');
+                @endphp
                 <label class="toggle-switch">
                   <input type="checkbox"
                     id="insurerFilterToggle"
-                    {{ ( request()->filled('insurer') || request()->filled('paid_status') ) ? 'checked' : '' }}>
+                    {{ $filterOn ? 'checked' : '' }}>
                   <span class="toggle-slider"></span>
                 </label>
 
-                @php
-                $hasPaidStatus = request()->filled('paid_status');
-                @endphp
-
-                <!-- Show Unpaid Button -->
-                <button class="btn filter-btn {{ $hasPaidStatus ? 'active-insurer' : '' }}"
+                <!-- Show Unpaid / All Button -->
+                <button class="btn filter-btn {{ $isUnpaidActive ? 'active-insurer' : '' }}"
                   type="button"
-                  onclick="filterByPaidStatus('Unpaid')">
-                  {{ $hasPaidStatus ? 'All' : 'Show Unpaid' }}
+                  onclick="{{ $isUnpaidActive ? 'showAllCommissions()' : 'filterByPaidStatus(\'Unpaid\')' }}">
+                  {{ $isUnpaidActive ? 'All' : 'Show Unpaid' }}
                 </button>
 
                 <!-- Insurer Buttons -->
@@ -126,7 +128,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               </div>
             </div>
           </div>
-          @if(request()->filled('insurer') && request()->filled('paid_status') )
+          @if(request()->filled('insurer') && ($hasPaidStatus || ($isDefaultUnpaid ?? false)) )
           <div class="action-buttons">
             <button class="btn btn-add" id="addPreviewStatement">Preview Statement </button>
           </div>
@@ -136,7 +138,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             <button class="btn btn-add" id="addCommissionBtn">Add</button>
           </div>
           @endif
-          <button class="btn btn-close" onclick="window.history.back()">Close</button>
+          <a href="/dashboard" class="btn btn-back">Close</a>
 
         </div>
 
@@ -410,7 +412,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
               <label for="variance_reason" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Variance Notes</label>
-              <textarea class="form-control" name="variance_reason" id="variance_reason" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+              <textarea class="form-control" name="variance_reason" id="variance_reason" rows="3"></textarea>
             </div>
           </div>
         </div>

@@ -96,11 +96,7 @@ $mandatoryColumns = $config['mandatory_columns'];
             @if($filter != "expiring")
             <button type="button" class="btn btn-add" id="addPolicyBtn">Add</button>
             @endif
-            @if(request()->has('from_calendar') && request()->from_calendar == '1')
-            <button class="btn btn-back" onclick="window.location.href='/calendar?filter=renewals'">Back</button>
-            @else
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
-            @endif
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -607,7 +603,7 @@ $mandatoryColumns = $config['mandatory_columns'];
             </div>
             <div class="form-group">
               <label for="notes">Notes</label>
-              <textarea id="notes" name="notes" class="form-control" rows="2"></textarea>
+              <textarea id="notes" name="notes" class="form-control" rows="3"></textarea>
             </div>
           </div>
         </div>

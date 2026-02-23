@@ -64,7 +64,7 @@
           <a href="{{ route('users.create') }}" class="btn btn-add">Add</a>
         @endif
         @endauth
-        <button class="btn btn-back" onclick="window.history.back()">Back</button>
+        <a href="/dashboard" class="btn btn-back">Close</a>
       </div>
     </div>
 

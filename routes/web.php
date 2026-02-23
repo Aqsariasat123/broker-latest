@@ -28,6 +28,8 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\NomineeController;
 use App\Http\Controllers\FollowupController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SettingsController;
 
 
 
@@ -280,6 +282,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/statements', [StatementController::class, 'store'])->name('statements.store');
     Route::put('/statements/{statement}', [StatementController::class, 'update'])->name('statements.update');
     Route::delete('/statements/{statement}', [StatementController::class, 'destroy'])->name('statements.destroy');
+
+    // Search API for autocomplete
+    Route::get('/api/search', [SearchController::class, 'search'])->name('api.search');
+
+    // Settings (password-protected)
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/authenticate', [SettingsController::class, 'authenticate'])->name('settings.authenticate');
+    Route::get('/settings/logout', [SettingsController::class, 'logout'])->name('settings.logout');
+    Route::put('/settings/values/{lookupValue}', [SettingsController::class, 'updateValue'])->name('settings.update-value');
+    Route::post('/settings/values', [SettingsController::class, 'storeValue'])->name('settings.store-value');
 
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
     Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');

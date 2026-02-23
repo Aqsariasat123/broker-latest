@@ -189,7 +189,7 @@
         <div class="form-row full-width" style="display:flex; gap:15px; margin-bottom:15px;">
           <div class="form-group" style="flex:1 1 100%;">
             <label for="notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Notes</label>
-            <textarea id="notes" name="notes" class="form-control" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+            <textarea id="notes" name="notes" class="form-control" rows="3"></textarea>
           </div>
         </div>
       </div>

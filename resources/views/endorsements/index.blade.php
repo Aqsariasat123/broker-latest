@@ -230,7 +230,7 @@
           <div class="form-row" style="display:flex; gap:15px; margin-bottom:15px;">
             <div class="form-group" style="flex:1 1 100%;">
               <label for="endorsement_notes" style="display:block; margin-bottom:5px; font-size:13px; font-weight:500;">Endorsment  Notes</label>
-              <textarea class="form-control" name="endorsement_notes" id="endorsement_notes" rows="4" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:2px; font-size:13px; resize:vertical;"></textarea>
+              <textarea class="form-control" name="endorsement_notes" id="endorsement_notes" rows="3"></textarea>
             </div>
           </div>
           <div id="selectedDocumentPreview" style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:4px; display:none;">

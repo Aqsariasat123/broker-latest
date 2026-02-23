@@ -11,7 +11,7 @@
           <div class="records-found">Records Found - {{ $categories->total() }}</div>
         <div class="action-buttons">
           <button class="btn btn-add" onclick="openCategoryDialog()">Add</button>
-          <a href="{{ route('dashboard') }}" class="btn btn-back">Back</a>
+          <a href="/dashboard" class="btn btn-back">Close</a>
         </div>
       </div>
       

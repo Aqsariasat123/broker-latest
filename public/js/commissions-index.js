@@ -352,6 +352,15 @@ function filterByPaidStatus(paid_status = null) {
 }
 
 
+// Show all commissions (clear unpaid default filter)
+function showAllCommissions() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('paid_status');
+  url.searchParams.delete('insurer');
+  url.searchParams.set('show_all', '1');
+  window.location.href = url.toString();
+}
+
 // Update UI on page load
 document.addEventListener('DOMContentLoaded', function () {
   const toggle = document.getElementById('insurerFilterToggle');
@@ -360,8 +369,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const params = new URLSearchParams(window.location.search);
   const currentInsurer = params.get('insurer');
   const currentPaidStatus = params.get('paid_status');
+  const showAll = params.get('show_all');
 
-  const hasFilter = !!currentInsurer || !!currentPaidStatus;
+  // Filter is ON by default (unpaid) unless show_all is set
+  const hasFilter = !!currentInsurer || !!currentPaidStatus || !showAll;
 
   // Sync toggle
   toggle.checked = hasFilter;
@@ -372,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnText = btn.textContent.trim();
 
-    if (btnText === 'All' && currentPaidStatus === 'Unpaid') {
+    if (btnText === 'All' && (currentPaidStatus === 'Unpaid' || (!showAll && !currentPaidStatus))) {
       btn.classList.add('active-insurer');
     }
     else if (btnText === currentInsurer) {
@@ -381,11 +392,16 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   toggle.addEventListener('change', function () {
     if (!this.checked) {
-      // Clear all query params
+      // Show all - clear filters and set show_all flag
       const url = new URL(window.location.href);
-      url.search = '';
-
-      // Reload page with clean URL
+      url.searchParams.delete('paid_status');
+      url.searchParams.delete('insurer');
+      url.searchParams.set('show_all', '1');
+      window.location.href = url.toString();
+    } else {
+      // Re-enable default filter by removing show_all
+      const url = new URL(window.location.href);
+      url.searchParams.delete('show_all');
       window.location.href = url.toString();
     }
   });

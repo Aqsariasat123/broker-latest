@@ -76,11 +76,7 @@
         </div>
       </div>
       <div class="action-buttons">
-        @if(request()->has('from_calendar') && request()->from_calendar == '1')
-          <button class="btn btn-back" onclick="window.location.href='/calendar?filter=instalments'">Back</button>
-        @else
-          <button class="btn btn-back" onclick="window.history.back()">Back</button>
-        @endif
+        <a href="/dashboard" class="btn btn-back">Close</a>
         <button class="btn btn-add" id="addPaymentBtn">Add</button>
       </div>
     </div>

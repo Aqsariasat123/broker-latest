@@ -79,7 +79,7 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label for="notes">Notes</label>
-            <textarea id="notes" name="notes" class="form-control" style="min-height:80px;">{{ old('notes', $schedule->notes) }}</textarea>
+            <textarea id="notes" name="notes" class="form-control" rows="3">{{ old('notes', $schedule->notes) }}</textarea>
             @error('notes')<span class="error-message">{{ $message }}</span>@enderror
           </div>
         </div>

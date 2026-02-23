@@ -90,11 +90,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           <div class="action-buttons">
             <button class="btn btn-add" id="addContactBtn">Add</button>
-            @if(request()->has('from_calendar') && request()->from_calendar == '1')
-            <button class="btn btn-back" onclick="window.location.href='/calendar?filter=follow-ups'">Back</button>
-            @else
-            <button class="btn btn-close" onclick="window.history.back()">Close</button>
-            @endif
+            <a href="/dashboard" class="btn btn-back">Close</a>
           </div>
         </div>
 
@@ -536,15 +532,15 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; align-items: center; margin-bottom: 6px;">
             <div>
-              <label for="type" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Contact Type</label>
+              <label for="type" class="required" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Contact Type</label>
               <select id="type" name="type" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
                 <option value="">Select</option>
                 @foreach($lookupData['contact_types'] as $t) <option value="{{ $t['id'] }}">{{ $t['name'] }}</option> @endforeach
               </select>
             </div>
             <div>
-              <label for="contact_name" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Contact Name</label>
-              <input id="contact_name" name="contact_name" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
+              <label for="contact_name" class="required" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Contact Name</label>
+              <input id="contact_name" name="contact_name" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;" data-autocomplete="contacts" autocomplete="off">
             </div>
             <div>
               <label for="occupation" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Occupation</label>
@@ -600,7 +596,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               </div>
             </div>
             <div>
-              <label for="source" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Source</label>
+              <label for="source" class="required" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Source</label>
               <select id="source" name="source" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
                 <option value="">Select</option>
                 @foreach($lookupData['sources'] as $s) <option value="{{ $s['id'] }}">{{ $s['name'] }}</option> @endforeach
@@ -626,7 +622,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
               </select>
             </div>
             <div>
-              <label for="status" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Status</label>
+              <label for="status" class="required" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Status</label>
               <select id="status" name="status" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
                 <option value="">Select</option>
                 @foreach($lookupData['contact_statuses'] as $st) <option value="{{ $st['id'] }}">{{ $st['name']  }}</option> @endforeach
@@ -686,7 +682,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       <div class="modal-body" style="padding: 12px;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; align-items: center; margin-bottom: 6px;">
           <div>
-            <label for="follow_up_date" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Follow Up Date *</label>
+            <label for="follow_up_date" class="required" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Follow Up Date</label>
             <input id="follow_up_date" name="follow_up_date" type="date" class="form-control" required style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;">
           </div>
           <div>
@@ -712,11 +708,11 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           <div style="grid-column: span 2;">
             <label for="summary" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Summary</label>
-            <textarea id="summary" name="summary" class="form-control" rows="2" style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;"></textarea>
+            <textarea id="summary" name="summary" class="form-control" rows="3"></textarea>
           </div>
           <div style="grid-column: span 2;">
             <label for="next_action" style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 3px;">Next Action</label>
-            <textarea id="next_action" name="next_action" class="form-control" rows="2" style="width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 2px; font-size: 12px;"></textarea>
+            <textarea id="next_action" name="next_action" class="form-control" rows="3"></textarea>
           </div>
         </div>
       </div>
