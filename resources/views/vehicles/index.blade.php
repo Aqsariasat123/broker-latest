@@ -216,7 +216,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
         <div class="footer-left">
           <a class="btn btn-export" href="{{ route('vehicles.export') }}">Export</a>
           <button class="btn btn-column" id="columnBtn2" type="button">Column</button>
-          <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
+          <button class="btn btn-export" id="printBtn" type="button">Print</button>
         </div>
         <div class="paginator">
           @php

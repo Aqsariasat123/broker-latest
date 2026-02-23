@@ -88,8 +88,7 @@
                   <td class="bell-cell">
                     <div style="display:flex; align-items:center; justify-content:center;">
                       <div class="status-indicator"
-                           style="width:14px; height:14px; border-radius:50%; border:2px solid {{ $priorityBorder }};
-                                  background-color:{{ $priorityBg }};">
+                           style="background-color:{{ $priorityBg }}; border-color:{{ $priorityBorder }};">
                       </div>
                     </div>
                   </td>

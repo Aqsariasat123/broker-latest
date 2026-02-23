@@ -81,7 +81,7 @@
               <tr>
                 <td class="bell-cell {{ $nominee->date_removed ? 'expired' : '' }}">
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="status-indicator {{ $nominee->date_removed ? 'expired' : 'normal' }}" style="background-color:{{ $nominee->date_removed ? '#000' : 'transparent' }}; border-color:{{ $nominee->date_removed ? '#000' : '#f3742a' }};"></div>
+                    <div class="status-indicator {{ $nominee->date_removed ? 'expired' : 'normal' }}" style="background-color:{{ $nominee->date_removed ? '#dc3545' : 'transparent' }}; border-color:{{ $nominee->date_removed ? '#dc3545' : '#999' }};"></div>
                   </div>
                 </td>
                 <td style="text-align:center;">
@@ -137,7 +137,7 @@
         <div class="footer-left">
           <a class="btn btn-export" href="{{ route('nominees.export', $policyId ? ['policy_id' => $policyId] : []) }}">Export</a>
           <button class="btn btn-column" id="columnBtn" type="button">Column</button>
-          <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
+          <button class="btn btn-export" id="printBtn" type="button">Print</button>
         </div>
         <div class="paginator">
           @php

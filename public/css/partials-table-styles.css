@@ -10,7 +10,7 @@
     gap: 15px;
     flex: 1;
      justify-content:flex-start;
-}    h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; font-size: 16px; font-family: Arial, sans-serif; }
+}    h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; font-size: 14px; font-family: Arial, sans-serif; }
     .records-found { font-size: 11px; color: #555; font-weight: normal; font-family: Arial, sans-serif; }
     .top-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; margin-bottom:15px; }
     .left-group { display:flex; align-items:center; gap:15px; flex:1 1 auto; min-width:220px; }
@@ -30,7 +30,7 @@
     .btn-list-all { background:#66BB6A; color:#fff; border-color:#66BB6A; }
     .btn-close { background:#e0e0e0; color:#000; border-color:#ccc; }
     .btn-back { background:#e0e0e0; color:#333; border:1px solid #ccc; padding:6px 16px; }
-    .filter-toggle { display:flex; align-items:center; gap:8px; }
+    .filter-toggle { display:flex; align-items:center; gap:8px; margin-left:15px; flex-shrink:0; }
     .filter-label { font-size:11px; color:#555; white-space:nowrap; order:-1; font-family:'Aptos Narrow', 'Arial Narrow', Arial, sans-serif; }
     .toggle-switch { position:relative; width:44px; height:24px; }
     .toggle-switch input { opacity:0; width:0; height:0; }

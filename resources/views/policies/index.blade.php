@@ -151,7 +151,7 @@ $mandatoryColumns = $config['mandatory_columns'];
               <tr class="{{ $isExpired ? 'expired-row' : ($isDFR ? 'dfr-row' : '') }}">
                 <td class="bell-cell {{ $isExpired ? 'expired' : ($isDFR ? 'dfr' : '') }}">
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#f3742a' }};"></div>
+                    <div class="status-indicator {{ $isExpired ? 'expired' : 'normal' }}" style="background-color:{{ $isExpired ? '#dc3545' : 'transparent' }}; border-color:{{ $isExpired ? '#dc3545' : '#999' }};"></div>
                   </div>
                 </td>
                 <td class="action-cell">

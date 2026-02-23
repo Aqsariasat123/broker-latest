@@ -261,7 +261,7 @@ $selectedColumns = session('client_columns', [
           <div class="footer-left">
             <a class="btn btn-export" href="{{ route('clients.export', array_merge(request()->query(), ['page' => $clients->currentPage()])) }}">Export</a>
             <button class="btn btn-column" id="columnBtn" type="button">Column</button>
-            <button class="btn btn-export" id="printBtn" type="button" style="margin-left:10px;">Print</button>
+            <button class="btn btn-export" id="printBtn" type="button">Print</button>
           </div>
           <div class="paginator">
             @php

@@ -74,11 +74,11 @@
               <td class="bell-cell {{ $isExpired ? 'expired' : '' }}">
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
                   @if($isExpired)
-                    <div class="status-indicator expired" style="width:12px; height:12px; border-radius:50%; background-color:#dc3545; border:2px solid #dc3545;"></div>
+                    <div class="status-indicator expired" style="background-color:#dc3545; border-color:#dc3545;"></div>
                   @else
                     <label style="cursor:pointer; margin:0; padding:0; display:flex; align-items:center; justify-content:center;" onclick="document.querySelector('input[name=\'selected_bo\'][value=\'{{ $bo->id }}\']').click();">
                       <input type="radio" name="selected_bo" value="{{ $bo->id }}" data-owner-code="{{ $bo->owner_code }}" style="display:none;" onchange="loadDocumentsForSelectedBO(this)">
-                      <div class="status-indicator normal" style="width:12px; height:12px; border-radius:50%; background-color:transparent; border:2px solid #000;"></div>
+                      <div class="status-indicator normal" style="background-color:transparent; border-color:#999;"></div>
                     </label>
                   @endif
                 </div>
