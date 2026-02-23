@@ -12,7 +12,7 @@
         <div class="records-found">Settings - Lookup Values</div>
         <div class="action-buttons" style="display:flex; gap:10px;">
           <a href="{{ route('settings.logout') }}" class="btn" style="background:#dc3545; color:#fff; border-color:#dc3545;">Lock Settings</a>
-          <a href="/dashboard" class="btn btn-back">Close</a>
+          <a href="/dashboard" class="btn btn-back">Back</a>
         </div>
       </div>
 

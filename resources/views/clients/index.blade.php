@@ -85,7 +85,7 @@ $selectedColumns = session('client_columns', [
             @if($filter != "ids_expired" && $filter != "birthday_today" )
             <button class="btn btn-add" id="addClientBtn">Add</button>
             @endif
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 

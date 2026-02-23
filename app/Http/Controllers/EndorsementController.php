@@ -42,13 +42,30 @@ class EndorsementController extends Controller
         })->where('active', 1)->orderBy('seq')->get();
 
 
+        // Check policy renewal status
+        $renewalType = $types->firstWhere('name', 'Renewal');
+        $hasRenewalEndorsement = false;
+        if ($renewalType) {
+            $hasRenewalEndorsement = Endorsement::where('policy_id', $policy->id)
+                ->where('type', $renewalType->id)
+                ->exists();
+        }
+        $policyRenewalStatus = 'Active';
+        if ($hasRenewalEndorsement) {
+            $policyRenewalStatus = 'Policy Renewed';
+        } elseif ($policy->isExpired()) {
+            $policyRenewalStatus = 'Expired';
+        } elseif ($policy->isDueForRenewal()) {
+            $policyRenewalStatus = 'Due for Renewal';
+        }
+
         // Use TableConfigHelper for selected columns
         $config = \App\Helpers\TableConfigHelper::getConfig('endorsements');
         $selectedColumns = \App\Helpers\TableConfigHelper::getSelectedColumns('endorsements',);
 
-       
 
-        return view('endorsements.index', compact('endorsements','policy', 'policies', 'types','selectedColumns'));
+
+        return view('endorsements.index', compact('endorsements','policy', 'policies', 'types','selectedColumns', 'policyRenewalStatus', 'hasRenewalEndorsement'));
     }
 
 

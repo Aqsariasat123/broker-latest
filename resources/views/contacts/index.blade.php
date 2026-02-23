@@ -90,7 +90,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           <div class="action-buttons">
             <button class="btn btn-add" id="addContactBtn">Add</button>
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 
@@ -519,7 +519,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
         <h4 id="contactModalTitle" style="margin: 0; font-size: 16px; font-weight: bold;">Add Contact</h4>
         <div style="display: flex; gap: 8px;">
           <button type="submit" form="contactForm" class="btn-save" style="background: #f3742a; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Save</button>
-          <button type="button" class="btn-cancel" onclick="closeContactModal()" style="background: #000; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeContactModal()" style="background: #6c757d; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Cancel</button>
         </div>
       </div>
 
@@ -674,7 +674,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
       <h4 style="margin: 0; font-size: 16px; font-weight: bold;">Add Follow Up</h4>
       <div style="display: flex; gap: 8px;">
         <button type="submit" form="followUpForm" class="btn-save" style="background: #f3742a; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Save</button>
-        <button type="button" class="btn-cancel" onclick="closeFollowUpModal()" style="background: #000; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Cancel</button>
+        <button type="button" class="btn-cancel" onclick="closeFollowUpModal()" style="background: #6c757d; color: #fff; border: none; padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 12px;">Cancel</button>
       </div>
     </div>
     <form id="followUpForm" method="POST" action="">

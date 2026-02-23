@@ -37,7 +37,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
             @if(auth()->check() && (auth()->user()->hasPermission('incomes.create') || auth()->user()->isAdmin()))
             <button class="btn btn-add" id="addIncomeBtn">Add</button>
             @endif
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 
@@ -221,7 +221,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           <button type="submit" form="incomeForm" class="btn-save"
             style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
           <button type="button" class="btn-cancel" onclick="closeIncomeModal()"
-            style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
+            style="background:#6c757d; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
         </div>
       </div>
       <form id="incomeForm" method="POST" action="{{ route('incomes.store') }}" enctype="multipart/form-data">

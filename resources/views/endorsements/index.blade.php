@@ -26,7 +26,21 @@
                  <span class="client-name" > Endorsements</span>
               @endif
 
-                  
+              @if(isset($policyRenewalStatus))
+                @php
+                  $statusColor = match($policyRenewalStatus) {
+                    'Policy Renewed' => '#28a745',
+                    'Due for Renewal' => '#ffc107',
+                    'Expired' => '#dc3545',
+                    default => '#6c757d',
+                  };
+                  $statusTextColor = $policyRenewalStatus === 'Due for Renewal' ? '#333' : '#fff';
+                @endphp
+                <span style="background:{{ $statusColor }}; color:{{ $statusTextColor }}; padding:3px 10px; border-radius:3px; font-size:12px; font-weight:600; margin-left:10px;">
+                  {{ $policyRenewalStatus }}
+                </span>
+              @endif
+
               </h3>
       </div>
   </div>
@@ -191,7 +205,7 @@
         <h4 id="endorsementModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Add Endorsement</h4>
         <div style="display:flex; gap:10px;">
           <button type="submit" form="endorsementForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
-          <button type="button" class="btn-cancel" onclick="closeendorsementModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeendorsementModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
         </div>
       </div>
       <form id="endorsementForm" method="POST" action="{{ route('endorsements.store') }}" enctype="multipart/form-data">

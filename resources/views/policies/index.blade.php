@@ -96,7 +96,7 @@ $mandatoryColumns = $config['mandatory_columns'];
             @if($filter != "expiring")
             <button type="button" class="btn btn-add" id="addPolicyBtn">Add</button>
             @endif
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 
@@ -874,7 +874,7 @@ $mandatoryColumns = $config['mandatory_columns'];
 
         </div>
         <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end; padding:15px 20px; border-top:1px solid #ddd;">
-          <button type="button" class="btn-cancel" onclick="closeRenewalModal()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeRenewalModal()" style="background:#6c757d; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Cancel</button>
           <button type="submit" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer;">Save</button>
         </div>
       </form>

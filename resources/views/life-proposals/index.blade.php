@@ -64,7 +64,7 @@ $mandatoryColumns = $config['mandatory_columns'];
           </div>
           <div class="action-buttons" style="display:flex; align-items:center; gap:10px; white-space:nowrap;">
             <button class="btn btn-add" id="addProposalBtn">Add</button>
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
         @if ($errors->any())

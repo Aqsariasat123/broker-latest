@@ -76,7 +76,7 @@
         </div>
       </div>
       <div class="action-buttons">
-        <a href="/dashboard" class="btn btn-back">Close</a>
+        <a href="/dashboard" class="btn btn-back">Back</a>
         <button class="btn btn-add" id="addPaymentBtn">Add</button>
       </div>
     </div>

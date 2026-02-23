@@ -64,7 +64,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
           @endif
           <div class="action-buttons">
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 
@@ -301,7 +301,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           </div>
         </div>
         <div class="modal-footer" style="padding:15px 20px; border-top:1px solid #ddd; background:#fff; display:flex; justify-content:center; gap:10px;">
-          <button type="button" class="btn-cancel" onclick="closeDocumentModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="closeDocumentModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
           <button type="button" class="btn-delete" id="documentDeleteBtnModal" style="display: none; background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;" onclick="deleteDocument()">Delete</button>
           <button type="submit" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
         </div>

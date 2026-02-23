@@ -10,7 +10,7 @@
     <div style="background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;">
       <div class="table-header" style="background:#fff; border-bottom:1px solid #ddd; margin-bottom:0;">
         <div class="records-found">Settings - Password Required</div>
-        <a href="/dashboard" class="btn btn-back">Close</a>
+        <a href="/dashboard" class="btn btn-back">Back</a>
       </div>
       <div style="padding:40px 20px; display:flex; justify-content:center;">
         <div style="max-width:360px; width:100%;">

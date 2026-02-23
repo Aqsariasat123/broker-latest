@@ -183,7 +183,7 @@
       <h4 style="margin:0;" id="nomineeModalTitle">Add Nominee</h4>
       <div style="display:flex; gap:8px; align-items:center;">
         <button type="button" onclick="saveNominee()" style="background:#f3742a; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Save</button>
-        <button type="button" onclick="closeNomineeDialog()" style="background:#000; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Cancel</button>
+        <button type="button" onclick="closeNomineeDialog()" style="background:#6c757d; color:#fff; border:none; padding:6px 20px; border-radius:2px; cursor:pointer; font-size:12px; font-weight:500;">Cancel</button>
       </div>
     </div>
       <form id="nomineeForm">

@@ -135,7 +135,7 @@
       <h4 id="scheduleModalTitle" style="margin:0; font-size:18px; font-weight:bold;">Add Schedule</h4>
       <div style="display:flex; gap:10px;">
         <button type="submit" form="scheduleForm" class="btn-save" style="background:#f3742a; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Save</button>
-        <button type="button" class="btn-cancel" onclick="closeScheduleModal()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
+        <button type="button" class="btn-cancel" onclick="closeScheduleModal()" style="background:#6c757d; color:#fff; border:none; padding:8px 20px; border-radius:2px; cursor:pointer; font-size:13px;">Cancel</button>
       </div>
     </div>
     <form id="scheduleForm" method="POST" action="{{ route('schedules.store') }}">

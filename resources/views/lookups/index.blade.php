@@ -31,7 +31,7 @@
                 <button type="button" class="btn btn-add" onclick="openAddCategoryModal()">
                     <i class="fas fa-plus"></i> Add Category
                 </button>
-                <a href="/dashboard" class="btn btn-back">Close</a>
+                <a href="/dashboard" class="btn btn-back">Back</a>
             </div>
         </div>
         <div class="table-responsive">

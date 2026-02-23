@@ -182,7 +182,7 @@ $mandatoryColumns = $config['mandatory_columns'] ?? [];
           @endif
 
           <div class="action-buttons">
-            <a href="/dashboard" class="btn btn-back">Close</a>
+            <a href="/dashboard" class="btn btn-back">Back</a>
           </div>
         </div>
 

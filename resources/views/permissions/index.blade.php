@@ -38,7 +38,7 @@
       <div class="action-buttons">
         <a href="{{ route('permissions.create') }}" class="btn btn-add">Add</a>
         <a href="{{ route('roles.index') }}" class="btn" style="background:#007bff; color:#fff; border-color:#007bff;">Manage Roles</a>
-        <a href="/dashboard" class="btn btn-back">Close</a>
+        <a href="/dashboard" class="btn btn-back">Back</a>
       </div>
     </div>
 
