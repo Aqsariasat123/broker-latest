@@ -1,21 +1,22 @@
 
   /* Status indicator - round shape for policy status */
   .status-indicator {
-    width: 18px !important;
-    height: 18px !important;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     display: inline-block;
     flex-shrink: 0;
+    border: 2px solid #999;
   }
-  
+
   .status-indicator.expired {
-    background-color: #dc3545 !important;
-    border: 2px solid #dc3545 !important;
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
   }
-  
+
   .status-indicator.normal {
-    background-color: transparent !important;
-    border: 2px solid black !important;
+    background-color: transparent;
+    border: 2px solid #999;
   }
   
   /* Orange styling for checkboxes in policy forms */

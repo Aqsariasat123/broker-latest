@@ -1,26 +1,26 @@
 
   .container-table { max-width: 100%; margin: 0 auto; }
-  h3 { background: #f1f1f1; padding: 8px; margin-bottom: 10px; font-weight: bold; border: 1px solid #ddd; }
+  h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; font-size: 14px; font-family: Arial, sans-serif; }
   .top-bar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
   .left-group { display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:220px; }
   .left-buttons { display:flex; gap:10px; align-items:center; }
   .records-found { color:#555; min-width:150px; }
   .action-buttons { margin-left:auto; display:flex; gap:10px; align-items:center; }
-  .btn { border:none; cursor:pointer; padding:6px 12px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; }
+  .btn { border:none; cursor:pointer; padding:6px 16px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; height:30px; display:inline-flex; align-items:center; }
   .btn-add { background:#df7900; color:#fff; border-color:#df7900; }
   .btn-export, .btn-column { background:#fff; color:#000; border:1px solid #ccc; }
-  .btn-back { background:#ccc; color:#333; border-color:#ccc; }
+  .btn-back { background:#e0e0e0; color:#333; border:1px solid #ccc; }
   .table-responsive { width: 100%; overflow-x: auto; border: 1px solid #ddd; max-height: 520px; overflow-y: auto; background: #fff; }
-  .footer { display:flex; justify-content:center; align-items:center; padding:10px 15px; gap:10px; border-top:1px solid #ccc; flex-wrap:wrap; margin-top:15px; }
-  .paginator { display:flex; align-items:center; gap:5px; font-size:12px; color:#555; white-space:nowrap; justify-content:center; }
-  .btn-page { color:#2d2d2d; font-size:25px; width:22px; height:50px; padding:5px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .footer { display:flex; justify-content:space-between; align-items:center; padding:6px 15px; gap:8px; border-top:1px solid #ddd; flex-wrap:wrap; margin-top:0; background:#f5f5f5; }
+  .paginator { display:flex; align-items:center; gap:5px; font-size:12px; color:#555; white-space:nowrap; margin:0 auto; }
+  .btn-page { color:#2d2d2d; font-size:14px; width:30px; height:30px; padding:0; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; background:#f5f5f5; border:1px solid #ddd; border-radius:4px; font-weight:normal; }
   table { width:100%; border-collapse:collapse; font-size:13px; min-width:900px; }
-  thead tr { background-color: black; color: white; height:35px; font-weight: normal; }
-  thead th { padding:6px 5px; text-align:left; white-space:nowrap; font-weight: normal; }
+  thead tr { background-color: black; color: white; height:28px; font-weight: normal; }
+  thead th { padding:4px 5px; text-align:left; white-space:nowrap; font-weight: normal; font-size:11px; }
   tbody tr { background-color:#fefefe; min-height:28px; }
   tbody tr:nth-child(even) { background-color:#f8f8f8; }
   tbody tr.inactive-row { background:#fff3cd !important; }
-  tbody td { padding:5px 5px; white-space:nowrap; vertical-align:middle; font-size:10px; }
+  tbody td { padding:4px 5px; white-space:nowrap; vertical-align:middle; font-size:10px; }
   .icon-expand { cursor:pointer; color:black; text-align:center; width:20px; }
   .btn-action { padding:2px 6px; font-size:11px; margin:1px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:2px; display:inline-block; }
   .btn-action:hover { background:#f0f0f0; }

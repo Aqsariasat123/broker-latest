@@ -4,15 +4,15 @@
     body { font-family: Arial, sans-serif; color: #000; margin: 0; background: #f5f5f5;  }
     .main-content {  height: 100vh !important; }
     .container-table { max-width: 100%; margin: 0 auto; background: #fff; padding: 0; }
-    .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; flex-wrap: wrap; gap: 15px; background: #f5f5f5; padding: 15px 20px; border-bottom: 1px solid #ddd; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; flex-wrap: wrap; gap: 8px; background: #f5f5f5; padding: 6px 15px; border-bottom: 1px solid #ddd; }
 .page-title-section {
     display: flex;
     align-items: center;
     gap: 15px;
     flex: 1;
-     justify-content:center;
-}    h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; }
-    .records-found { color: #2d2d2d; }
+     justify-content:flex-start;
+}    h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; font-size: 14px; font-family: Arial, sans-serif; }
+    .records-found { font-size: 11px; color: #555; font-weight: normal; }
     .top-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; margin-bottom:15px; }
     .left-group { display:flex; align-items:center; gap:15px; flex:1 1 auto; min-width:220px; }
     .left-buttons { display:flex; gap:10px; align-items:center; }
@@ -22,18 +22,18 @@
     .column-filter { display:none; }
     .column-filter.visible { display:block; }
     .action-buttons { margin-left:auto; display:flex; gap:10px; align-items:center; }
-    .btn { border:none; cursor:pointer; padding:6px 16px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; font-weight:normal; }
+    .btn { border:none; cursor:pointer; padding:6px 16px; font-size:13px; border-radius:4px; white-space:nowrap; transition:background-color .2s; text-decoration:none; color:inherit; background:#fff; border:1px solid #ccc; font-weight:normal; height:30px; display:inline-flex; align-items:center; }
     .btn-add { background:#f3742a; color:#fff; border-color:#f3742a; }
     .btn-export, .btn-column { background:#fff; color:#000; border:1px solid #ccc; }
     .btn-follow-up { background:#2d2d2d; color:#fff; border-color:#2d2d2d; }
     .btn-list-all { background:#66BB6A; color:#fff; border-color:#66BB6A; }
     .btn-close { background:#e0e0e0; color:#000; border-color:#ccc; }
-    .btn-back { background:#ccc; color:#333; border-color:#ccc; }
-    .filter-toggle { display:flex; align-items:center; gap:8px; }
+    .btn-back { background:#e0e0e0; color:#333; border:1px solid #ccc; }
+    .filter-toggle { display:flex; align-items:center; gap:8px; margin-left:15px; flex-shrink:0; }
     .table-responsive { width: 100%; border: none; background: #fff; margin-bottom:0; overflow-x: auto; padding: 0 15px; }
     .table-responsive.no-scroll { overflow: visible; }
-    .footer { display:flex; justify-content:space-between; align-items:center; padding:10px 15px; gap:10px; border-top:1px solid #ddd; flex-wrap:wrap; margin-top:0; background:#f5f5f5; }
-    .footer-left { display:flex; gap:10px; }
+    .footer { display:flex; justify-content:space-between; align-items:center; padding:6px 15px; gap:8px; border-top:1px solid #ddd; flex-wrap:wrap; margin-top:0; background:#f5f5f5; }
+    .footer-left { display:flex; gap:8px; }
    .paginator {
       display: flex;
       align-items: center;
@@ -46,8 +46,8 @@
     .btn-page{
       color: #2d2d2d;
       font-size: 14px;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       padding: 0;
       cursor: pointer;
       text-decoration: none;
@@ -56,15 +56,15 @@
       justify-content: center;
       background: #f5f5f5;
       border: 1px solid #ddd;
-      border-radius: 2px;
+      border-radius: 4px;
       font-weight: normal;
     }
     .btn-page:hover:not([disabled]) { background: #e9e9e9; }
     .btn-page[disabled] { opacity: 0.5; cursor: not-allowed; background: #f5f5f5; }
     .page-info { padding: 0 12px; color: #555; font-size: 12px; }
     table { width:100%; border-collapse:collapse; font-size:13px; min-width:900px; }
-    thead tr { background-color: #000; color: #fff; height:35px; font-weight: normal; }
-    thead th { padding:8px 5px; text-align:left; white-space:nowrap; font-weight: normal; color: #fff !important; }
+    thead tr { background-color: #000; color: #fff; height:28px; font-weight: normal; }
+    thead th { padding:4px 5px; text-align:left; white-space:nowrap; font-weight: normal; color: #fff !important; font-size:11px; }
     thead th:first-child { text-align:center; }
     tbody tr { background-color:#fff; min-height:32px; }
     tbody tr:nth-child(even) { background-color:#f8f8f8; }
@@ -74,8 +74,8 @@
     tbody tr.has-expired td { background-color:#ffebee !important; }
     tbody tr.has-expiring { background-color:#fff8e1 !important; }
     tbody tr.has-expiring td { background-color:#fff8e1 !important; }
-    tbody td { padding:8px 5px; white-space:nowrap; vertical-align:middle; font-size:10px; }
-    .bell-cell { text-align:center; padding:8px 5px; vertical-align:middle; }
+    tbody td { padding:4px 5px; white-space:nowrap; vertical-align:middle; font-size:10px; }
+    .bell-cell { text-align:center; padding:4px 5px; vertical-align:middle; }
     .bell-cell.expired { background-color:#ffebee !important; }
     .bell-cell.expiring { background-color:#fff8e1 !important; }
     .bell-cell:not(.expired):not(.expiring) { background-color:#fff !important; }
@@ -86,7 +86,7 @@
     .bell-cell.expired td { background-color:#ffebee !important; }
     .bell-cell.expiring td { background-color:#fff8e1 !important; }
 
-    .action-cell { display:flex; align-items:center; gap:6px; padding:8px; }
+    .action-cell { display:flex; align-items:center; gap:6px; padding:4px; justify-content:center; }
     .action-radio { width:18px; height:18px; cursor:default; pointer-events:none; accent-color:#f3742a; }
     .action-radio.selected { accent-color:#f3742a; }
     .action-radio:checked { accent-color:#f3742a; }

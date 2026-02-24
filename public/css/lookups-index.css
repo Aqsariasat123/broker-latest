@@ -2,22 +2,22 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; color: #000; margin: 0; background: #fff; }
         .container-table { max-width: 100%; margin: 0; padding: 10px; }
-        h3 { background: #f1f1f1; padding: 6px; margin-bottom: 10px; font-weight: bold; border: 1px solid #ddd; font-size: 19px; line-height: 1.2; }
+        h3 { background: transparent; padding: 0; margin: 0; font-weight: bold; color: #2d2d2d; font-size: 14px; font-family: Arial, sans-serif; }
         .top-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
         .records-found { flex: 1 1 auto; color: #555; min-width: 150px; }
         .action-buttons { margin-left: auto; display: flex; gap: 10px; }
-        .btn { border: none; cursor: pointer; padding: 6px 12px; font-size: 13px; border-radius: 4px; white-space: nowrap; transition: background-color 0.3s ease; text-decoration: none; display: inline-block; text-align: center; }
+        .btn { border: none; cursor: pointer; padding: 6px 16px; font-size: 13px; border-radius: 4px; white-space: nowrap; transition: background-color 0.3s ease; text-decoration: none; display: inline-flex; text-align: center; height:30px; align-items:center; background:#fff; border:1px solid #ccc; color:inherit; }
         .btn-add { background-color: #df7900; color: white; }
         .btn-add:hover { background-color: #b46500; }
-        .btn-back { background-color: #ccc; color: #333; }
+        .btn-back { background-color: #e0e0e0; color: #333; border:1px solid #ccc; }
         .btn-back:hover { background-color: #aaa; }
         .table-responsive { width: 100%; overflow-x: auto; border: 1px solid #ddd; max-height: 600px; overflow-y: auto; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
-        thead tr { background-color: black; color: white; height: 35px; font-weight: normal; }
-        thead th { padding: 6px 5px; text-align: left; white-space: nowrap; }
+        thead tr { background-color: black; color: white; height: 28px; font-weight: normal; }
+        thead th { padding: 4px 5px; text-align: left; white-space: nowrap; font-size:11px; font-weight:normal; }
         tbody tr { background-color: #fefefe; min-height: 28px; }
         tbody tr:nth-child(even) { background-color: #f8f8f8; }
-        tbody td { padding: 5px 5px; white-space: nowrap; vertical-align: middle; font-weight: 400; font-size: 10px; }
+        tbody td { padding: 4px 5px; white-space: nowrap; vertical-align: middle; font-weight: 400; font-size: 10px; }
         .status-active { color: green; font-weight: bold; }
         .status-inactive { color: red; font-weight: bold; }
         .btn-action { padding: 2px 6px; font-size: 11px; margin: 1px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-block; }
